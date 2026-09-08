@@ -45,14 +45,23 @@ function normalizedName(value) {
 }
 
 function git(args, cwd) {
-  return execFileSync("git", args, { cwd, stdio: ["ignore", "pipe", "pipe"] }).toString();
+  try {
+    return execFileSync("git", args, { cwd, stdio: ["ignore", "pipe", "pipe"] }).toString();
+  } catch (error) {
+    const stderr = error.stderr?.toString().trim();
+    throw new Error(`git ${args.join(" ")} basarisiz: ${stderr || error.message}`);
+  }
 }
 
+/**
+ * Varsayilan dal kullanilir; upstream depolar dal adini degistirse bile calisir.
+ */
 async function syncRepository(repository) {
   const target = path.join(cacheDir, repository.id);
+  const ref = repository.branch ?? "HEAD";
   if (existsSync(path.join(target, ".git"))) {
     if (!offline) {
-      git(["fetch", "--depth", "1", "origin", repository.branch ?? "HEAD"], target);
+      git(["fetch", "--depth", "1", "origin", ref], target);
       git(["reset", "--hard", "FETCH_HEAD"], target);
       git(["clean", "-fd"], target);
     }
