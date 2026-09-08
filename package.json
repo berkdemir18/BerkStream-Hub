@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node scripts/build-catalog.mjs",
     "verify": "node scripts/build-catalog.mjs --verify",
-    "check": "node --check scripts/build-catalog.mjs"
+    "check": "node --check scripts/build-catalog.mjs && node --check scripts/vendor-sources.mjs",
+    "vendor": "node scripts/vendor-sources.mjs"
   }
 }

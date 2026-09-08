@@ -1,8 +1,8 @@
-# BerkStream Hub
+# BerkStream
 
-BerkStream Hub, birden fazla güncel CloudStream deposundaki aktif eklentileri
-tek katalogda toplar. Aynı isimli eklentiler tekilleştirilir; öncelik sırası
-`sources.json` içindeki `priority` alanıyla belirlenir.
+BerkStream artık **tek eklenti**. PLT Stream'in yaptığı gibi bütün kaynaklar
+tek `.cs3` dosyasının içine gömülüdür: kurulumda tek satır eklersin, 60+ Türkçe
+kaynak birden açılır. Tek tek eklenti kurmak, tek tek güncellemek yok.
 
 Pakette ayrıca `BerkStream` adlı özel bir ana provider bulunur. Ana sayfası vizyon,
 günün popülerleri, en çok izlenen filmler, gündemdeki diziler, Netflix, Prime Video,
@@ -16,16 +16,44 @@ menülerinde birlikte seçilebilir.
 Ana sayfa yanıtları önbelleğe alınır; aynı ekran yenilendiğinde uzak sayfalar tekrar
 tekrar çağrılmaz. İki harften sonra çalışan hızlı arama önerileri de etkindir.
 
-`BerkStream.cs3` tek başına kurulabilir; birleşik kaynak motoru paketin içindedir.
-Motorun güncel ikili dosyası derleme sırasında PLT Stream'in yayımladığı paketten
-alınır ve kaynak adı `BerkStream Kaynakları` olarak gösterilir.
+## Kurulum
 
-## Neden tek `.cs3` değil?
+CloudStream → Ayarlar → Eklentiler → Depo ekle:
 
-CloudStream'in doğal modeli her provider'ı ayrı eklenti olarak paketlemektir.
-Bu proje hepsini **tek depo adresinden** sunar fakat modülleri ayrı tutar. Böylece
-bir sitenin bozulması diğer provider'ları devre dışı bırakmaz ve her eklenti
-bağımsız güncellenebilir.
+```text
+https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/repo.json
+```
+
+Depoda tek paket görürsün: **BerkStream**. Onu kur, bitti.
+
+Tek tek kurmayı tercih edersen eski katalog da yayında kalıyor:
+
+```text
+https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/repo-full.json
+```
+
+## Tek eklenti nasıl toplanıyor?
+
+`scripts/vendor-sources.mjs`, upstream depolardaki her sağlayıcı modülünün Kotlin
+kaynağını çeker ve `BerkStream/src/main/kotlin/com/berkstream/vendor/` altına
+kopyalar. Her modül kendine özel bir pakete taşınır
+(`com.keyiflerolsun` → `com.berkstream.vendor.feroxx.dizipal.keyiflerolsun`), böylece
+farklı depolardaki aynı isimli sınıflar (`DiziPal`, `SearchItem`, `IptvPlaylistParser`…)
+birbirini ezmez. Alt eklentilerin `@CloudstreamPlugin` işareti kaldırılır — bir `.cs3`
+içinde tek giriş noktası olabilir — ve hepsi üretilen `VendoredSources.kt` listesi
+üzerinden `BerkStreamPlugin` tarafından kaydedilir.
+
+Her kaynak ayrı ayrı `runCatching` içinde yüklenir: biri patlarsa diğerleri açılmaya
+devam eder. Kapalı kaynak olan PLT Stream motoru derlenemediği için CI, PLT'nin
+yayımladığı `.cs3`in dex'ini pakete ekler ve motor yansımayla ayağa kaldırılır.
+
+Kaynak listesi ve neyin neden atlandığı `vendor-report.json` dosyasında.
+
+Yerelde yeniden toplamak için:
+
+```powershell
+npm run vendor
+```
 
 ## Kaynaklar
 
@@ -36,7 +64,8 @@ bağımsız güncellenebilir.
 
 Yalnız manifestinde `status: 1` olan eklentiler alınır. Aynı eklenti birden çok
 kaynakta varsa resmî kaynak, ardından PLT Stream, Feroxx ve Nikyokki tercih edilir.
-Eklentilerin telif ve lisans koşulları kendi kaynak depolarına aittir.
+Eklentilerin telif ve lisans koşulları kendi kaynak depolarına aittir; gömülen
+kaynak kodu değiştirilmeden, kaynağı ve orijinal paketi belirtilerek taşınır.
 
 ## Yerelde güncelleme ve doğrulama
 
@@ -49,7 +78,8 @@ npm run verify
 ```
 
 `verify` komutu her `.cs3`/`.jar` dosyasını indirir, HTTP erişimini ve manifestte
-varsa SHA-256 değerini denetler, sonra `plugins.json`, `repo.json` ve
+varsa SHA-256 değerini denetler, sonra `plugins.json` (tek eklenti),
+`plugins-all.json` (tekil paketler), `repo.json`, `repo-full.json` ve
 `catalog-report.json` dosyalarını üretir.
 
 ## GitHub'a koyma

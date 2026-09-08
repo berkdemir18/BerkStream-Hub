@@ -35,24 +35,33 @@ jobs:
         with:
           node-version: 22
 
+      - name: Vendor all upstream sources into BerkStream
+        run: |
+          set -euo pipefail
+          npm run vendor
+          node -e "const r=require('./vendor-report.json'); if (r.vendoredCount < 40) { console.error('Beklenenden az kaynak gomuldu: '+r.vendoredCount); process.exit(1); }"
+
       - name: Build custom provider
         run: |
           chmod +x gradlew
           ./gradlew make makePluginsJson ensureJarCompatibility
 
-      - name: Bundle unified source engine
+      - name: Bundle closed-source PLT engine
         run: |
           set -euo pipefail
           temp_dir="$(mktemp -d)"
           curl -fsSL "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plt-stream.cs3" -o "$temp_dir/plt-stream.cs3"
-          mkdir -p "$temp_dir/berk" "$temp_dir/merged"
+          mkdir -p "$temp_dir/berk" "$temp_dir/plt" "$temp_dir/merged"
           unzip -q BerkStream/build/BerkStream.cs3 -d "$temp_dir/berk"
-          unzip -p "$temp_dir/plt-stream.cs3" classes.dex > "$temp_dir/plt.dex"
+          unzip -q -o "$temp_dir/plt-stream.cs3" 'classes*.dex' -d "$temp_dir/plt"
           d8_path="$(find "$ANDROID_HOME/build-tools" -type f -name d8 | sort -V | tail -1)"
-          "$d8_path" --min-api 21 --output "$temp_dir/merged" "$temp_dir/berk/classes.dex" "$temp_dir/plt.dex"
-          cp "$temp_dir/merged/classes.dex" "$temp_dir/berk/classes.dex"
+          "$d8_path" --min-api 21 --output "$temp_dir/merged" "$temp_dir"/berk/classes*.dex "$temp_dir"/plt/classes*.dex
+          rm -f "$temp_dir"/berk/classes*.dex
+          cp "$temp_dir"/merged/classes*.dex "$temp_dir/berk/"
+          echo "Birlesik dex dosyalari:"
+          ls -la "$temp_dir/berk"
           rm -f BerkStream/build/BerkStream.cs3
-          (cd "$temp_dir/berk" && zip -q "$GITHUB_WORKSPACE/BerkStream/build/BerkStream.cs3" manifest.json classes.dex)
+          (cd "$temp_dir/berk" && zip -qr "$GITHUB_WORKSPACE/BerkStream/build/BerkStream.cs3" .)
 
       - name: Build and verify merged catalog
         env:
