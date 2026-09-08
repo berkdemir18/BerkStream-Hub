@@ -14,7 +14,8 @@ buildscript {
 
     dependencies {
         classpath("com.android.tools.build:gradle:9.1.1")
-        classpath("com.github.recloudstream.gradle:gradle:master-SNAPSHOT")
+        // Pinned because JitPack's moving snapshot metadata is intermittently malformed.
+        classpath("com.github.recloudstream.gradle:gradle:81b1d424d2")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.0")
     }
 }
