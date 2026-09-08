@@ -1,0 +1,44 @@
+{
+  "sources": [
+    {
+      "id": "plt-stream",
+      "name": "PLT Stream",
+      "manifest": "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plugins.json",
+      "repository": "https://github.com/pltmustafa/plt-stream",
+      "priority": 110
+    },
+    {
+      "id": "feroxx",
+      "name": "Feroxx Turkish Providers",
+      "manifest": "https://raw.githubusercontent.com/feroxx/Kekik-cloudstream/builds/plugins.json",
+      "repository": "https://github.com/feroxx/Kekik-cloudstream",
+      "priority": 100
+    },
+    {
+      "id": "nikyokki",
+      "name": "Nikyokki Turkish Providers",
+      "manifest": "https://raw.githubusercontent.com/nikyokki/nik-cloudstream/builds/plugins.json",
+      "repository": "https://github.com/nikyokki/nik-cloudstream",
+      "priority": 80
+    },
+    {
+      "id": "official",
+      "name": "ReCloudStream Official Extensions",
+      "manifest": "https://raw.githubusercontent.com/recloudstream/extensions/builds/plugins.json",
+      "repository": "https://github.com/recloudstream/extensions",
+      "priority": 120
+    }
+  ],
+  "includeStatuses": [1],
+  "excludedPlugins": [],
+  "blockedNamePatterns": [
+    "porn",
+    "xxx",
+    "adult",
+    "hentai",
+    "erotik",
+    "sex",
+    "uncutmaza"
+  ],
+  "preferredSourceByPlugin": {}
+}

@@ -1,0 +1,8 @@
+{
+  "name": "BerkStream Hub",
+  "description": "Güncel ve tekilleştirilmiş CloudStream eklenti kataloğu",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/plugins.json"
+  ]
+}

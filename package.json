@@ -1,0 +1,11 @@
+{
+  "name": "berkstream-hub",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-catalog.mjs",
+    "verify": "node scripts/build-catalog.mjs --verify",
+    "check": "node --check scripts/build-catalog.mjs"
+  }
+}
