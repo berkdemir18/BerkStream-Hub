@@ -106,6 +106,9 @@ subprojects {
         implementation("com.google.code.gson:gson:2.14.0")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
         implementation("org.bouncycastle:bcpkix-jdk18on:1.84")
+        // Resmi YoutubeProvider icin gerekli; CloudStream uygulamasi calisma
+        // aninda sagliyor, pakete gomulmuyor.
+        implementation("com.github.teamnewpipe:NewPipeExtractor:v0.25.2")
     }
 }
 
