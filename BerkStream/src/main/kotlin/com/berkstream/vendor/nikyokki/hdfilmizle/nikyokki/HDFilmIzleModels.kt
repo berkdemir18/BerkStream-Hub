@@ -1,5 +1,5 @@
 // BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (HDFilmIzle).
-// Kaynak paket: null -> com.berkstream.vendor.nikyokki.hdfilmizle.nikyokki
+// Kaynak paket: (varsayilan paket) -> com.berkstream.vendor.nikyokki.hdfilmizle.nikyokki
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
 package com.berkstream.vendor.nikyokki.hdfilmizle.nikyokki
 import com.fasterxml.jackson.annotation.JsonProperty

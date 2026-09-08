@@ -1,5 +1,5 @@
 // BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (YabanciDizi).
-// Kaynak paket: null -> com.berkstream.vendor.nikyokki.yabancidizi.nikyokki
+// Kaynak paket: (varsayilan paket) -> com.berkstream.vendor.nikyokki.yabancidizi.nikyokki
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
 package com.berkstream.vendor.nikyokki.yabancidizi.nikyokki
 

@@ -1,5 +1,5 @@
 // BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (DiziMag).
-// Kaynak paket: null -> com.berkstream.vendor.nikyokki.dizimag.nikyokki
+// Kaynak paket: (varsayilan paket) -> com.berkstream.vendor.nikyokki.dizimag.nikyokki
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
 package com.berkstream.vendor.nikyokki.dizimag.nikyokki
 
