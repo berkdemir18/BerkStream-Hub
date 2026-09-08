@@ -40,6 +40,20 @@ jobs:
           chmod +x gradlew
           ./gradlew make makePluginsJson ensureJarCompatibility
 
+      - name: Bundle unified source engine
+        run: |
+          set -euo pipefail
+          temp_dir="$(mktemp -d)"
+          curl -fsSL "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plt-stream.cs3" -o "$temp_dir/plt-stream.cs3"
+          mkdir -p "$temp_dir/berk" "$temp_dir/merged"
+          unzip -q BerkStream/build/BerkStream.cs3 -d "$temp_dir/berk"
+          unzip -p "$temp_dir/plt-stream.cs3" classes.dex > "$temp_dir/plt.dex"
+          d8_path="$(find "$ANDROID_HOME/build-tools" -type f -name d8 | sort -V | tail -1)"
+          "$d8_path" --min-api 21 --output "$temp_dir/merged" "$temp_dir/berk/classes.dex" "$temp_dir/plt.dex"
+          cp "$temp_dir/merged/classes.dex" "$temp_dir/berk/classes.dex"
+          rm -f BerkStream/build/BerkStream.cs3
+          (cd "$temp_dir/berk" && zip -q "$GITHUB_WORKSPACE/BerkStream/build/BerkStream.cs3" manifest.json classes.dex)
+
       - name: Build and verify merged catalog
         env:
           BERKSTREAM_REPOSITORY: ${{ github.repository }}

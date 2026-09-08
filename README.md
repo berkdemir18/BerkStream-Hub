@@ -4,10 +4,21 @@ BerkStream Hub, birden fazla güncel CloudStream deposundaki aktif eklentileri
 tek katalogda toplar. Aynı isimli eklentiler tekilleştirilir; öncelik sırası
 `sources.json` içindeki `priority` alanıyla belirlenir.
 
-Pakette ayrıca `BerkStream` adlı özel bir ana provider bulunur. Box Office
-Türkiye'nin anahtarsız, herkese açık seans sayfasından bu hafta vizyona girenleri,
-geçen haftanın yenilerini ve vizyondaki diğer filmleri gösterir. Bir film
-açıldığında kurulu Türkçe provider'ları tarar; `plt-stream` ilk tercihidir.
+Pakette ayrıca `BerkStream` adlı özel bir ana provider bulunur. Ana sayfası vizyon,
+günün popülerleri, en çok izlenen filmler, gündemdeki diziler, Netflix, Prime Video,
+Disney+, HBO Max, tabii, canlı TV ve günlük sürpriz seçki raflarından oluşur.
+Platform rafları Türkiye kataloğuna göre film ve dizileri ayrı ayrı toplayıp
+dönüşümlü gösterir. Film açıldığında kurulu Türkçe provider'ları tarar;
+paketin içine gömülü birleşik kaynak motoru ilk tercihidir. Film ve dizilerde
+bulunan farklı sunucular ile altyazılar CloudStream oynatıcısının kaynak ve altyazı
+menülerinde birlikte seçilebilir.
+
+Ana sayfa yanıtları önbelleğe alınır; aynı ekran yenilendiğinde uzak sayfalar tekrar
+tekrar çağrılmaz. İki harften sonra çalışan hızlı arama önerileri de etkindir.
+
+`BerkStream.cs3` tek başına kurulabilir; birleşik kaynak motoru paketin içindedir.
+Motorun güncel ikili dosyası derleme sırasında PLT Stream'in yayımladığı paketten
+alınır ve kaynak adı `BerkStream Kaynakları` olarak gösterilir.
 
 ## Neden tek `.cs3` değil?
 

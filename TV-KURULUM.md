@@ -3,11 +3,11 @@
 ## CloudStream içinde
 
 1. BerkStream Hub depo adresini CloudStream'e ekle.
-2. `BerkStream` ile birlikte kullanmak istediğin Türkçe kaynakları yükle. En az
-   `plt-stream` kurulu olsun; BerkStream kaynak ararken onu ilk sırada dener.
+2. Yalnızca `BerkStream` eklentisini yükle. Birleşik film/dizi kaynak motoru paketin
+   içindedir. Canlı TV rafı için ayrıca `plt-tv` yüklenirse kanal listesi eklenir.
 3. CloudStream ana ekranındaki provider seçicisinden `BerkStream`i seç.
-4. İlk satır `🎬 Vizyondaki Filmler` olur. Sonraki satırlarda geçen hafta vizyona
-   girenler ve vizyondaki diğer filmler görünür.
+4. İlk satır `🎬 VİZYON • BU HAFTA` olur. Devamında popüler, film, dizi,
+   platform seçkileri, canlı TV ve günlük sürpriz rafları görünür.
 
 ## Google TV ana ekranında
 
