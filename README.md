@@ -27,10 +27,6 @@ Yalnız manifestinde `status: 1` olan eklentiler alınır. Aynı eklenti birden 
 kaynakta varsa resmî kaynak, ardından PLT Stream, Feroxx ve Nikyokki tercih edilir.
 Eklentilerin telif ve lisans koşulları kendi kaynak depolarına aittir.
 
-Yetişkin içerik eklentileri alınmaz. `isAdult: true` işaretli paketler ve adı
-Porn/XXX/Adult/Hentai/Erotik/Sex ile ilişkili olan modüller güncelleme sırasında
-otomatik elenir; sonuç `catalog-report.json` içinde ayrıca raporlanır.
-
 ## Yerelde güncelleme ve doğrulama
 
 Node.js 22 veya daha yenisiyle:

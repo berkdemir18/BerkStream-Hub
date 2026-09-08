@@ -93,11 +93,6 @@ const allCandidates = loadedSources.flatMap((source) =>
       key: normalizedName(plugin.internalName || plugin.name),
     })),
   );
-const adultFiltered = allCandidates
-  .filter(({ plugin, key }) =>
-    plugin.isAdult === true || blockedNamePatterns.some((pattern) => key.includes(pattern)),
-  )
-  .map(({ plugin, source }) => ({ plugin: plugin.name, source: source.id }));
 const candidates = allCandidates
   .filter(({ plugin, key }) =>
     allowedStatuses.has(plugin.status) &&
@@ -190,7 +185,6 @@ const report = {
   totalPlugins: plugins.length,
   sourceCounts,
   duplicates,
-  adultFiltered,
   verified: verifyFiles,
   verifiedFiles: verification.sort((a, b) => a.name.localeCompare(b.name, "tr")),
 };
@@ -207,5 +201,4 @@ for (const [source, count] of Object.entries(sourceCounts)) {
   console.log(`- ${source}: ${count}`);
 }
 console.log(`- tekilleştirilen tekrar: ${duplicates.length}`);
-console.log(`- engellenen yetişkin eklentisi: ${adultFiltered.length}`);
 console.log(`- dosya doğrulaması: ${verifyFiles ? "tamamlandı" : "atlanıldı"}`);
