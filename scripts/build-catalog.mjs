@@ -133,6 +133,9 @@ if (verifyFiles) {
         : null;
     const bytes = localCs3 ? await readFile(localCs3) : await fetchBytes(plugin.url);
     const actualHash = sha256(bytes);
+    // Yerel paketin hash'i Gradle manifestinde derleme anindaki haliyle duruyor;
+    // PLT dex'i sonradan eklendigi icin dogru deger yalnizca dosyanin kendisi.
+    if (localCs3) plugin.fileHash = null;
     if (plugin.fileHash && plugin.fileHash !== actualHash) {
       throw new Error(`${plugin.name}: CS3 hash uyuşmuyor (${source.id})`);
     }
