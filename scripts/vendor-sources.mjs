@@ -198,6 +198,20 @@ for (const item of [...selected.values()].sort((a, b) => a.module.localeCompare(
   const renameOrder = [...rename].sort((a, b) => b[0].length - a[0].length);
   const pluginClasses = [];
 
+  // Kok pakette duran yardimci dosyalar modulun ana paketine tasindigi icin,
+  // onlari `import CryptoJS` gibi cagiran kardes dosyalarin importu artik
+  // gecersiz: ayni pakette olduklarindan import satiri silinmeli.
+  const rootDeclarations = new Set();
+  for (const entry of parsed) {
+    if (entry.oldPackage) continue;
+    for (const match of entry.text.matchAll(
+      /^(?:@\w+(?:\([^)]*\))?\s*)*(?:public\s+|internal\s+|open\s+|abstract\s+|sealed\s+|data\s+|enum\s+|annotation\s+|value\s+)*(?:class|object|interface|typealias|fun|val|var)\s+(`[^`]+`|[A-Za-z_][A-Za-z0-9_]*)/gm,
+    )) {
+      rootDeclarations.add(match[1].replace(/`/g, ""));
+    }
+  }
+  const rootPackageTarget = `${moduleBase}.${packageSuffix(dominantPackage)}`;
+
   for (const entry of parsed) {
     let text = entry.text;
     // Paket adlarini yeniden yaz: en uzun paket once, alt paketleri bozmamak icin.
@@ -205,6 +219,18 @@ for (const item of [...selected.values()].sort((a, b) => a.module.localeCompare(
       text = text.split(oldPackage).join(newPackage);
     }
     const newPackage = rename.get(entry.oldPackage ?? dominantPackage);
+    if (rootDeclarations.size > 0) {
+      text = text.replace(
+        /^[ \t]*import\s+(`[^`]+`|[A-Za-z_][A-Za-z0-9_]*)((?:\.[A-Za-z_][A-Za-z0-9_]*)*)[ \t]*(\r?\n)/gm,
+        (line, head, tail, eol) => {
+          if (!rootDeclarations.has(head.replace(/`/g, ""))) return line;
+          if (tail) return `import ${rootPackageTarget}.${head}${tail}${eol}`;
+          // Ayni pakete tasindiysa import gereksiz.
+          return newPackage === rootPackageTarget ? "" : `import ${rootPackageTarget}.${head}${eol}`;
+        },
+      );
+    }
+
     if (!entry.oldPackage) {
       const fileAnnotations = text.match(/^(?:\s*@file:[^\n]*\n)+/);
       const offset = fileAnnotations ? fileAnnotations[0].length : 0;

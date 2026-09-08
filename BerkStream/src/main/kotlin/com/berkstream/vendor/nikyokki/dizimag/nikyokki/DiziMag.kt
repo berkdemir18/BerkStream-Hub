@@ -3,7 +3,6 @@
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
 package com.berkstream.vendor.nikyokki.dizimag.nikyokki
 
-import CryptoJS
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.lagradost.api.Log
 import com.lagradost.cloudstream3.Actor

@@ -3,7 +3,6 @@
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
 package com.berkstream.vendor.nikyokki.hdfilmizle.nikyokki
 
-import Video
 import android.util.Log
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.ObjectMapper

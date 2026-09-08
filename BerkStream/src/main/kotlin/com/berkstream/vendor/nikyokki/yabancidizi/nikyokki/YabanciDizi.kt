@@ -3,7 +3,6 @@
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
 package com.berkstream.vendor.nikyokki.yabancidizi.nikyokki
 
-import CryptoJS
 import android.util.Log
 import com.lagradost.cloudstream3.Actor
 import com.lagradost.cloudstream3.Episode
