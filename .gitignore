@@ -7,3 +7,4 @@ local.properties
 
 # Upstream kaynak onbellegi (vendor-sources.mjs)
 .vendor-cache/
+*.stackdump
