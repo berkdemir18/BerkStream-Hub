@@ -29,7 +29,9 @@
       "priority": 120
     }
   ],
-  "includeStatuses": [1],
+  "includeStatuses": [
+    1
+  ],
   "excludedPlugins": [],
   "blockedNamePatterns": [
     "porn",
@@ -40,5 +42,29 @@
     "sex",
     "uncutmaza"
   ],
-  "preferredSourceByPlugin": {}
+  "preferredSourceByPlugin": {},
+  "vendorRepositories": [
+    {
+      "id": "official",
+      "name": "ReCloudStream Official Extensions",
+      "url": "https://github.com/recloudstream/extensions.git",
+      "branch": "master",
+      "priority": 120
+    },
+    {
+      "id": "feroxx",
+      "name": "Feroxx Turkish Providers",
+      "url": "https://github.com/feroxx/Kekik-cloudstream.git",
+      "branch": "main",
+      "priority": 100
+    },
+    {
+      "id": "nikyokki",
+      "name": "Nikyokki Turkish Providers",
+      "url": "https://github.com/nikyokki/nik-cloudstream.git",
+      "branch": "main",
+      "priority": 80
+    }
+  ],
+  "vendorExcludedPlugins": []
 }

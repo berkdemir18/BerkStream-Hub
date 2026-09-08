@@ -1,0 +1,1482 @@
+{
+  "generatedAt": "2026-09-08T23:26:13.442Z",
+  "vendoredCount": 64,
+  "pluginClassCount": 64,
+  "originCounts": {
+    "official": 5,
+    "feroxx": 36,
+    "nikyokki": 23
+  },
+  "vendored": [
+    {
+      "id": "4KFilmIzlesene",
+      "slug": "p4kfilmizlesene",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 6,
+      "description": "En yeni ve sorunsuz ⚡  Full HD Film izle keyfi her yerde sizinle ! 4K ve 1080p online film izleme farkıyla 4KFilmizlesene&amp;#039;nin Tadını Çıkart.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.4kfilmizlesene.org&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.p4kfilmizlesene.nikyokki.`4KFilmIzlesenePlugin`"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "AnimeciX",
+      "slug": "animecix",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 21,
+      "description": "AnimeciX, animeleri keşfedebileceğiniz ve animeler hakkında her şeyi öğrenebileceğiniz bir paylaşım platformudur.",
+      "language": "tr",
+      "tvTypes": [
+        "Anime"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "inatchii",
+        "JustRelaxable"
+      ],
+      "iconUrl": "https://animecix.tv/favicon.ico",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.animecix.keyiflerolsun.AnimeciXPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "AsyaAnimeleri",
+      "slug": "asyaanimeleri",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 1,
+      "description": "Asya Animeleri - Anime izle, Donghua izle, Türkçe Altyazılı Anime izle.",
+      "language": "tr",
+      "tvTypes": [
+        "Anime"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=asyaanimeleri.top&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.asyaanimeleri.keyiflerolsun.AsyaAnimeleriPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "AsyaWatch",
+      "slug": "asyawatch",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 6,
+      "description": "Asyawatch",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=asyawatch.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.asyawatch.nikyokki.AsyaWatchPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "BelgeselX",
+      "slug": "belgeselx",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 17,
+      "description": "En yeni belgeseller, türkçe altyazılı yada dublaj olarak 1080p kalitesinde HD belgesel izle.",
+      "language": "tr",
+      "tvTypes": [
+        "Documentary"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "JustRelaxable"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=belgeselx.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.belgeselx.keyiflerolsun.BelgeselXPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "CanliTV",
+      "slug": "canlitv",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 10,
+      "description": "Canlı TV",
+      "language": "tr",
+      "tvTypes": [
+        "Live"
+      ],
+      "authors": [
+        "Adippe",
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tr.canlitv.team&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.canlitv.keyiflerolsun.CanliTVPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "CizgiMax",
+      "slug": "cizgimax",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 16,
+      "description": "ÇizgiMax ile Çizgi Film izlemek artık daha kolay, donmadan full hd ve reklamsız bir sitedir, içerisinde 700 den fazla çizgi film olan, Bu site bu işi profesyonelce yapıyor.",
+      "language": "tr",
+      "tvTypes": [
+        "Cartoon",
+        "Anime",
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=cizgimax.online&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.cizgimax.keyiflerolsun.CizgiMaxPlugin"
+      ],
+      "fileCount": 7
+    },
+    {
+      "id": "DailymotionProvider",
+      "slug": "dailymotionprovider",
+      "origin": "official",
+      "originName": "ReCloudStream Official Extensions",
+      "version": 4,
+      "description": "Watch content from Dailymotion",
+      "language": "",
+      "tvTypes": [
+        "Others"
+      ],
+      "authors": [
+        "Luna712"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.dailymotion.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.official.dailymotionprovider.recloudstream.DailymotionPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "Ddizi",
+      "slug": "ddizi",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 22,
+      "description": "DDizi.im için Cloudstream eklentisi",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.ddizi.im/favicon.ico",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.ddizi.keyiflerolsun.DDiziPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "DiziBox",
+      "slug": "dizibox",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 23,
+      "description": "Yabancı Dizi izle, Tüm yabancı dizilerin yeni ve eski sezonlarını full hd izleyebileceğiniz elit site.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.dizibox.live&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizibox.keyiflerolsun.DiziBoxPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "DiziGom",
+      "slug": "dizigom",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 9,
+      "description": "Türkçe altyazılı yabancı dizi izle, Tüm yabancı, kore, netflix dizilerin yeni ve eski sezonlarını orijinal dilinde dizigom1 alt yazılı film izleyebilir, sadece türkçe altyazılı en iyi yabancı diziler ve filmler hakkında yorum yapabilirsiniz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dizigom1.co&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.dizigom.nikyokki.DiziGomPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "DiziKorea",
+      "slug": "dizikorea",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 41,
+      "description": "En Güncel Kore Dizileri izleme Sitesi",
+      "language": "tr",
+      "tvTypes": [
+        "AsianDrama"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://dizikorea.vip&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizikorea.keyiflerolsun.DiziKoreaPlugin"
+      ],
+      "fileCount": 5
+    },
+    {
+      "id": "Dizilla",
+      "slug": "dizilla",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 92,
+      "description": "Dizilla tüm yabancı dizileri ücretsiz olarak Türkçe Dublaj ve altyazılı seçenekleri ile 1080P kalite izleyebileceğiniz yeni nesil yabancı dizi izleme siteniz.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dizilla.club&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizilla.keyiflerolsun.DizillaPlugin"
+      ],
+      "fileCount": 5
+    },
+    {
+      "id": "DiziMag",
+      "slug": "dizimag",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 18,
+      "description": "En son çıkan yabancı dizi ve filmleri DiziMag farkıyla full hd 1080p kalitede izle. Dizimag Geniş ve güncel arşiviyle dizi ve filmlerin tadını çıkartın.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dizimag.net&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.dizimag.nikyokki.DiziMagPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "DiziMom",
+      "slug": "dizimom",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 58,
+      "description": "Binlerce yerli yabancı dizi arşivi, tüm sezonlar, kesintisiz bölümler. Sadece dizi izle, Dizimom heryerde seninle!",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.dizimom.plus&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizimom.keyiflerolsun.DiziMomPlugin"
+      ],
+      "fileCount": 7
+    },
+    {
+      "id": "DiziPal",
+      "slug": "dizipal",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 106,
+      "description": "en yeni dizileri güvenli ve hızlı şekilde sunar.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "muratcesmecioglu"
+      ],
+      "iconUrl": "https://dizipal1563.com/assets/favicon/favicon-32x32.png?v=3",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizipal.keyiflerolsun.DiziPalPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "DiziPalOriginal",
+      "slug": "dizipaloriginal",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 88,
+      "description": "en yeni dizileri güvenli ve hızlı şekilde sunar.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "muratcesmecioglu"
+      ],
+      "iconUrl": "https://chessplyimages.cfd/uploads/site/favicon-32x32.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizipaloriginal.keyiflerolsun.DiziPalOriginalPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "DiziYou",
+      "slug": "diziyou",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 25,
+      "description": "Diziyou en kaliteli Türkçe dublaj ve altyazılı yabancı dizi izleme sitesidir. Güncel ve efsanevi dizileri 1080p Full HD kalitede izlemek için hemen tıkla!",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://cdn.diziyou.one/wp-content/uploads/2020/04/diziyou-favicon.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.diziyou.keyiflerolsun.DiziYouPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "DMax",
+      "slug": "dmax",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 2,
+      "description": "DMAX dizi ve programlarını takip etmek için ziyaret edin. DMAX dizi ve programlarını tek parça ve hd kalitesiyle izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.dmax.com.tr/favicon.ico",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.dmax.nikyokki.DMaxPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "FilmIzleIlk",
+      "slug": "filmizleilk",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 6,
+      "description": "Filmizleilk.com Yerli ve Yabancı en son Film ve Dizileri Full HD 1080p Bluray Tek Part Full izle",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.filmizleilk.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.filmizleilk.nikyokki.FilmIzleIlkPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "FilmKovasi",
+      "slug": "filmkovasi",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 3,
+      "description": "Film Kovasi ⚡ ile en güncel ve sorunsuz Full HD Film izle keyfi her yerde seninle! 1080p online film izleme ayrıcalığıyla Film Kovası'nın Tadını Çıkarın.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=filmkovasi.tv&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.filmkovasi.nikyokki.FilmKovasiPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "FilmMakinesi",
+      "slug": "filmmakinesi",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 58,
+      "description": "Film Makinesi, en yeni ve en güncel filmleri sitemizde full HD kalite farkı ile izleyebilirsiniz. HD film izle denildiğinde akla gelen en kaliteli film izleme sitesi.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "usdogu"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=filmmakinesi.film&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.filmmakinesi.keyiflerolsun.FilmMakinesiPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "FilmModu",
+      "slug": "filmmodu",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 19,
+      "description": "Film modun geldiyse yüksek kalitede en yeni filmleri izle, 1080p izleyebileceğiniz reklamsiz film sitesi.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.filmmodu.one/icon/favicon.ico",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.filmmodu.keyiflerolsun.FilmModuPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "FullHDFilm",
+      "slug": "fullhdfilm",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 36,
+      "description": "Fullhdfilm ile en yeni vizyon filmler Full HD ve kesintisiz film sizlerle. Özgün film arşivimizle en üstün kaliteli film izle keyfini sunuyoruz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilm.us&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.fullhdfilm.keyiflerolsun.FullHDFilmPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "FullHDFilmİzlede",
+      "slug": "fullhdfilmizlede",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 5,
+      "description": "En güncel ve popüler filmleri Full HD kalitesinde, Türkçe altyazılı veya Türkçe dublaj seçenekleriyle izleyebileceğiniz tek adres! Sinema tutkunları için en özel film deneyimini yaşamak için fullhdfilmizlede.net",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=fullhdfilmizlede.net&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.fullhdfilmizlede.nikyokki.FullHDFilmIzledePlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "FullHDFilmizlesene",
+      "slug": "fullhdfilmizlesene",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 33,
+      "description": "Sinema zevkini evinize kadar getirdik. Türkiye'nin lider Film sitesinde, en yeni filmleri Full HD izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.fullhdfilmizlesene.de&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.fullhdfilmizlesene.keyiflerolsun.FullHDFilmizlesenePlugin"
+      ],
+      "fileCount": 8
+    },
+    {
+      "id": "HDFilmCehennemi",
+      "slug": "hdfilmcehennemi",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 48,
+      "description": "Türkiye'nin en hızlı hd film izleme sitesi",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "hexated",
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmcehennemi.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.hdfilmcehennemi.keyiflerolsun.HDFilmCehennemiPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "HDFilmCehennemi2",
+      "slug": "hdfilmcehennemi2",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 7,
+      "description": "Full hd film izleme keyfini hdfilmcehennemi2 ile yaşayın. Türkiyenin en güncel yüksek hd kalitede film izleme sitesi.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.hdfilmcehennemi2.nl&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.hdfilmcehennemi2.nikyokki.HDFilmCehennemi2Plugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "HDFilmDelisi",
+      "slug": "hdfilmdelisi",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 1,
+      "description": "HD Film Delisi - Türkçe Filmler",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmdelisi.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.hdfilmdelisi.patron.HDFilmDelisiPlugin"
+      ],
+      "fileCount": 7
+    },
+    {
+      "id": "HDFilmIzle",
+      "slug": "hdfilmizle",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 7,
+      "description": "HDFilmizle ile Full HD izle, 1080p kalitede Yerli ve Yabancı filmlerle Türkçe dublaj veya Altyazı olarak kesintisiz film izlemenin tadını çıkarın.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmizle.to&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.hdfilmizle.nikyokki.HDFilmIzlePlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "HDFilmSitesi",
+      "slug": "hdfilmsitesi",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 18,
+      "description": "Film izle, Hdfilmsitesi ile Online 1080p ve 4K kalite Full HD Filmlere Türkçe Dublaj ve Altyazılı olarak Reklamsız Kesintisiz HD Film izle.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmsitesi.net&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.hdfilmsitesi.nikyokki.HDFilmSitesiPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "InatBox",
+      "slug": "inatbox",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 30,
+      "description": "İnatBox cloudstream eklentisidir. Sevdiğiniz yayın platformlarını ve canlı maçları burada bulabilirsiniz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries",
+        "Live"
+      ],
+      "authors": [
+        "JustRelaxable",
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh3vCp6N1K4bECoYRQD-cisJF2_6V_Hk01ZhDmoPR2JuM8O5qr4MqrPO1munM9cRlleBBSK6odYhLtDBWv4E3vhPhynlmS5hVVtJZShHoGA5REQ8_3v8SIlccTEqzVQu2UJyNYQdJNrKIfWy66RQeT0D-CcmFCbHPz5023H6p2v5fv4NVloZ5Rqo_yGrIY/s320/iNat-Box-App.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.inatbox.keyiflerolsun.InatBoxPlugin"
+      ],
+      "fileCount": 7
+    },
+    {
+      "id": "InternetArchiveProvider",
+      "slug": "internetarchiveprovider",
+      "origin": "official",
+      "originName": "ReCloudStream Official Extensions",
+      "version": 1,
+      "description": "Watch content from the Internet Archive at archive.org",
+      "language": "",
+      "tvTypes": [
+        "Others"
+      ],
+      "authors": [
+        "Luna712"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=archive.org&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.official.internetarchiveprovider.recloudstream.InternetArchivePlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "InvidiousProvider",
+      "slug": "invidiousprovider",
+      "origin": "official",
+      "originName": "ReCloudStream Official Extensions",
+      "version": 9,
+      "description": "Watch content from any invidious instance",
+      "language": "",
+      "tvTypes": [
+        "Others"
+      ],
+      "authors": [
+        "Cloudburst"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=invidious.io&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.official.invidiousprovider.recloudstream.InvidiousPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "JetFilmizle",
+      "slug": "jetfilmizle",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 47,
+      "description": "Binlerce Film İzleme Seçeneğiyle En İyi Film İzleme Sitesi",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://jetfilmizle.de&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.jetfilmizle.keyiflerolsun.JetFilmizlePlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "KoreanTurk",
+      "slug": "koreanturk",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 6,
+      "description": "Güney Kore sevdalılarının vazgeçemediği ve Türkiye'nin en çok ziyaret edilen Güney Kore Portalı; Koreantürk'e hoşgeldiniz!",
+      "language": "tr",
+      "tvTypes": [
+        "AsianDrama"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.koreanturk.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.koreanturk.keyiflerolsun.KoreanTurkPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "KultFilmler",
+      "slug": "kultfilmler",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 16,
+      "description": "Kült Filmler özenle en iyi filmleri derler ve iyi bir altyazılı film izleme deneyimi sunmayı amaçlar",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=kultfilmler.net&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.kultfilmler.keyiflerolsun.KultFilmlerPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "powerDizi",
+      "slug": "powerdizi",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 3,
+      "description": "powerDizi",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tr.canlitv.team&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.powerdizi.keyiflerolsun.powerDiziPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "powerSinema",
+      "slug": "powersinema",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 3,
+      "description": "powerSinema",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tr.canlitv.team&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.powersinema.keyiflerolsun.powerSinemaPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "RareFilmm",
+      "slug": "rarefilmm",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 3,
+      "description": "The Cave of Forgotten Films",
+      "language": "en",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=rarefilmm.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.rarefilmm.keyiflerolsun.RareFilmmPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "RecTV",
+      "slug": "rectv",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 113,
+      "description": "RecTv APK, Türkiye’deki en popüler Çevrimiçi Medya Akış platformlarından biridir. Filmlerin, Canlı Sporların, Web Dizilerinin ve çok daha fazlasının keyfini ücretsiz çıkarın.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "Live",
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "yusiqo",
+        "inatchii",
+        "JustRelaxable"
+      ],
+      "iconUrl": "https://rectv.org.tr/wp-content/uploads/2024/11/rectv-modified.webp",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.rectv.keyiflerolsun.RecTVPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "RoketDizi",
+      "slug": "roketdizi",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 15,
+      "description": "Türkiye'nin en tatlış yabancı dizi izleme sitesi. Türkçe dublaj, altyazılı, eski ve yeni yabancı dizilerin yanı sıra kore (asya) dizileri izleyebilirsiniz.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=roketdizi.co&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.roketdizi.nikyokki.RoketDiziPlugin"
+      ],
+      "fileCount": 6
+    },
+    {
+      "id": "SelcukFlix",
+      "slug": "selcukflix",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 1,
+      "description": "SelcukFlix eklentisi.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://selcukflix.co/assets/favicon/favicon-32x32.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.selcukflix.keyiflerolsun.SelcukFlixPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "SetFilmIzle",
+      "slug": "setfilmizle",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 30,
+      "description": "Setfilmizle sitemizde, donma yaşamadan Türkçe dublaj ve altyazılı filmleri ile dizileri muhteşem 1080p full HD kalitesinde izleyebilirsiniz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.setfilmizle.uk&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.setfilmizle.keyiflerolsun.SetFilmIzlePlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "SezonlukDizi",
+      "slug": "sezonlukdizi",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 9,
+      "description": "Güncel ve eski dizileri en iyi görüntü kalitesiyle bulabileceğiniz yabancı dizi izleme siteniz.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "JustRelaxable"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=sezonlukdizi6.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.sezonlukdizi.keyiflerolsun.SezonlukDiziPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "SinemaCX",
+      "slug": "sinemacx",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 24,
+      "description": "Güncel ve en iyi yabancı filmleri yüksek görüntü kalitesinde, Türkçe dublaj ve altyazı seçenekleriyle filmleri full izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.sinema.cx&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.sinemacx.keyiflerolsun.SinemaCXPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "Sinewix",
+      "slug": "sinewix",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 2,
+      "description": "Sinewix | Ücretsiz Film - Dizi - Anime İzleme Uygulaması",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries",
+        "Anime"
+      ],
+      "authors": [
+        "patr0n",
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://play-lh.googleusercontent.com/brwGNmr7IjA_MKk_TTPs0va10hdKE_bD_a1lnKoiMuCayW98EHpRv55edA6aEoJlmwfX",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.sinewix.keyiflerolsun.SinewixPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "SuperFilmGeldi",
+      "slug": "superfilmgeldi",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 25,
+      "description": "Hd film izliyerek arkadaşlarınızla ve sevdiklerinizle iyi bir vakit geçirmek istiyorsanız açın bir film eğlenmeye bakın. Bilim kurgu filmleri, aşk drama vahşet aşk romantik sıradışı korku filmlerini izle.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.superfilmgeldi.biz&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun.SuperFilmGeldiPlugin"
+      ],
+      "fileCount": 5
+    },
+    {
+      "id": "TLC",
+      "slug": "tlc",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 1,
+      "description": "TLC TV dizi ve programlarını takip etmek için ziyaret edin. TLC TV dizi ve programlarını tek parça ve hd kalitesiyle izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.tlctv.com.tr/favicon.ico",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.tlc.nikyokki.TLCPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "TLCtr",
+      "slug": "tlctr",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 19,
+      "description": "TLC tr",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.tlctv.com.tr&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.tlctr.keyiflerolsun.TlctrPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "TRanimaci",
+      "slug": "tranimaci",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 18,
+      "description": "TRanimeci - Türkiye'nin Online Anime izleme sitesi.",
+      "language": "tr",
+      "tvTypes": [
+        "Anime"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tranimaci.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.tranimaci.keyiflerolsun.TRanimaciPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "TRasyalog",
+      "slug": "trasyalog",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 65,
+      "description": "TRasyalog izleme sitesi.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=asyalog.co&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.trasyalog.keyiflerolsun.TRasyalogPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "TurkAnime",
+      "slug": "turkanime",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 14,
+      "description": "Türk Anime TV - Türkiye'nin Online Anime izleme sitesi.",
+      "language": "tr",
+      "tvTypes": [
+        "Anime"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.turkanime.co&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.turkanime.keyiflerolsun.TurkAnimePlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "TvDiziler",
+      "slug": "tvdiziler",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 5,
+      "description": "Ücretsiz yerli dizi izleme sitesi en popüler dizileri tek parça hd kalitesiyle ve reklamsız bedava olarak buradan tv dizileri izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tvdiziler.cc&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.tvdiziler.nikyokki.TvDizilerPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "TwitchProvider",
+      "slug": "twitchprovider",
+      "origin": "official",
+      "originName": "ReCloudStream Official Extensions",
+      "version": 2,
+      "description": "Watch livestreams from Twitch",
+      "language": "",
+      "tvTypes": [
+        "Live"
+      ],
+      "authors": [
+        "CranberrySoup"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=twitch.tv&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.official.twitchprovider.recloudstream.TwitchPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "UgurFilm",
+      "slug": "ugurfilm",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 6,
+      "description": "Yabancı film izle, Türkçe dublaj ve Türkçe altyazılı film seçenekleriyle 720p ve 1080p HD kalitesinde film izle - Uğur Film full hd film izle.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun",
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=ugurfilm7.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun.UgurFilmPlugin"
+      ],
+      "fileCount": 6
+    },
+    {
+      "id": "vavooSpor",
+      "slug": "vavoospor",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 2,
+      "description": "vavooSpor",
+      "language": "tr",
+      "tvTypes": [
+        "Live"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tr.canlitv.team&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.vavoospor.keyiflerolsun.vavooSporPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "Watch2Movies",
+      "slug": "watch2movies",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 6,
+      "description": "Movies2Watch is a Free Movies streaming site with zero ads. We let you watch movies online without having to register or paying, with over 10000 movies and TV-Series.",
+      "language": "en",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=movies2watch.watch&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.watch2movies.keyiflerolsun.Watch2MoviesPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "WebdramaTurkey2",
+      "slug": "webdramaturkey2",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 1,
+      "description": "WebdramaTurkey2 İçerikleri",
+      "language": "tr",
+      "tvTypes": [
+        "AsianDrama",
+        "Movie",
+        "Anime",
+        "Others"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://webdramaturkey2.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.webdramaturkey2.patron.WebdramaTurkey2Plugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "WebteIzle",
+      "slug": "webteizle",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "version": 21,
+      "description": "Her türlü filmi ister dublaj ister altyazılı, en kaliteli bir şekilde izleyebileceğiniz arşivi en geniş gerçek film izleme siteniz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=webteizle3.xyz&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.webteizle.keyiflerolsun.WebteIzlePlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "WFilmİzle",
+      "slug": "wfilmizle",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 7,
+      "description": "Aile Filmleri izle, Yerli ve yabancı en yeni Aile filmlerini Full HD 1080p görüntü kalitesiyle Türkçe Dublaj ve Türkçe Altyazı seçenekleriyle izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=wfilmizle.my&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.wfilmizle.nikyokki.WFilmIzlePlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "XPrime",
+      "slug": "xprime",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 6,
+      "description": "XPrime.Tv",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=xprime.tv&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.xprime.nikyokki.XPrimePlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "YabanciDizi",
+      "slug": "yabancidizi",
+      "origin": "nikyokki",
+      "originName": "Nikyokki Turkish Providers",
+      "version": 8,
+      "description": "Son çıkan yabancı dizi ve filmleri yabancidizi' de izle. En yeni yabancı film ve diziler, türkçe altyazılı yada dublaj olarak 1080p kalitesinde hd izle.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "nikyokki"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=yabancidizi.tv&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.nikyokki.yabancidizi.nikyokki.YabanciDiziPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "YoutubeProvider",
+      "slug": "youtubeprovider",
+      "origin": "official",
+      "originName": "ReCloudStream Official Extensions",
+      "version": 1,
+      "description": "Watch Youtube in Cloudstream",
+      "language": "",
+      "tvTypes": [
+        "Other",
+        "Live",
+        "TvSeries"
+      ],
+      "authors": [
+        "KaifTaufiq"
+      ],
+      "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/YouTube_full-color_icon_%282017%29.svg/3840px-YouTube_full-color_icon_%282017%29.svg.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.official.youtubeprovider.recloudstream.YoutubePlugin"
+      ],
+      "fileCount": 2
+    }
+  ],
+  "skipped": [
+    {
+      "origin": "nikyokki",
+      "module": "AnimeciX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "BelgeselX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "CanliTV",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "CizgiMax",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DDizi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziBox",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziKorea",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "Dizilla",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziMom",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziPal",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziYou",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "Filmİzlesene",
+      "reason": "status=0"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "FilmMakinesi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "FilmModu",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "FullHDFilm",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "FullHDFilmizlesene",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "HDFilmCehennemi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "InatBox",
+      "reason": "status=3"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "JetFilmizle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "KultFilmler",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "RecTV",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "SelcukFlix",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "SetFilmIzle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "SezonlukDizi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "SinemaCX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "SineWix",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "Tafdi",
+      "reason": "status=0"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "TurkAnime",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "WebteIzle",
+      "reason": "feroxx surumu tercih edildi"
+    }
+  ],
+  "failures": []
+}

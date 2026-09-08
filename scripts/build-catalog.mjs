@@ -163,6 +163,11 @@ if (verifyFiles) {
 }
 
 const plugins = chosen.map(({ plugin }) => plugin);
+// Ana katalog artik tek eklenti: BerkStream butun kaynaklari kendi icinde tasiyor.
+// Tekil paketler yedek katalogda (plugins-all.json) yayinlanmaya devam ediyor.
+const allInOne = chosen
+  .filter(({ source }) => source.id === "berkstream")
+  .map(({ plugin }) => plugin);
 const sourceCounts = Object.fromEntries(
   loadedSources.map((source) => [
     source.id,
@@ -171,17 +176,27 @@ const sourceCounts = Object.fromEntries(
 );
 
 const repo = {
-  name: "BerkStream Hub",
-  description: "Güncel ve tekilleştirilmiş CloudStream eklenti kataloğu",
+  name: "BerkStream",
+  description: "Tüm Türkçe kaynakları tek eklentide toplayan BerkStream",
   manifestVersion: 1,
   pluginLists: [
     `https://raw.githubusercontent.com/${repositorySlug}/${branch}/plugins.json`,
   ],
 };
 
+const fullRepo = {
+  name: "BerkStream Hub (tekil paketler)",
+  description: "Güncel ve tekilleştirilmiş CloudStream eklenti kataloğu — tek tek kurmak isteyenler için",
+  manifestVersion: 1,
+  pluginLists: [
+    `https://raw.githubusercontent.com/${repositorySlug}/${branch}/plugins-all.json`,
+  ],
+};
+
 const report = {
   generatedAt: new Date().toISOString(),
   repositorySlug,
+  allInOnePlugins: allInOne.length,
   totalPlugins: plugins.length,
   sourceCounts,
   duplicates,
@@ -191,12 +206,15 @@ const report = {
 
 await mkdir(outputDir, { recursive: true });
 await Promise.all([
-  writeFile(path.join(outputDir, "plugins.json"), `${JSON.stringify(plugins, null, 2)}\n`),
+  writeFile(path.join(outputDir, "plugins.json"), `${JSON.stringify(allInOne, null, 2)}\n`),
+  writeFile(path.join(outputDir, "plugins-all.json"), `${JSON.stringify(plugins, null, 2)}\n`),
   writeFile(path.join(outputDir, "repo.json"), `${JSON.stringify(repo, null, 2)}\n`),
+  writeFile(path.join(outputDir, "repo-full.json"), `${JSON.stringify(fullRepo, null, 2)}\n`),
   writeFile(path.join(outputDir, "catalog-report.json"), `${JSON.stringify(report, null, 2)}\n`),
 ]);
 
-console.log(`BerkStream Hub: ${plugins.length} eklenti seçildi.`);
+console.log(`BerkStream ana katalog: ${allInOne.length} eklenti (tek paket).`);
+console.log(`BerkStream Hub yedek katalog: ${plugins.length} eklenti seçildi.`);
 for (const [source, count] of Object.entries(sourceCounts)) {
   console.log(`- ${source}: ${count}`);
 }

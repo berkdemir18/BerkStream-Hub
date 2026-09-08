@@ -1,10 +1,10 @@
-version = 2
+version = 3
 
 cloudstream {
     authors = listOf("berkdemir18")
     language = "tr"
-    description = "Film, dizi, platform seçkileri, vizyon, canlı TV ve akıllı kaynak aramasını tek ana ekranda birleştiren BerkStream medya merkezi."
+    description = "Turkce film, dizi, anime, belgesel ve canli TV kaynaklarinin tamamini tek eklentide toplayan BerkStream medya merkezi."
     status = 1
-    tvTypes = listOf("Movie", "TvSeries")
+    tvTypes = listOf("Movie", "TvSeries", "Anime", "AsianDrama", "Cartoon", "Documentary", "Live", "Others")
     iconUrl = "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.svg"
 }
