@@ -2,9 +2,10 @@
 
 ## CloudStream içinde
 
-1. BerkStream Hub depo adresini CloudStream'e ekle.
-2. Yalnızca `BerkStream` eklentisini yükle. Birleşik film/dizi kaynak motoru paketin
-   içindedir. Canlı TV rafı için ayrıca `plt-tv` yüklenirse kanal listesi eklenir.
+1. BerkStream depo adresini CloudStream'e ekle:
+   `https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/repo.json`
+2. Depoda tek paket var: `BerkStream`. Onu yükle — 60+ Türkçe kaynak, canlı TV ve
+   birleşik film/dizi kaynak motoru paketin içindedir, ayrıca bir şey kurmana gerek yok.
 3. CloudStream ana ekranındaki provider seçicisinden `BerkStream`i seç.
 4. İlk satır `🎬 VİZYON • BU HAFTA` olur. Devamında popüler, film, dizi,
    platform seçkileri, canlı TV ve günlük sürpriz rafları görünür.
