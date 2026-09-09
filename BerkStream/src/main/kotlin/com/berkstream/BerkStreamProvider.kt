@@ -50,7 +50,7 @@ class BerkStreamProvider : TmdbProvider() {
     override val useMetaLoadResponse = true
     override val hasQuickSearch = true
     override val quickSearchTimeoutMs = 12_000L
-    override val getMainPageTimeoutMs = 45_000L
+    override val getMainPageTimeoutMs = 20_000L
     override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries)
 
     private val tmdbApiUrl = "https://api.themoviedb.org/3"
@@ -65,11 +65,22 @@ class BerkStreamProvider : TmdbProvider() {
      * film mi dizi mi olarak kuracagimizi soyler, "mixed" ise TMDB'nin kendi
      * `media_type` alani kullanilir.
      */
-    override val mainPage = listOf(
-        MainPageData("🎯  SANA ÖZEL", "personal", false),
-        MainPageData("🆕  KAYNAKLARDA YENİ", "fresh", false),
+    override val mainPage: List<MainPageData>
+        get() = allShelves.filter { data ->
+            when {
+                data.data == "personal" -> BerkStreamSettings.personalShelfEnabled
+                data.data == "fresh" -> BerkStreamSettings.freshShelfEnabled
+                data.data in setOf("dice", "onthisday") -> BerkStreamSettings.discoveryShelvesEnabled
+                data.data.contains("with_watch_providers") -> BerkStreamSettings.platformShelvesEnabled
+                data.data.contains("with_genres") -> BerkStreamSettings.genreShelvesEnabled
+                else -> true
+            }
+        }
+
+    private val allShelves = listOf(
         shelf("🎬  VİZYONDAKİ FİLMLER", "movie", "movie/now_playing?region=TR"),
         shelf("🔥  GÜNÜN TRENDLERİ", "mixed", "trending/all/day"),
+        MainPageData("🎯  SANA ÖZEL", "personal", false),
         shelf("📈  HAFTANIN POPÜLER FİLMLERİ", "movie", "trending/movie/week"),
         shelf("📺  HAFTANIN POPÜLER DİZİLERİ", "tv", "trending/tv/week"),
         shelf("🆕  YENİ ÇIKAN FİLMLER", "movie", "discover/movie?sort_by=primary_release_date.desc&vote_count.gte=25"),
@@ -77,6 +88,7 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("⭐  EN YÜKSEK PUANLI DİZİLER", "tv", "discover/tv?sort_by=vote_average.desc&vote_count.gte=250"),
         shelf("🇹🇷  TÜRK DİZİLERİ", "tv", "discover/tv?with_original_language=tr&sort_by=popularity.desc"),
         shelf("🇹🇷  TÜRK FİLMLERİ", "movie", "discover/movie?with_original_language=tr&sort_by=popularity.desc"),
+        MainPageData("🆕  KAYNAKLARDA YENİ", "fresh", false),
         shelf("ᴺ  NETFLIX • FİLM", "movie", "discover/movie?with_watch_providers=8"),
         shelf("ᴺ  NETFLIX • DİZİ", "tv", "discover/tv?with_watch_providers=8"),
         shelf("▶  PRIME VIDEO • FİLM", "movie", "discover/movie?with_watch_providers=119"),
@@ -264,6 +276,15 @@ class BerkStreamProvider : TmdbProvider() {
      * uygulaniyor: guncel adres saglayicinin mainUrl'ine yaziliyor, cevap
      * vermeyen kaynaklar da taramaya hic sokulmuyor.
      */
+    init {
+        BerkStreamSettings.cacheCleaner = { shelfCache.clear() }
+        BerkStreamSettings.domainRefresher = {
+            domainsApplied = false
+            disabledProviders.clear()
+            failureCounts.clear()
+        }
+    }
+
     private suspend fun ensureDomains() {
         if (domainsApplied) return
         domainsApplied = true
@@ -323,142 +344,71 @@ class BerkStreamProvider : TmdbProvider() {
         return items to hasNext
     }
 
-    private val sportsKeywords = listOf(
-        "spor", "sport", "bein", "tivibu", "s ", "trt", "smart", "exxen", "tabii",
-        "futbol", "lig", "mac", "maç",
+    private val sportsWords = listOf(
+        "spor", "sport", "bein", "tivibu", "smart", "futbol", "lig", "mac", "match",
+        "eurosport", "trt spor", "aspor", "tabii spor", "exxen",
     )
 
-    private suspend fun liveShelf(onlySports: Boolean = false): List<SearchResponse> = apis
-        .filter { api ->
-            api.name != name && api.providerType != ProviderType.MetaProvider &&
-                (TvType.Live in api.supportedTypes ||
-                    liveProviderPriority.any { it.equals(api.name, ignoreCase = true) })
-        }
-        .sortedBy { api ->
-            liveProviderPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
-                .let { if (it == -1) Int.MAX_VALUE else it }
-        }
-        .take(5)
-        .amap { api ->
-            try {
-                val first = api.mainPage.firstOrNull() ?: return@amap emptyList()
-                api.getMainPage(1, MainPageRequest(first.name, first.data, first.horizontalImages))
-                    ?.items?.flatMap { it.list }.orEmpty()
-            } catch (error: Throwable) {
-                logError(Exception(error))
-                emptyList()
-            }
-        }
-        .flatten()
-        .let { items ->
-            if (!onlySports) items
-            else items.filter { item ->
-                val label = looseTitle(item.name)
-                sportsKeywords.any { label.contains(it.trim()) }
-            }
-        }
-        .distinctBy { normalize(it.name) }
-        .take(40)
-
-    /**
-     * Izleme gecmisi CloudStream'in uygulama modulunde duruyor ve eklenti
-     * derleme paketinde var oldugu garanti degil; bu yuzden yansimayla
-     * okunuyor. Erisilemezse sessizce bos donuyor, raf da trend listesine
-     * dusuyor.
-     */
-    /**
-     * Kendi izleme kaydimiz. CloudStream'in gecmisini yansimayla okumak her
-     * surumde tutmuyor; oynatilan her basligi kendimiz de yazinca "Sana Ozel"
-     * rafi kesin veriyle calisiyor. [BerkStreamPlugin] baslarken dolduruluyor.
-     */
-    private fun rememberWatched(title: String) {
-        val store = BerkStreamSettings.store ?: return
-        runCatching {
-            val previous = store.getString(WATCH_HISTORY_KEY, "").orEmpty()
-                .split('\n').filter { it.isNotBlank() }
-            val updated = (listOf(title) + previous).distinct().take(60)
-            store.edit().putString(WATCH_HISTORY_KEY, updated.joinToString("\n")).apply()
-        }
+    private fun isSporty(label: String): Boolean {
+        val text = looseTitle(label)
+        return sportsWords.any { text.contains(it) }
     }
 
-    private fun ownWatchedTitles(): List<String> = runCatching {
-        BerkStreamSettings.store?.getString(WATCH_HISTORY_KEY, "").orEmpty()
-            .split('\n').filter { it.isNotBlank() }
-    }.getOrElse { emptyList() }
+    /**
+     * Canli yayin kaynaklari birden fazla kategori rafi tasiyor: InatBox'ta 25,
+     * RecTV'de 14 raf var. Onceden yalnizca ilk raf okundugu icin toplam 10-15
+     * kanal gorunuyordu; artik kategorilerin tamami geziliyor ve spor rafi da
+     * kategori adindan suzuluyor.
+     */
+    private suspend fun liveShelf(onlySports: Boolean, page: Int): List<SearchResponse> {
+        ensureDomains()
+        val providers = apis
+            .filter { api ->
+                api.name != name && api.providerType != ProviderType.MetaProvider &&
+                    normalize(api.name) !in disabledProviders &&
+                    (TvType.Live in api.supportedTypes ||
+                        liveProviderPriority.any { it.equals(api.name, ignoreCase = true) })
+            }
+            .sortedBy { api ->
+                liveProviderPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
+                    .let { if (it == -1) Int.MAX_VALUE else it }
+            }
+            .take(6)
 
-    private fun cloudstreamWatchedTitles(): List<String> = runCatching {
-        val helper = Class.forName("com.lagradost.cloudstream3.utils.DataStoreHelper")
-        val instance = helper.getField("INSTANCE").get(null)
-        val ids = buildList {
-            for (method in listOf("getAllResumeStateIds", "getAllWatchStateIds")) {
+        return scanProviders(providers) { api ->
+            val shelves = api.mainPage
+                .filter { !onlySports || isSporty(it.name) }
+                .take(if (onlySports) 6 else 12)
+            shelves.mapNotNull { shelf ->
                 runCatching {
-                    (helper.getMethod(method).invoke(instance) as? List<*>)?.let(::addAll)
+                    api.getMainPage(
+                        page,
+                        MainPageRequest(shelf.name, shelf.data, shelf.horizontalImages),
+                    )?.items?.flatMap { it.list }
+                }.getOrNull()
+            }.flatten()
+        }
+            .flatten()
+            .let { items ->
+                // Kategori adi spor degilse bile kanal adi spor olabilir.
+                if (!onlySports) items else {
+                    val byShelf = items.filter { isSporty(it.name) }
+                    if (byShelf.size >= 8) byShelf else items
                 }
             }
-        }.filterIsInstance<Int>().distinct()
-        val readers = listOf("getLastWatched", "getBookmarkedData").mapNotNull { method ->
-            runCatching { helper.getMethod(method, Integer::class.java) }.getOrNull()
-        }
-        ids.takeLast(30).mapNotNull { id ->
-            readers.firstNotNullOfOrNull { reader ->
-                runCatching {
-                    val record = reader.invoke(instance, id) ?: return@runCatching null
-                    record.javaClass.getMethod("getName").invoke(record) as? String
-                }.getOrNull()
-            }
-        }.filter { it.isNotBlank() }.distinct()
-    }.getOrElse { emptyList() }
-
-    private fun watchedTitles(): List<String> =
-        (ownWatchedTitles() + cloudstreamWatchedTitles()).distinct()
-
-    private suspend fun tmdbLookup(title: String): Pair<String, Int>? = runCatching {
-        val url = "$tmdbApiUrl/search/multi?api_key=$tmdbApiKey&language=tr-TR" +
-            "&include_adult=false&query=${title.encodeQuery()}"
-        tryParseJson<TmdbPage>(app.get(url).text)?.results
-            ?.firstOrNull { it.id != null && (it.mediaType == "movie" || it.mediaType == "tv") }
-            ?.let { it.mediaType!! to it.id!! }
-    }.getOrNull()
-
-    private fun String.encodeQuery() = java.net.URLEncoder.encode(this, "UTF-8")
-
-    /** Izlenenlere/yarim birakilanlara gore TMDB onerileri. */
-    private suspend fun personalShelf(page: Int): Pair<List<SearchResponse>, Boolean> {
-        val seeds = watchedTitles().take(12).shuffled().take(4)
-        if (seeds.isEmpty()) return tmdbShelf("trending/all/week", "mixed", page)
-        val recommendations = seeds.amap { title ->
-            val (kind, id) = tmdbLookup(title) ?: return@amap emptyList()
-            runCatching {
-                tmdbShelf("$kind/$id/recommendations", kind, page).first
-            }.getOrElse { emptyList() }
-        }.flatten()
-        val watched = watchedTitles().map(::looseTitle).toSet()
-        val filtered = recommendations
-            .distinctBy { it.url }
-            .filter { looseTitle(it.name) !in watched }
-            .shuffled()
-        return filtered to (filtered.isNotEmpty() && page < 5)
-    }
-
-    /**
-     * Kaynaklarin kendi ana sayfalarindaki taze icerik. TMDB'de olmayan ya da
-     * heniz eklenmemis yeni bolumler burada goruntuleniyor.
-     */
-    private suspend fun freshFromProviders(): List<SearchResponse> {
-        ensureDomains()
-        val providers = validApisFor(movieTypes + seriesTypes).take(8)
-        return scanProviders(providers) { api ->
-            val first = api.mainPage.firstOrNull() ?: return@scanProviders null
-            api.getMainPage(1, MainPageRequest(first.name, first.data, first.horizontalImages))
-                ?.items?.flatMap { it.list }?.take(8)
-        }.flatten().distinctBy { "${it.apiName}|${looseTitle(it.name)}" }.shuffled().take(40)
+            .distinctBy { "${it.apiName}|${normalize(it.name)}" }
+            .take(240)
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         when (request.data) {
             "live", "sports" -> {
-                val items = if (page > 1) emptyList() else liveShelf(request.data == "sports")
-                return newHomePageResponse(request, items, false)
+                val sports = request.data == "sports"
+                val key = if (sports) "sports" else "live"
+                if (page == 1) cachedShelf(key)?.let { return newHomePageResponse(request, it, true) }
+                val items = liveShelf(sports, page)
+                if (page == 1) putShelf(key, items)
+                return newHomePageResponse(request, items, items.isNotEmpty())
             }
             "personal" -> {
                 val (items, hasNext) = try {
@@ -589,7 +539,7 @@ class BerkStreamProvider : TmdbProvider() {
                 api.loadLinks(innerData, isCasting, subtitleCallback, countingCallback)
                 true
             }
-            if (linkCount.get() >= 6) break
+            if (linkCount.get() >= BerkStreamSettings.linkTarget) break
         }
         return linkCount.get() > 0
     }
@@ -610,8 +560,13 @@ class BerkStreamProvider : TmdbProvider() {
             val parsed = tryParseJson<StremioSubtitleList>(
                 app.get("$subtitleApiUrl/$suffix.json").text,
             ) ?: return
+            val allowed = when (BerkStreamSettings.subtitleLanguage) {
+                1 -> setOf("tur", "tr")
+                2 -> setOf("eng", "en")
+                else -> wantedSubtitleLanguages
+            }
             parsed.subtitles
-                .filter { it.url != null && it.lang in wantedSubtitleLanguages }
+                .filter { it.url != null && it.lang in allowed }
                 .distinctBy { it.url }
                 .take(14)
                 .forEach { subtitle ->
