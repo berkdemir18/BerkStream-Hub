@@ -220,7 +220,20 @@ class BerkStreamProvider : TmdbProvider() {
 
     @Volatile
     private var domainsApplied = false
-    private val disabledProviders = mutableSetOf<String>()
+    private val disabledProviders = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private val failureCounts = java.util.concurrent.ConcurrentHashMap<String, Int>()
+
+    /**
+     * CI taramasi GitHub'in sunucularindan yapiliyor; Turkiye'den erisilemeyen
+     * bir site oradan ayakta gorunebiliyor, yani yayimlanan liste kullanicinin
+     * agini birebir yansitmiyor. Bu yuzden cihaz tarafinda da olcuyoruz: ust uste
+     * cevap veremeyen kaynak bu oturumda taramaya sokulmuyor.
+     */
+    private fun noteFailure(api: MainAPI) {
+        val key = normalize(api.name)
+        val total = failureCounts.merge(key, 1, Int::plus) ?: 1
+        if (total >= 2) disabledProviders.add(key)
+    }
 
     /**
      * Kaynak siteleri surekli adres degistirdigi icin adresler pakete gomulu
@@ -446,8 +459,12 @@ class BerkStreamProvider : TmdbProvider() {
     ): List<T> = withTimeoutOrNull(providerScanBudgetMs) {
         providers.amap { api ->
             try {
-                withTimeoutOrNull(providerScanTimeoutMs) { block(api) }
+                withTimeoutOrNull(providerScanTimeoutMs) { block(api) } ?: run {
+                    noteFailure(api)
+                    null
+                }
             } catch (error: Throwable) {
+                noteFailure(api)
                 // Exception DEGIL Throwable: eski API'yi uygulamayan saglayicilar
                 // NotImplementedError firlatiyor ve o bir Error. Exception yakalaninca
                 // hata yukari kaciyor, CloudStream de tum akisi
