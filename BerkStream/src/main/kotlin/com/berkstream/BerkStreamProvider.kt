@@ -128,7 +128,8 @@ class BerkStreamProvider : TmdbProvider() {
 
     private val wantedSubtitleLanguages = setOf("tur", "tr", "eng", "en")
 
-    private val liveProviderPriority = listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "vavooSpor")
+    private val liveProviderPriority =
+        listOf("BerkStream Canlı", "plt-tv", "InatBox", "CanliTV", "RecTV", "vavooSpor")
 
     private val movieTypes = setOf(TvType.Movie, TvType.AnimeMovie)
 
