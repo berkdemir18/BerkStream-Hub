@@ -21,11 +21,14 @@ import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.newHomePageResponse
 import com.lagradost.cloudstream3.newMovieSearchResponse
 import com.lagradost.cloudstream3.newSearchResponseList
+import com.lagradost.cloudstream3.newSubtitleFile
 import com.lagradost.cloudstream3.newTvSeriesSearchResponse
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import kotlinx.coroutines.withTimeoutOrNull
+import me.xdrop.fuzzywuzzy.FuzzySearch
 import java.text.Normalizer
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * BerkStream ana ekrani.
@@ -92,8 +95,24 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("🧒  ANİMASYON • DİZİ", "tv", "discover/tv?with_genres=16&sort_by=popularity.desc"),
         shelf("🎌  ANİME", "tv", "discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc"),
         shelf("📖  BELGESEL", "movie", "discover/movie?with_genres=99&sort_by=popularity.desc"),
+        shelf("🇰🇷  KORE DİZİLERİ", "tv", "discover/tv?with_original_language=ko&sort_by=popularity.desc"),
+        shelf("🇯🇵  JAPON SİNEMASI", "movie", "discover/movie?with_original_language=ja&sort_by=popularity.desc"),
+        shelf("🇪🇸  İSPANYOL YAPIMLARI", "tv", "discover/tv?with_original_language=es&sort_by=popularity.desc"),
+        shelf("📅  BU HAFTA YENİ BÖLÜM", "tv", "tv/on_the_air"),
+        shelf("💎  GİZLİ CEVHERLER", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=200&vote_count.lte=1200"),
+        shelf("⏱️  KISA GECE • 95 DK ALTI", "movie", "discover/movie?with_runtime.lte=95&vote_count.gte=300&sort_by=vote_average.desc"),
+        shelf("🎂  SEN DOĞDUĞUNDA • 2007", "movie", "discover/movie?primary_release_year=2007&sort_by=popularity.desc"),
+        shelf("🕰️  90'LAR KLASİKLERİ", "movie", "discover/movie?primary_release_date.gte=1990-01-01&primary_release_date.lte=1999-12-31&sort_by=vote_average.desc&vote_count.gte=500"),
+        shelf("🏆  OSCAR YOLUNDA", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=1500&primary_release_date.gte=2015-01-01"),
         MainPageData("📡  CANLI TV", "live", true),
     )
+
+    private val domainsUrl =
+        "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/domains.json"
+
+    private val subtitleApiUrl = "https://opensubtitles-v3.strem.io/subtitles"
+
+    private val wantedSubtitleLanguages = setOf("tur", "tr", "eng", "en")
 
     private val liveProviderPriority = listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "vavooSpor")
 
@@ -153,6 +172,75 @@ class BerkStreamProvider : TmdbProvider() {
         .replace('ı', 'i')
         .replace(Regex("[^A-Za-z0-9]"), "")
         .lowercase()
+
+    /**
+     * Kaynak sitelerin baslıklari "X izle", "X Türkçe Dublaj 1080p" gibi ekler
+     * tasiyor. Tam esleşme aramasi bu yuzden cok icerigi kaciriyordu; once bu
+     * ekler temizleniyor, sonra bulanik karsilastirma yapiliyor.
+     */
+    private fun looseTitle(value: String): String = Normalizer
+        .normalize(value, Normalizer.Form.NFD)
+        .replace(Regex("\\p{M}+"), "")
+        .replace('ı', 'i')
+        .lowercase()
+        .replace(Regex("[^a-z0-9]+"), " ")
+        .replace(
+            Regex(
+                "\\b(izle|seyret|full|hd|fullhd|4k|1080p|720p|480p|turkce|turkiye|dublaj|" +
+                    "altyazili|altyazi|filmi|film|dizisi|dizi|online|tek|parca|part|sezon|bolum|" +
+                    "yerli|yabanci|hdfilm|tr)\\b",
+            ),
+            " ",
+        )
+        .replace(Regex("\\s+"), " ")
+        .trim()
+
+    private fun titleMatches(candidate: String, target: String): Boolean {
+        val a = looseTitle(candidate)
+        val b = looseTitle(target)
+        if (a.isBlank() || b.isBlank()) return false
+        if (a == b) return true
+        if (normalize(candidate) == normalize(target)) return true
+        return FuzzySearch.tokenSetRatio(a, b) >= 88
+    }
+
+    private data class DomainConfig(
+        @JsonProperty("overrides") val overrides: Map<String, String> = emptyMap(),
+        @JsonProperty("disabled") val disabled: List<String> = emptyList(),
+    )
+
+    private data class StremioSubtitle(
+        @JsonProperty("url") val url: String? = null,
+        @JsonProperty("lang") val lang: String? = null,
+    )
+
+    private data class StremioSubtitleList(
+        @JsonProperty("subtitles") val subtitles: List<StremioSubtitle> = emptyList(),
+    )
+
+    @Volatile
+    private var domainsApplied = false
+    private val disabledProviders = mutableSetOf<String>()
+
+    /**
+     * Kaynak siteleri surekli adres degistirdigi icin adresler pakete gomulu
+     * kalamiyor. CI haftalik tarama yapip `domains.json` uretiyor; burada o liste
+     * uygulaniyor: guncel adres saglayicinin mainUrl'ine yaziliyor, cevap
+     * vermeyen kaynaklar da taramaya hic sokulmuyor.
+     */
+    private suspend fun ensureDomains() {
+        if (domainsApplied) return
+        domainsApplied = true
+        runCatching {
+            val config = tryParseJson<DomainConfig>(app.get(domainsUrl).text) ?: return
+            config.disabled.forEach { disabledProviders.add(normalize(it)) }
+            if (config.overrides.isEmpty()) return
+            val byName = apis.associateBy { normalize(it.name) }
+            config.overrides.forEach { (providerName, url) ->
+                byName[normalize(providerName)]?.mainUrl = url
+            }
+        }.onFailure { logError(Exception("Adres listesi uygulanamadi", it)) }
+    }
 
     private fun TmdbItem.toSearchResponse(fallbackType: String): SearchResponse? {
         if (adult == true) return null
@@ -252,6 +340,7 @@ class BerkStreamProvider : TmdbProvider() {
             logError(Exception(error))
             emptyList()
         }
+        ensureDomains()
         val direct = if (page > 1) emptyList() else scanProviders(
             validApisFor(movieTypes + seriesTypes),
         ) { api -> api.searchSafely(query).take(3) }.flatten()
@@ -272,33 +361,75 @@ class BerkStreamProvider : TmdbProvider() {
         val link = tryParseJson<TmdbLink>(data) ?: return false
         val title = link.movieName?.trim().orEmpty()
         if (title.isBlank()) return false
+        ensureDomains()
         val season = link.season
         val episode = link.episode
         val isSeries = season != null || episode != null
-        val target = normalize(title)
 
-        var found = false
-        scanProviders(validApisFor(if (isSeries) seriesTypes else movieTypes)) { api ->
-            val hit = api.searchSafely(title)
-                .firstOrNull { normalize(it.name) == target }
-                ?: return@scanProviders null
-            val response = api.load(hit.url) ?: return@scanProviders null
-            val innerData = when {
-                isSeries && response is TvSeriesLoadResponse -> response.episodes.firstOrNull {
-                    (season == null || it.season == season) && (episode == null || it.episode == episode)
-                }?.data
-                !isSeries && response is MovieLoadResponse -> response.dataUrl
-                else -> null
-            } ?: return@scanProviders null
-            if (api.loadLinks(innerData, isCasting, subtitleCallback, callback)) found = true
-            true
+        val linkCount = AtomicInteger(0)
+        val countingCallback: (ExtractorLink) -> Unit = { extractor ->
+            linkCount.incrementAndGet()
+            callback(extractor)
         }
-        return found
+
+        loadStremioSubtitles(link, subtitleCallback)
+
+        // Saglayicilar oncelik sirasina gore obekler halinde taraniyor: yeterli
+        // link toplanınca kalan obekler hic denenmiyor. Hepsini birden beklemek
+        // oynatmayi gereksiz geciktiriyordu.
+        for (batch in validApisFor(if (isSeries) seriesTypes else movieTypes).chunked(6)) {
+            scanProviders(batch) { api ->
+                val hit = api.searchSafely(title)
+                    .firstOrNull { titleMatches(it.name, title) }
+                    ?: return@scanProviders null
+                val response = api.load(hit.url) ?: return@scanProviders null
+                val innerData = when {
+                    isSeries && response is TvSeriesLoadResponse -> response.episodes.firstOrNull {
+                        (season == null || it.season == season) &&
+                            (episode == null || it.episode == episode)
+                    }?.data
+                    !isSeries && response is MovieLoadResponse -> response.dataUrl
+                    else -> null
+                } ?: return@scanProviders null
+                api.loadLinks(innerData, isCasting, subtitleCallback, countingCallback)
+                true
+            }
+            if (linkCount.get() >= 6) break
+        }
+        return linkCount.get() > 0
+    }
+
+    /**
+     * Altyazi: Stremio'nun kamuya acik OpenSubtitles kopruSu anahtarsiz calisiyor
+     * ve TmdbLink zaten imdbID tasiyor. Kaynak sitenin kendi altyazisi olmadigi
+     * durumlarda tek secenek bu.
+     */
+    private suspend fun loadStremioSubtitles(link: TmdbLink, subtitleCallback: (SubtitleFile) -> Unit) {
+        val imdbId = link.imdbID?.takeIf { it.startsWith("tt") } ?: return
+        val suffix = if (link.season != null && link.episode != null) {
+            "series/$imdbId:${link.season}:${link.episode}"
+        } else {
+            "movie/$imdbId"
+        }
+        runCatching {
+            val parsed = tryParseJson<StremioSubtitleList>(
+                app.get("$subtitleApiUrl/$suffix.json").text,
+            ) ?: return
+            parsed.subtitles
+                .filter { it.url != null && it.lang in wantedSubtitleLanguages }
+                .distinctBy { it.url }
+                .take(14)
+                .forEach { subtitle ->
+                    val label = if (subtitle.lang?.startsWith("tu") == true) "Türkçe" else "İngilizce"
+                    subtitleCallback(newSubtitleFile(label, subtitle.url!!))
+                }
+        }.onFailure { logError(Exception("Altyazi alinamadi", it)) }
     }
 
     private fun validApisFor(types: Set<TvType>) = apis.filter {
         it.name != name && it.lang == "tr" && it.providerType != ProviderType.MetaProvider &&
-            it.supportedTypes.any(types::contains)
+            it.supportedTypes.any(types::contains) &&
+            normalize(it.name) !in disabledProviders
     }.sortedBy { api ->
         providerPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
             .let { if (it == -1) Int.MAX_VALUE else it }
