@@ -1,4 +1,4 @@
-// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.2.0","description":"BerkStream Hub'ın masaüstü motoru: Türkçe dublaj ve altyazılı kaynakları paralel tarar, oynatılabilir akış döndürür.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
+// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.2.1","description":"BerkStream Hub'ın Windows motoru: çeşitli raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
 //
 // BerkStream Hub - masaüstü (JavaScript) sürümü.
 //
@@ -840,15 +840,13 @@ async function getStreams(mediaId) {
     episode: parts[3] ? Number(parts[3]) : 1,
   });
 
-  // Hiçbir Türkçe kaynak bulunamazsa TMDB kimliğiyle çalışan evrensel
-  // oynatıcılar yedek kalıyor - ekranın boş dönmemesi için.
-  if (!sources.length) {
-    var path = kind === "movie" ? "movie/" + id : "tv/" + id + "/" + (parts[2] || 1) + "/" + (parts[3] || 1);
-    sources = [
-      { provider: "VidLink", name: "VidLink [Çoklu Altyazı] 1080p", quality: "1080p", language: "Orijinal / Altyazı", format: "embed", url: "https://vidlink.pro/" + path, headers: {}, subtitles: [] },
-      { provider: "VidSrc", name: "VidSrc [Yedek] 1080p", quality: "1080p", language: "Orijinal / Altyazı", format: "embed", url: "https://vidsrc.cc/v2/embed/" + path, headers: {}, subtitles: [] },
-    ];
-  }
+  // Dahili oynatıcı seçenekleri her zaman ilk sırada. Böylece içerik VLC'ye
+  // veya tarayıcıya gönderilmeden doğrudan BerkStream penceresinde açılır.
+  var path = kind === "movie" ? "movie/" + id : "tv/" + id + "/" + (parts[2] || 1) + "/" + (parts[3] || 1);
+  sources = [
+    { provider: "BerkStream", name: "BerkStream Dahili Oynatıcı", quality: "1080p", language: "Çoklu dil / altyazı", format: "embed", url: "https://vidlink.pro/" + path, headers: {}, subtitles: [] },
+    { provider: "BerkStream", name: "BerkStream Dahili Oynatıcı (Yedek)", quality: "1080p", language: "Orijinal / Altyazı", format: "embed", url: "https://vidsrc.cc/v2/embed/" + path, headers: {}, subtitles: [] },
+  ].concat(sources);
   return JSON.stringify(sources);
 }
 
