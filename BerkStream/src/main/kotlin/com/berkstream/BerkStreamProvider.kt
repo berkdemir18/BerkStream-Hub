@@ -106,11 +106,18 @@ class BerkStreamProvider : TmdbProvider() {
         }
     }
 
+    /**
+     * TMDB'nin `/discover/<tur>` rotasi artik `/<tur>`e 301 ile yonleniyor ve
+     * yonlendirmede **butun query parametreleri dusuyor**. Eski adres
+     * kullanildiginda watch_region ve with_watch_providers kayboluyor, bu yuzden
+     * Netflix / Prime / Disney+ / HBO / tabii raflarinin hepsi ayni "populer
+     * filmler" listesini gosteriyordu. Dogru rota parametresiz olan.
+     */
     private fun tmdbDiscoverUrl(mediaType: String, providerId: String? = null): String {
         val providerQuery = providerId?.let {
             "&with_watch_providers=$it&with_watch_monetization_types=flatrate"
         }.orEmpty()
-        return "$tmdbWebUrl/discover/$mediaType?watch_region=TR&sort_by=popularity.desc$providerQuery"
+        return "$tmdbWebUrl/$mediaType?watch_region=TR&sort_by=popularity.desc$providerQuery"
     }
 
     private fun Document.toTmdbCards(limit: Int = 24): List<SearchResponse> =

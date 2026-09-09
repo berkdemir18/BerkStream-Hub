@@ -64,5 +64,5 @@
     }
   ],
   "vendorExcludedPlugins": [],
-  "bundlePltEngine": false
+  "bundlePltEngine": true
 }
