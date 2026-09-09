@@ -86,6 +86,11 @@ jobs:
           BERKSTREAM_OUTPUT_DIR: ${{ github.workspace }}/publish
         run: npm run verify
 
+      - name: Scan source domains and publish address list
+        env:
+          BERKSTREAM_OUTPUT_DIR: ${{ github.workspace }}/publish
+        run: node scripts/check-domains.mjs
+
       - name: Add custom packages
         run: |
           cp BerkStream/build/*.cs3 publish/

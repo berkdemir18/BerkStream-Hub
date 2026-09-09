@@ -262,11 +262,21 @@ for (const item of [...selected.values()].sort((a, b) => a.module.localeCompare(
     continue;
   }
 
+  // Saglayicinin calisma anindaki adi ve adresi; domain sagligi taramasi
+  // (scripts/check-domains.mjs) bu ikisiyle eslestirme yapiyor.
+  const providers = [];
+  for (const entry of parsed) {
+    const providerName = (entry.text.match(/override\s+var\s+name\s*=\s*"((?:[^"\\]|\\.)*)"/) || [])[1];
+    const providerUrl = (entry.text.match(/override\s+var\s+mainUrl\s*=\s*"((?:[^"\\]|\\.)*)"/) || [])[1];
+    if (providerName && providerUrl) providers.push({ name: providerName, mainUrl: providerUrl });
+  }
+
   vendored.push({
     id: item.module,
     slug,
     origin: item.origin,
     originName: item.originName,
+    providers,
     version: item.meta.version,
     description: item.meta.description,
     language: item.meta.language,
