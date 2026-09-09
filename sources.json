@@ -64,5 +64,8 @@
     }
   ],
   "vendorExcludedPlugins": [],
-  "bundlePltEngine": true
+  "bundlePltEngine": true,
+  "manualDomains": {
+    "RoketDizi": "https://roketdizi.life"
+  }
 }

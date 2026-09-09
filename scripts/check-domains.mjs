@@ -76,6 +76,7 @@ async function mapLimit(items, limit, worker) {
   return results;
 }
 
+const config = JSON.parse(await readFile(path.join(root, "sources.json"), "utf8"));
 const report = JSON.parse(await readFile(path.join(root, "vendor-report.json"), "utf8"));
 const providers = [];
 for (const item of report.vendored ?? []) {
@@ -94,6 +95,9 @@ if (!skipNetwork) {
     console.log(`! PLT adres listesi alinamadi: ${error}`);
   }
 }
+const manualByKey = new Map(
+  Object.entries(config.manualDomains ?? {}).map(([name, url]) => [normalizedName(name), url]),
+);
 const upstreamByKey = new Map(
   Object.entries(upstream).map(([name, url]) => [normalizedName(name), url]),
 );
@@ -102,8 +106,8 @@ const checked = await mapLimit(providers, 16, async (provider) => {
   const first = await probe(provider.mainUrl);
   if (first.ok) return { ...provider, status: first.status, alive: true };
 
-  // Olu: PLT'nin guncel adresi varsa onu dene.
-  const candidate = upstreamByKey.get(provider.key);
+  // Olu: once elle bakilan liste, sonra PLT'nin guncel adresi denenir.
+  const candidate = manualByKey.get(provider.key) ?? upstreamByKey.get(provider.key);
   if (candidate && candidate !== provider.mainUrl) {
     const second = await probe(candidate);
     if (second.ok) {

@@ -264,6 +264,33 @@ class BerkStreamProvider : TmdbProvider() {
      * agini birebir yansitmiyor. Bu yuzden cihaz tarafinda da olcuyoruz: ust uste
      * cevap veremeyen kaynak bu oturumda taramaya sokulmuyor.
      */
+    /**
+     * Hangi kaynagin gercekten link urettigini ogreniyoruz. Elle yazilan
+     * oncelik listesi bir tahmindi; basari sayaci zamanla gercek performansa
+     * gore siralamayi duzeltiyor ve iyi kaynaklar one geciyor.
+     */
+    private fun noteSuccess(api: MainAPI) {
+        val store = BerkStreamSettings.store ?: return
+        val key = "hit_${normalize(api.name)}"
+        runCatching {
+            store.edit().putInt(key, (store.getInt(key, 0) + 1).coerceAtMost(500)).apply()
+        }
+        failureCounts.remove(normalize(api.name))
+    }
+
+    private fun successScore(api: MainAPI): Int =
+        BerkStreamSettings.store?.getInt("hit_${normalize(api.name)}", 0) ?: 0
+
+    /** Bir icerikte hangi kaynagin ise yaradigini hatirla: tekrar acilista o once denenir. */
+    private fun rememberWinner(contentKey: String, apiName: String) {
+        runCatching {
+            BerkStreamSettings.store?.edit()?.putString("win_$contentKey", apiName)?.apply()
+        }
+    }
+
+    private fun winnerFor(contentKey: String): String? =
+        BerkStreamSettings.store?.getString("win_$contentKey", null)
+
     private fun noteFailure(api: MainAPI) {
         val key = normalize(api.name)
         val total = failureCounts.merge(key, 1, Int::plus) ?: 1
@@ -609,24 +636,40 @@ class BerkStreamProvider : TmdbProvider() {
 
         if (BerkStreamSettings.subtitlesEnabled) loadStremioSubtitles(link, subtitleCallback)
 
-        // Saglayicilar oncelik sirasina gore obekler halinde taraniyor: yeterli
-        // link toplanınca kalan obekler hic denenmiyor. Hepsini birden beklemek
-        // oynatmayi gereksiz geciktiriyordu.
-        for (batch in validApisFor(if (isSeries) seriesTypes else movieTypes).chunked(6)) {
+        // Ayni icerik daha once hangi kaynaktan acildiysa o kaynak listenin
+        // basina aliniyor; tekrar izlemede tarama neredeyse aninda bitiyor.
+        val contentKey = "${looseTitle(title)}_${season ?: 0}_${episode ?: 0}".take(80)
+        val winner = winnerFor(contentKey)
+        val ordered = validApisFor(if (isSeries) seriesTypes else movieTypes)
+            .sortedByDescending { it.name == winner }
+
+        for (batch in ordered.chunked(6)) {
             scanProviders(batch) { api ->
                 val hit = api.searchSafely(title)
                     .firstOrNull { titleMatches(it.name, title) }
                     ?: return@scanProviders null
                 val response = api.load(hit.url) ?: return@scanProviders null
                 val innerData = when {
-                    isSeries && response is TvSeriesLoadResponse -> response.episodes.firstOrNull {
-                        (season == null || it.season == season) &&
-                            (episode == null || it.episode == episode)
+                    isSeries && response is TvSeriesLoadResponse -> {
+                        val episodes = response.episodes
+                        // Kaynaklar sezon numarasini her zaman TMDB ile ayni vermiyor;
+                        // tam eslesme tutmazsa once bolum numarasina, en son sıraya bakilir.
+                        episodes.firstOrNull {
+                            (season == null || it.season == season) &&
+                                (episode == null || it.episode == episode)
+                        }
+                            ?: episodes.firstOrNull { episode != null && it.episode == episode }
+                            ?: episode?.let { episodes.getOrNull(it - 1) }
                     }?.data
                     !isSeries && response is MovieLoadResponse -> response.dataUrl
                     else -> null
                 } ?: return@scanProviders null
+                val before = linkCount.get()
                 api.loadLinks(innerData, isCasting, subtitleCallback, countingCallback)
+                if (linkCount.get() > before) {
+                    noteSuccess(api)
+                    rememberWinner(contentKey, api.name)
+                }
                 true
             }
             if (linkCount.get() >= BerkStreamSettings.linkTarget) break
@@ -670,10 +713,13 @@ class BerkStreamProvider : TmdbProvider() {
         it.name != name && it.lang == "tr" && it.providerType != ProviderType.MetaProvider &&
             it.supportedTypes.any(types::contains) &&
             normalize(it.name) !in disabledProviders
-    }.sortedBy { api ->
-        providerPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
-            .let { if (it == -1) Int.MAX_VALUE else it }
-    }.take(18)
+    }.sortedWith(
+        compareByDescending<MainAPI> { successScore(it) }
+            .thenBy { api ->
+                providerPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
+                    .let { if (it == -1) Int.MAX_VALUE else it }
+            },
+    ).take(18)
 
     /**
      * Saglayicilari paralel tarar ama hem tek tek hem de toplamda sureyi
