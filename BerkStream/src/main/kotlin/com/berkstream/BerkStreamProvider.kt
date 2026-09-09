@@ -2,6 +2,7 @@ package com.berkstream
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.APIHolder.apis
+import com.lagradost.cloudstream3.AnimeLoadResponse
 import com.lagradost.cloudstream3.HomePageResponse
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.MainPageData
@@ -50,8 +51,6 @@ class BerkStreamProvider : TmdbProvider() {
     override val hasQuickSearch = true
     override val quickSearchTimeoutMs = 12_000L
     override val getMainPageTimeoutMs = 20_000L
-    override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries)
-
     private val tmdbApiUrl = "https://api.themoviedb.org/3"
 
     /** CloudStream'in kendi acik kaynakli TMDB anahtari; TmdbProvider da bunu kullaniyor. */
@@ -129,9 +128,12 @@ class BerkStreamProvider : TmdbProvider() {
     private val wantedSubtitleLanguages = setOf("tur", "tr", "eng", "en")
 
     private val liveProviderPriority =
-        listOf("BerkStream Canlı", "plt-tv", "InatBox", "CanliTV", "RecTV", "vavooSpor")
+        listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "vavooSpor", "BerkStream Canlı")
 
     private val movieTypes = setOf(TvType.Movie, TvType.AnimeMovie)
+
+    /** BerkStream anime basliklarini da acabilmeli. */
+    override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries, TvType.Anime)
 
     private val seriesTypes = setOf(
         TvType.TvSeries, TvType.Anime, TvType.Cartoon, TvType.AsianDrama, TvType.OVA,
@@ -649,6 +651,19 @@ class BerkStreamProvider : TmdbProvider() {
                     ?: return@scanProviders null
                 val response = api.load(hit.url) ?: return@scanProviders null
                 val innerData = when {
+                    // Anime kaynaklari (TurkAnime, AnimeciX, RecTV...) TvSeriesLoadResponse
+                    // degil AnimeLoadResponse donuyor; bu dal olmadigi icin One Piece
+                    // gibi basliklarda hicbir link bulunamiyordu.
+                    isSeries && response is AnimeLoadResponse -> {
+                        val episodes = response.episodes.values.flatten()
+                        val match = episodes.firstOrNull {
+                            (season == null || it.season == season) &&
+                                (episode == null || it.episode == episode)
+                        }
+                            ?: episodes.firstOrNull { episode != null && it.episode == episode }
+                            ?: episode?.let { episodes.getOrNull(it - 1) }
+                        match?.data
+                    }
                     isSeries && response is TvSeriesLoadResponse -> {
                         val episodes = response.episodes
                         // Kaynaklar sezon numarasini her zaman TMDB ile ayni vermiyor;
