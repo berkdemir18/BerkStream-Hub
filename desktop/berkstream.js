@@ -1,4 +1,4 @@
-// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.1.0","description":"BerkStream Hub'ın masaüstü motoru: Türkçe dublaj ve altyazılı kaynakları paralel tarar, oynatılabilir akış döndürür.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
+// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.2.0","description":"BerkStream Hub'ın masaüstü motoru: Türkçe dublaj ve altyazılı kaynakları paralel tarar, oynatılabilir akış döndürür.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
 //
 // BerkStream Hub - masaüstü (JavaScript) sürümü.
 //
@@ -16,6 +16,7 @@
 // (yanıt başlıkları okunamıyor, yönlendirmeyi host hallediyor.)
 //
 // Sözleşme (host bu üçünü çağırır, JSON string bekler):
+//   getCatalog(arg)      -> [{title, items:[...]}]  (ana sayfa rafları)
 //   search(query)        -> [{id,title,poster_url,media_type,year,...}]
 //   getEpisodes(mediaId) -> [{id,title,season,episode_number,...}]
 //   getStreams(mediaId)  -> [{url,quality,format,provider,language,headers}]
@@ -703,6 +704,71 @@ async function resolveQuery(query) {
 
 // ─────────────────── host sözleşmesi (JSON string döner) ───────────────────
 
+
+/** TMDB listesini host'un beklediği karta çevirir. */
+function toCards(list, forcedType) {
+  var out = [];
+  for (var i = 0; i < (list || []).length; i++) {
+    var x = list[i];
+    var type = forcedType || (x.media_type === "tv" ? "tv" : x.media_type === "movie" ? "movie" : null);
+    if (!type || !x.id) continue;
+    if (!x.poster_path) continue;
+    var date = x.release_date || x.first_air_date || "";
+    out.push({
+      id: (type === "tv" ? "tv" : "movie") + ":" + x.id,
+      title: x.title || x.name,
+      original_title: x.original_title || x.original_name || null,
+      poster_url: IMAGE + x.poster_path,
+      media_type: type === "tv" ? "show" : "movie",
+      year: parseInt(date.slice(0, 4), 10) || null,
+      rating: x.vote_average || null,
+      description: x.overview || null
+    });
+  }
+  return out;
+}
+
+var SHELVES = [
+  { title: "Bugün trend", path: "/trending/all/day", params: "", type: null },
+  { title: "Vizyondakiler", path: "/movie/now_playing", params: "", type: "movie" },
+  { title: "Popüler diziler", path: "/tv/popular", params: "", type: "tv" },
+  { title: "Popüler filmler", path: "/movie/popular", params: "", type: "movie" },
+  { title: "Türk dizileri", path: "/discover/tv", params: "&with_original_language=tr&sort_by=popularity.desc", type: "tv" },
+  { title: "Türk filmleri", path: "/discover/movie", params: "&with_original_language=tr&sort_by=popularity.desc", type: "movie" },
+  { title: "Anime", path: "/discover/tv", params: "&with_genres=16&with_original_language=ja&sort_by=popularity.desc", type: "tv" },
+  { title: "En yüksek puanlı filmler", path: "/movie/top_rated", params: "", type: "movie" },
+  { title: "En yüksek puanlı diziler", path: "/tv/top_rated", params: "", type: "tv" }
+];
+
+/**
+ * Ana sayfa rafları. Uygulama açılışta bunu çağırıyor; bu çağrı olmadan
+ * ana ekran boş kalıyordu ve içerik yalnızca aramadan geliyordu.
+ * Raflar TMDB'den, oynatma yine kaynak taramasıyla.
+ */
+async function getCatalog() {
+  var jobs = [];
+  for (var i = 0; i < SHELVES.length; i++) {
+    jobs.push(
+      (function (shelf) {
+        var url = TMDB + shelf.path + "?api_key=" + TMDB_KEY + "&language=tr-TR" + shelf.params;
+        return getJson(url).then(
+          function (data) {
+            return { title: shelf.title, items: toCards(data.results, shelf.type) };
+          },
+          function (err) {
+            console.log("[BerkStream] raf '" + shelf.title + "': " + err);
+            return { title: shelf.title, items: [] };
+          }
+        );
+      })(SHELVES[i])
+    );
+  }
+  var rows = await Promise.all(jobs);
+  var out = [];
+  for (var r = 0; r < rows.length; r++) if (rows[r].items.length) out.push(rows[r]);
+  return JSON.stringify(out);
+}
+
 async function search(query) {
   var data = await getJson(
     TMDB +
@@ -787,5 +853,5 @@ async function getStreams(mediaId) {
 }
 
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { search: search, getEpisodes: getEpisodes, getStreams: getStreams, titleMatches: titleMatches, unpack: unpack, resolveQuery: resolveQuery };
+  module.exports = { getCatalog: getCatalog, search: search, getEpisodes: getEpisodes, getStreams: getStreams, titleMatches: titleMatches, unpack: unpack, resolveQuery: resolveQuery };
 }
