@@ -156,6 +156,11 @@ class BerkStreamProvider : TmdbProvider() {
         "FilmModu", "FilmKovası", "SelcukFlix", "UgurFilm", "XPrime", "Sinewix",
         "4KFilmİzlesene", "WFilmİzle", "Filmİzleİlk", "Watch2Movies", "KultFilmler",
         "RareFilmm", "RecTV", "powerSinema",
+        // Anime/cizgi: listede olmadiklari icin hepsi en sona dusuyor ve
+        // take(18) onlari kesiyordu; One Piece gibi basliklarda hicbir anime
+        // kaynagi taranmiyordu.
+        "TurkAnime", "AnimeciX", "AsyaAnimeleri", "TrAnimeci", "AsyaWatch",
+        "ÇizgiMax", "CizgiDuo", "CizgiPass",
     )
 
     private class CachedShelf(val savedAt: Long, val items: List<SearchResponse>)
@@ -641,8 +646,10 @@ class BerkStreamProvider : TmdbProvider() {
         // basina aliniyor; tekrar izlemede tarama neredeyse aninda bitiyor.
         val contentKey = "${looseTitle(title)}_${season ?: 0}_${episode ?: 0}".take(80)
         val winner = winnerFor(contentKey)
-        val ordered = validApisFor(if (isSeries) seriesTypes else movieTypes)
-            .sortedByDescending { it.name == winner }
+        val ordered = validApisFor(
+            if (isSeries) seriesTypes else movieTypes,
+            if (isSeries) TvType.Anime else TvType.AnimeMovie,
+        ).sortedByDescending { it.name == winner }
 
         for (batch in ordered.chunked(6)) {
             scanProviders(batch) { api ->
@@ -724,7 +731,21 @@ class BerkStreamProvider : TmdbProvider() {
         }.onFailure { logError(Exception("Altyazi alinamadi", it)) }
     }
 
-    private fun validApisFor(types: Set<TvType>) = apis.filter {
+    /**
+     * @param guarantee bu turu destekleyen kaynaklardan birkaci, oncelik
+     * siralamasinda geride kalsalar bile listeye ekleniyor. Anime kaynaklari
+     * yalnizca TvType.Anime destekledigi icin genel siralamada hep disarida
+     * kaliyordu.
+     */
+    private fun validApisFor(types: Set<TvType>, guarantee: TvType? = null): List<MainAPI> {
+        val ordered = orderedApis(types)
+        val head = ordered.take(18)
+        if (guarantee == null) return head
+        val extra = ordered.filter { guarantee in it.supportedTypes && it !in head }.take(5)
+        return head + extra
+    }
+
+    private fun orderedApis(types: Set<TvType>) = apis.filter {
         it.name != name && it.lang == "tr" && it.providerType != ProviderType.MetaProvider &&
             it.supportedTypes.any(types::contains)
     }.sortedWith(
@@ -738,7 +759,7 @@ class BerkStreamProvider : TmdbProvider() {
                 providerPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
                     .let { if (it == -1) Int.MAX_VALUE else it }
             },
-    ).take(18)
+    )
 
     /**
      * Saglayicilari paralel tarar ama hem tek tek hem de toplamda sureyi
