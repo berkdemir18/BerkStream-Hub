@@ -2,13 +2,18 @@
   {
     "url": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/desktop/berkstream.js",
     "status": 1,
-    "version": "1.0.0",
+    "version": "2.0.0",
     "name": "BerkStream Desktop",
     "internalName": "berkstream-desktop",
-    "authors": ["berkdemir18"],
-    "description": "Windows için Türkçe film ve dizi arama; bulunan içeriği web oynatıcısında açar.",
+    "authors": [
+      "berkdemir18"
+    ],
+    "description": "Windows/masaüstü için BerkStream Hub motoru: Türkçe dublaj ve altyazılı kaynakları paralel tarar, oynatılabilir akış döndürür.",
     "language": "tr",
-    "tvTypes": ["Movie", "TvSeries"],
+    "tvTypes": [
+      "Movie",
+      "TvSeries"
+    ],
     "iconUrl": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png"
   }
 ]
