@@ -139,7 +139,11 @@ if (verifyFiles) {
     if (plugin.fileHash && plugin.fileHash !== actualHash) {
       throw new Error(`${plugin.name}: CS3 hash uyuşmuyor (${source.id})`);
     }
-    plugin.fileHash = actualHash;
+    // Yerel pakette hash YAZILMIYOR. raw.githubusercontent manifest ile .cs3
+    // dosyasini farkli anlarda tazeliyor; ikisi bir an uyusmadiginda CloudStream
+    // indirmeyi hash uyusmuyor diye reddedip "yukleme hatasi" veriyordu.
+    if (localCs3) delete plugin.fileHash;
+    else plugin.fileHash = actualHash;
     plugin.fileSize = bytes.length;
 
     if (plugin.jarUrl) {
