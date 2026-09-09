@@ -1,0 +1,14 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/desktop/berkstream.js",
+    "status": 1,
+    "version": "1.0.0",
+    "name": "BerkStream Desktop",
+    "internalName": "berkstream-desktop",
+    "authors": ["berkdemir18"],
+    "description": "Windows için Türkçe film ve dizi arama; bulunan içeriği web oynatıcısında açar.",
+    "language": "tr",
+    "tvTypes": ["Movie", "TvSeries"],
+    "iconUrl": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png"
+  }
+]

@@ -189,6 +189,9 @@ const repo = {
   pluginLists: [
     `https://raw.githubusercontent.com/${repositorySlug}/${branch}/plugins.json`,
   ],
+  desktopPluginLists: [
+    `https://raw.githubusercontent.com/${repositorySlug}/main/desktop/plugins.json`,
+  ],
 };
 
 const fullRepo = {
