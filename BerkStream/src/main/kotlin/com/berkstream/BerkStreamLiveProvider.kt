@@ -58,10 +58,16 @@ class BerkStreamLiveProvider : MainAPI() {
     private val cache = ConcurrentHashMap<String, Pair<Long, List<Channel>>>()
     private val cacheMs = 30 * 60 * 1000L
 
-    private fun playlistUrl(source: String) = when (source) {
-        "sports" -> "$mainUrl/categories/sports.m3u"
-        else -> "$mainUrl/countries/$source.m3u"
-    }
+    private val playlists = mapOf(
+        "tr" to listOf(
+            "$mainUrl/countries/tr.m3u",
+            "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlists/playlist_turkey.m3u8",
+        ),
+        "sports" to listOf(
+            "$mainUrl/categories/sports.m3u",
+            "$mainUrl/languages/tur.m3u",
+        ),
+    )
 
     /** Basit M3U ayristirici: #EXTINF satiri + hemen ardindaki adres. */
     private fun parse(text: String): List<Channel> {
@@ -89,13 +95,35 @@ class BerkStreamLiveProvider : MainAPI() {
     private suspend fun channels(source: String): List<Channel> {
         val now = System.currentTimeMillis()
         cache[source]?.takeIf { now - it.first < cacheMs }?.let { return it.second }
-        val parsed = runCatching { parse(app.get(playlistUrl(source)).text) }.getOrElse { emptyList() }
+        val parsed = (playlists[source] ?: listOf("$mainUrl/countries/$source.m3u"))
+            .flatMap { url -> runCatching { parse(app.get(url).text) }.getOrElse { emptyList() } }
+            .distinctBy { it.url }
         if (parsed.isNotEmpty()) cache[source] = now to parsed
         return parsed
     }
 
+    private suspend fun allChannels(): List<Channel> =
+        (channels("tr") + channels("sports")).distinctBy { it.url }
+
+    /**
+     * Akis adresi dogrudan verilemiyor: CloudStream icerigi acarken adrese bakip
+     * hangi saglayicinin isi oldugunu buluyor ve ham akis adresi (ornegin
+     * hls.4utv.live) bizim mainUrl'imizle eslesmedigi icin "baglanti bulunamadi"
+     * cikiyordu. Adres kendi alan adimizla sarmalanip [load] icinde cozuluyor.
+     */
+    private fun wrap(streamUrl: String) =
+        "$mainUrl/watch?u=" + java.net.URLEncoder.encode(streamUrl, "UTF-8")
+
+    private fun unwrap(url: String): String =
+        if (url.contains("/watch?u=")) {
+            runCatching { java.net.URLDecoder.decode(url.substringAfter("/watch?u="), "UTF-8") }
+                .getOrDefault(url)
+        } else {
+            url
+        }
+
     private fun Channel.toSearchResponse(): SearchResponse =
-        newLiveSearchResponse(title, url, TvType.Live, false) {
+        newLiveSearchResponse(title, wrap(url), TvType.Live, false) {
             this.posterUrl = logo
         }
 
@@ -105,15 +133,17 @@ class BerkStreamLiveProvider : MainAPI() {
         val all = channels(source)
         val filtered = if (group.isBlank()) all else all.filter { it.group.equals(group, true) }
         // Turkiye spor rafi bos kalmasin: kategori etiketi eksikse ada bakiyoruz.
-        val items = filtered.ifEmpty {
-            if (group == "Sports") {
-                all.filter { channel ->
-                    val label = channel.title.lowercase()
-                    listOf("spor", "sport", "bein", "tjk", "fb tv", "gs tv", "bjk").any(label::contains)
-                }
-            } else {
-                emptyList()
+        val items = if (group == "Sports") {
+            val byName = all.filter { channel ->
+                val label = channel.title.lowercase()
+                listOf(
+                    "spor", "sport", "bein", "tjk", "fb tv", "gs tv", "bjk tv", "trt spor",
+                    "a spor", "s sport", "htspor", "tivibu", "eurosport", "nba", "futbol",
+                ).any(label::contains)
             }
+            (filtered + byName).distinctBy { it.url }
+        } else {
+            filtered
         }
         val pageSize = 60
         val window = items.drop((page - 1) * pageSize).take(pageSize)
@@ -122,7 +152,7 @@ class BerkStreamLiveProvider : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val needle = query.lowercase()
-        return (channels("tr") + channels("sports"))
+        return allChannels()
             .filter { it.title.lowercase().contains(needle) }
             .distinctBy { it.url }
             .take(40)
@@ -132,8 +162,9 @@ class BerkStreamLiveProvider : MainAPI() {
     override suspend fun quickSearch(query: String): List<SearchResponse> = search(query)
 
     override suspend fun load(url: String): LoadResponse {
-        val channel = (channels("tr") + channels("sports")).firstOrNull { it.url == url }
-        return newLiveStreamLoadResponse(channel?.title ?: "Canlı yayın", url, url) {
+        val streamUrl = unwrap(url)
+        val channel = allChannels().firstOrNull { it.url == streamUrl }
+        return newLiveStreamLoadResponse(channel?.title ?: "Canlı yayın", url, streamUrl) {
             this.posterUrl = channel?.logo
             this.plot = channel?.group?.takeIf { it.isNotBlank() }?.let { "Kategori: $it" }
         }
