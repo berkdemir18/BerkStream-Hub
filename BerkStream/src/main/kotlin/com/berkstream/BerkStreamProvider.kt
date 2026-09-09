@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.APIHolder.apis
 import com.lagradost.cloudstream3.AnimeLoadResponse
 import com.lagradost.cloudstream3.HomePageResponse
+import com.lagradost.cloudstream3.LoadResponse
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.MainPageData
 import com.lagradost.cloudstream3.MainPageRequest
@@ -27,6 +28,7 @@ import com.lagradost.cloudstream3.newTvSeriesSearchResponse
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.Qualities
+import com.lagradost.cloudstream3.utils.newExtractorLink
 import kotlinx.coroutines.withTimeoutOrNull
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import java.text.Normalizer
@@ -120,8 +122,6 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("⏱️  KISA GECE • 95 DK ALTI", "movie", "discover/movie?with_runtime.lte=95&vote_count.gte=300&sort_by=vote_average.desc"),
         shelf("🕰️  90'LAR KLASİKLERİ", "movie", "discover/movie?primary_release_date.gte=1990-01-01&primary_release_date.lte=1999-12-31&sort_by=vote_average.desc&vote_count.gte=500"),
         shelf("🏆  OSCAR YOLUNDA", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=1500&primary_release_date.gte=2015-01-01"),
-        MainPageData("🎲  ZAR AT", "dice", false),
-        MainPageData("🗓️  YILLAR ÖNCE BUGÜN", "onthisday", false),
         MainPageData("⚽  CANLI SPOR", "sports", true),
         MainPageData("📡  CANLI TV", "live", true),
     )
@@ -621,6 +621,30 @@ class BerkStreamProvider : TmdbProvider() {
         return newHomePageResponse(request, items, hasNext)
     }
 
+    private data class TmdbOverview(
+        @JsonProperty("overview") val overview: String? = null,
+        @JsonProperty("tagline") val tagline: String? = null,
+    )
+
+    /**
+     * TmdbProvider detay cagrisini `language=en-US` ile yapiyor, bu yuzden ozetler
+     * Ingilizce geliyordu. Turkce ozet ayrica cekilip uzerine yaziliyor.
+     */
+    override suspend fun load(url: String): LoadResponse? {
+        val base = super.load(url) ?: return null
+        runCatching {
+            val match = Regex("themoviedb\.org/(movie|tv)/(\d+)").find(url) ?: return@runCatching
+            val kind = match.groupValues[1]
+            val id = match.groupValues[2]
+            val turkish = tryParseJson<TmdbOverview>(
+                app.get("$tmdbApiUrl/$kind/$id?api_key=$tmdbApiKey&language=tr-TR").text,
+            )
+            turkish?.overview?.takeIf { it.isNotBlank() }?.let { base.plot = it }
+            turkish?.tagline?.takeIf { it.isNotBlank() }?.let { base.tagline = it }
+        }
+        return base
+    }
+
     override suspend fun quickSearch(query: String): List<SearchResponse>? {
         if (query.length < 2) return emptyList()
         return super.search(query, 1)?.items?.take(12)
@@ -774,26 +798,32 @@ class BerkStreamProvider : TmdbProvider() {
      * kalite degeri en uste tasiniyor, gercek kalite ad icinde korunuyor.
      * Ayardan kapatilabiliyor.
      */
-    private fun emitSorted(links: List<ExtractorLink>, callback: (ExtractorLink) -> Unit) {
+    private suspend fun emitSorted(links: List<ExtractorLink>, callback: (ExtractorLink) -> Unit) {
         val ordered = synchronized(links) { links.toList() }.sortedBy { linkRank(it) }
         val boost = BerkStreamSettings.preferTurkishDub
-        ordered.forEach { link ->
-            runCatching {
-                when (linkRank(link)) {
-                    0 -> {
-                        val realQuality = Qualities.getStringByInt(link.quality)
-                        link.name = "🇹🇷 Dublaj • ${link.name} ($realQuality)"
-                        if (boost) link.quality = Qualities.P2160.value + 100
-                    }
-                    1 -> {
-                        val realQuality = Qualities.getStringByInt(link.quality)
-                        link.name = "🇹🇷 Altyazı • ${link.name} ($realQuality)"
-                        if (boost) link.quality = Qualities.P2160.value + 50
-                    }
-                    else -> Unit
-                }
+        for (link in ordered) {
+            val rank = linkRank(link)
+            if (!boost || rank > 1) {
+                callback(link)
+                continue
             }
-            callback(link)
+            // ExtractorLink.name `val`, bu yuzden etiketli bir kopya uretiliyor.
+            val tagged = runCatching {
+                val realQuality = Qualities.getStringByInt(link.quality)
+                val label = if (rank == 0) "🇹🇷 Dublaj" else "🇹🇷 Altyazı"
+                newExtractorLink(
+                    source = link.source,
+                    name = "$label • ${link.name} ($realQuality)",
+                    url = link.url,
+                    type = link.type,
+                ) {
+                    this.quality = Qualities.P2160.value + if (rank == 0) 100 else 50
+                    this.referer = link.referer
+                    this.headers = link.headers
+                    this.extractorData = link.extractorData
+                }
+            }.getOrNull()
+            callback(tagged ?: link)
         }
     }
 
