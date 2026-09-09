@@ -1,4 +1,4 @@
-// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.3.0","description":"BerkStream Hub'ın Windows motoru: çeşitli raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
+// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.4.0","description":"BerkStream Hub'ın Windows motoru: çeşitli raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
 //
 // BerkStream Hub - masaüstü (JavaScript) sürümü.
 //
@@ -843,14 +843,19 @@ async function getStreams(mediaId) {
     episode: parts[3] ? Number(parts[3]) : 1,
   });
 
-  // Dahili oynatıcı seçenekleri her zaman ilk sırada. Böylece içerik VLC'ye
-  // veya tarayıcıya gönderilmeden doğrudan BerkStream penceresinde açılır.
+  // Sıra önemli: gerçek Türkçe kaynaklar önce, evrensel oynatıcılar sonra.
+  // Önceki sürüm vidlink'i en üste sabitliyordu ve adını "BerkStream Dahili
+  // Oynatıcı" koyuyordu; kullanıcı hep onu seçiyor, o da çoğu zaman dönen
+  // çarkta kalıyordu (2026-09-10). Türkçe dublajlı kaynaklar listenin
+  // dibinde görünmüyordu.
   var path = kind === "movie" ? "movie/" + id : "tv/" + id + "/" + (parts[2] || 1) + "/" + (parts[3] || 1);
-  sources = [
-    { provider: "BerkStream", name: "BerkStream Dahili Oynatıcı", quality: "1080p", language: "Çoklu dil / altyazı", format: "embed", url: "https://vidlink.pro/" + path, headers: {}, subtitles: [] },
-    { provider: "BerkStream", name: "BerkStream Dahili Oynatıcı (Yedek)", quality: "1080p", language: "Orijinal / Altyazı", format: "embed", url: "https://vidsrc.cc/v2/embed/" + path, headers: {}, subtitles: [] },
-  ].concat(sources);
-  return JSON.stringify(sources);
+  var fallback = [
+    { provider: "Evrensel", name: "Evrensel yedek — VidLink", quality: "1080p", language: "Çoklu dil / altyazı", format: "embed", url: "https://vidlink.pro/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel yedek — VidSrc", quality: "1080p", language: "Orijinal / altyazı", format: "embed", url: "https://vidsrc.xyz/embed/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel yedek — EmbedSu", quality: "1080p", language: "Orijinal / altyazı", format: "embed", url: "https://embed.su/embed/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel yedek — AutoEmbed", quality: "720p", language: "Orijinal / altyazı", format: "embed", url: "https://player.autoembed.cc/embed/" + path, headers: {}, subtitles: [] },
+  ];
+  return JSON.stringify(sources.concat(fallback));
 }
 
 if (typeof module !== "undefined" && module.exports) {
