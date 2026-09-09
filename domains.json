@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-09-09T22:07:33.516Z",
+  "overrides": {
+    "RoketDizi": "https://roketdizi.life"
+  },
+  "disabled": [
+    "CizgiDuo",
+    "DiziGom",
+    "HDStreamAble",
+    "Filmİzleİlk",
+    "FilmMakinesi",
+    "HDFilmCehennemi",
+    "KoreanTurk",
+    "SetFilmIzle",
+    "MixPlayHD",
+    "SuperFilmGeldi",
+    "UgurFilm",
+    "WFilmİzle"
+  ]
+}

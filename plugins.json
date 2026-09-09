@@ -1,0 +1,28 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/BerkStream.cs3",
+    "status": 1,
+    "version": 27,
+    "name": "BerkStream",
+    "internalName": "BerkStream",
+    "authors": [
+      "berkdemir18"
+    ],
+    "description": "Turkce film, dizi, anime, belgesel ve canli TV kaynaklarinin tamamini tek eklentide toplayan BerkStream medya merkezi.",
+    "fileSize": 1562206,
+    "repositoryUrl": "https://github.com/berkdemir18/BerkStream-Hub",
+    "language": "tr",
+    "tvTypes": [
+      "Movie",
+      "TvSeries",
+      "Anime",
+      "AsianDrama",
+      "Cartoon",
+      "Documentary",
+      "Live",
+      "Others"
+    ],
+    "iconUrl": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png",
+    "apiVersion": 1
+  }
+]

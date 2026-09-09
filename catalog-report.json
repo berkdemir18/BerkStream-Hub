@@ -1,0 +1,568 @@
+{
+  "generatedAt": "2026-09-09T22:07:19.929Z",
+  "repositorySlug": "berkdemir18/BerkStream-Hub",
+  "allInOnePlugins": 1,
+  "totalPlugins": 70,
+  "sourceCounts": {
+    "plt-stream": 5,
+    "feroxx": 36,
+    "nikyokki": 23,
+    "official": 5,
+    "berkstream": 1
+  },
+  "duplicates": [
+    {
+      "plugin": "AnimeciX",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "BelgeselX",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "CanliTV",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "CizgiMax",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "DDizi",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "DiziBox",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "DiziKorea",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "Dizilla",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "DiziMom",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "DiziPal",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "DiziYou",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "FilmMakinesi",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "FilmModu",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "FullHDFilm",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "FullHDFilmizlesene",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "HDFilmCehennemi",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "JetFilmizle",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "KultFilmler",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "RecTV",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "SelcukFlix",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "SetFilmIzle",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "SezonlukDizi",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "SinemaCX",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "SineWix",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "TurkAnime",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    },
+    {
+      "plugin": "WebteIzle",
+      "kept": "feroxx",
+      "skipped": "nikyokki"
+    }
+  ],
+  "verified": true,
+  "verifiedFiles": [
+    {
+      "name": "4KFilmIzlesene",
+      "source": "nikyokki",
+      "cs3Bytes": 11825,
+      "result": "ok"
+    },
+    {
+      "name": "AnimeciX",
+      "source": "feroxx",
+      "cs3Bytes": 26561,
+      "result": "ok"
+    },
+    {
+      "name": "AsyaAnimeleri",
+      "source": "feroxx",
+      "cs3Bytes": 13712,
+      "result": "ok"
+    },
+    {
+      "name": "AsyaWatch",
+      "source": "nikyokki",
+      "cs3Bytes": 30151,
+      "result": "ok"
+    },
+    {
+      "name": "BelgeselX",
+      "source": "feroxx",
+      "cs3Bytes": 31167,
+      "result": "ok"
+    },
+    {
+      "name": "BerkStream",
+      "source": "berkstream",
+      "cs3Bytes": 1562206,
+      "result": "ok"
+    },
+    {
+      "name": "CanliTV",
+      "source": "feroxx",
+      "cs3Bytes": 20480,
+      "result": "ok"
+    },
+    {
+      "name": "CizgiMax",
+      "source": "feroxx",
+      "cs3Bytes": 36001,
+      "result": "ok"
+    },
+    {
+      "name": "Cloud-Sync",
+      "source": "plt-stream",
+      "cs3Bytes": 118481,
+      "result": "ok"
+    },
+    {
+      "name": "DailymotionProvider",
+      "source": "official",
+      "cs3Bytes": 11472,
+      "result": "ok"
+    },
+    {
+      "name": "Ddizi",
+      "source": "feroxx",
+      "cs3Bytes": 20110,
+      "result": "ok"
+    },
+    {
+      "name": "DiziBox",
+      "source": "feroxx",
+      "cs3Bytes": 30085,
+      "result": "ok"
+    },
+    {
+      "name": "DiziGom",
+      "source": "nikyokki",
+      "cs3Bytes": 18639,
+      "result": "ok"
+    },
+    {
+      "name": "DiziKorea",
+      "source": "feroxx",
+      "cs3Bytes": 23562,
+      "result": "ok"
+    },
+    {
+      "name": "Dizilla",
+      "source": "feroxx",
+      "cs3Bytes": 36123,
+      "result": "ok"
+    },
+    {
+      "name": "DiziMag",
+      "source": "nikyokki",
+      "cs3Bytes": 26515,
+      "result": "ok"
+    },
+    {
+      "name": "DiziMom",
+      "source": "feroxx",
+      "cs3Bytes": 34833,
+      "result": "ok"
+    },
+    {
+      "name": "DiziPal",
+      "source": "feroxx",
+      "cs3Bytes": 29473,
+      "result": "ok"
+    },
+    {
+      "name": "DiziPalOriginal",
+      "source": "feroxx",
+      "cs3Bytes": 25008,
+      "result": "ok"
+    },
+    {
+      "name": "DiziYou",
+      "source": "feroxx",
+      "cs3Bytes": 17204,
+      "result": "ok"
+    },
+    {
+      "name": "DMax",
+      "source": "nikyokki",
+      "cs3Bytes": 13243,
+      "result": "ok"
+    },
+    {
+      "name": "FilmIzleIlk",
+      "source": "nikyokki",
+      "cs3Bytes": 19950,
+      "result": "ok"
+    },
+    {
+      "name": "FilmKovasi",
+      "source": "nikyokki",
+      "cs3Bytes": 18426,
+      "result": "ok"
+    },
+    {
+      "name": "FilmMakinesi",
+      "source": "feroxx",
+      "cs3Bytes": 22836,
+      "result": "ok"
+    },
+    {
+      "name": "FilmModu",
+      "source": "feroxx",
+      "cs3Bytes": 16496,
+      "result": "ok"
+    },
+    {
+      "name": "FullHDFilm",
+      "source": "feroxx",
+      "cs3Bytes": 28171,
+      "result": "ok"
+    },
+    {
+      "name": "FullHDFilmİzlede",
+      "source": "nikyokki",
+      "cs3Bytes": 15452,
+      "result": "ok"
+    },
+    {
+      "name": "FullHDFilmizlesene",
+      "source": "feroxx",
+      "cs3Bytes": 40117,
+      "result": "ok"
+    },
+    {
+      "name": "HDFilmCehennemi",
+      "source": "feroxx",
+      "cs3Bytes": 31661,
+      "result": "ok"
+    },
+    {
+      "name": "HDFilmCehennemi2",
+      "source": "nikyokki",
+      "cs3Bytes": 24654,
+      "result": "ok"
+    },
+    {
+      "name": "HDFilmDelisi",
+      "source": "feroxx",
+      "cs3Bytes": 64395,
+      "result": "ok"
+    },
+    {
+      "name": "HDFilmIzle",
+      "source": "nikyokki",
+      "cs3Bytes": 28290,
+      "result": "ok"
+    },
+    {
+      "name": "HDFilmSitesi",
+      "source": "nikyokki",
+      "cs3Bytes": 20512,
+      "result": "ok"
+    },
+    {
+      "name": "InatBox",
+      "source": "feroxx",
+      "cs3Bytes": 36900,
+      "result": "ok"
+    },
+    {
+      "name": "InternetArchiveProvider",
+      "source": "official",
+      "cs3Bytes": 28037,
+      "result": "ok"
+    },
+    {
+      "name": "InvidiousProvider",
+      "source": "official",
+      "cs3Bytes": 13695,
+      "result": "ok"
+    },
+    {
+      "name": "JetFilmizle",
+      "source": "feroxx",
+      "cs3Bytes": 18698,
+      "result": "ok"
+    },
+    {
+      "name": "KoreanTurk",
+      "source": "nikyokki",
+      "cs3Bytes": 12216,
+      "result": "ok"
+    },
+    {
+      "name": "KultFilmler",
+      "source": "feroxx",
+      "cs3Bytes": 27243,
+      "result": "ok"
+    },
+    {
+      "name": "plt-party",
+      "source": "plt-stream",
+      "cs3Bytes": 77525,
+      "result": "ok"
+    },
+    {
+      "name": "plt-stream",
+      "source": "plt-stream",
+      "cs3Bytes": 501943,
+      "result": "ok"
+    },
+    {
+      "name": "plt-tv",
+      "source": "plt-stream",
+      "cs3Bytes": 45596,
+      "result": "ok"
+    },
+    {
+      "name": "powerDizi",
+      "source": "nikyokki",
+      "cs3Bytes": 18697,
+      "result": "ok"
+    },
+    {
+      "name": "powerSinema",
+      "source": "nikyokki",
+      "cs3Bytes": 18690,
+      "result": "ok"
+    },
+    {
+      "name": "RareFilmm",
+      "source": "feroxx",
+      "cs3Bytes": 16540,
+      "result": "ok"
+    },
+    {
+      "name": "RecTV",
+      "source": "feroxx",
+      "cs3Bytes": 28846,
+      "result": "ok"
+    },
+    {
+      "name": "RoketDizi",
+      "source": "nikyokki",
+      "cs3Bytes": 37404,
+      "result": "ok"
+    },
+    {
+      "name": "SelcukFlix",
+      "source": "feroxx",
+      "cs3Bytes": 34047,
+      "result": "ok"
+    },
+    {
+      "name": "SetFilmIzle",
+      "source": "feroxx",
+      "cs3Bytes": 24635,
+      "result": "ok"
+    },
+    {
+      "name": "SezonlukDizi",
+      "source": "feroxx",
+      "cs3Bytes": 21851,
+      "result": "ok"
+    },
+    {
+      "name": "SinemaCX",
+      "source": "feroxx",
+      "cs3Bytes": 16707,
+      "result": "ok"
+    },
+    {
+      "name": "Sinewix",
+      "source": "feroxx",
+      "cs3Bytes": 26760,
+      "result": "ok"
+    },
+    {
+      "name": "SuperFilmGeldi",
+      "source": "nikyokki",
+      "cs3Bytes": 19771,
+      "result": "ok"
+    },
+    {
+      "name": "TLC",
+      "source": "nikyokki",
+      "cs3Bytes": 13259,
+      "result": "ok"
+    },
+    {
+      "name": "TLCtr",
+      "source": "feroxx",
+      "cs3Bytes": 14282,
+      "result": "ok"
+    },
+    {
+      "name": "trakt-sync",
+      "source": "plt-stream",
+      "cs3Bytes": 97847,
+      "result": "ok"
+    },
+    {
+      "name": "TRanimaci",
+      "source": "feroxx",
+      "cs3Bytes": 16864,
+      "result": "ok"
+    },
+    {
+      "name": "TRasyalog",
+      "source": "feroxx",
+      "cs3Bytes": 15594,
+      "result": "ok"
+    },
+    {
+      "name": "TurkAnime",
+      "source": "feroxx",
+      "cs3Bytes": 19087,
+      "result": "ok"
+    },
+    {
+      "name": "TvDiziler",
+      "source": "nikyokki",
+      "cs3Bytes": 26861,
+      "result": "ok"
+    },
+    {
+      "name": "TwitchProvider",
+      "source": "official",
+      "cs3Bytes": 15239,
+      "result": "ok"
+    },
+    {
+      "name": "UgurFilm",
+      "source": "nikyokki",
+      "cs3Bytes": 22661,
+      "result": "ok"
+    },
+    {
+      "name": "vavooSpor",
+      "source": "nikyokki",
+      "cs3Bytes": 18697,
+      "result": "ok"
+    },
+    {
+      "name": "Watch2Movies",
+      "source": "feroxx",
+      "cs3Bytes": 24839,
+      "result": "ok"
+    },
+    {
+      "name": "WebdramaTurkey2",
+      "source": "feroxx",
+      "cs3Bytes": 47944,
+      "result": "ok"
+    },
+    {
+      "name": "WebteIzle",
+      "source": "feroxx",
+      "cs3Bytes": 24117,
+      "result": "ok"
+    },
+    {
+      "name": "WFilmİzle",
+      "source": "nikyokki",
+      "cs3Bytes": 15649,
+      "result": "ok"
+    },
+    {
+      "name": "XPrime",
+      "source": "nikyokki",
+      "cs3Bytes": 28280,
+      "result": "ok"
+    },
+    {
+      "name": "YabanciDizi",
+      "source": "nikyokki",
+      "cs3Bytes": 43072,
+      "result": "ok"
+    },
+    {
+      "name": "YoutubeProvider",
+      "source": "official",
+      "cs3Bytes": 13152,
+      "result": "ok"
+    }
+  ]
+}
