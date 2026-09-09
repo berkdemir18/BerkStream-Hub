@@ -2,13 +2,13 @@
   {
     "url": "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/desktop/berkstream.js",
     "status": 1,
-    "version": "2.0.0",
+    "version": "2.2.1",
     "name": "BerkStream Desktop",
     "internalName": "berkstream-desktop",
     "authors": [
       "berkdemir18"
     ],
-    "description": "Windows/masaüstü için BerkStream Hub motoru: Türkçe dublaj ve altyazılı kaynakları paralel tarar, oynatılabilir akış döndürür.",
+    "description": "Windows için BerkStream Hub: Netflix tarzı raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.",
     "language": "tr",
     "tvTypes": [
       "Movie",
