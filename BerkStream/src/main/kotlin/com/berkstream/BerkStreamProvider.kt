@@ -12,6 +12,7 @@ import com.lagradost.cloudstream3.MovieLoadResponse
 import com.lagradost.cloudstream3.MovieSearchResponse
 import com.lagradost.cloudstream3.ProviderType
 import com.lagradost.cloudstream3.SearchResponse
+import com.lagradost.cloudstream3.SearchResponseList
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.TvSeriesLoadResponse
 import com.lagradost.cloudstream3.TvSeriesSearchResponse
@@ -22,6 +23,7 @@ import com.lagradost.cloudstream3.metaproviders.TmdbProvider
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.newHomePageResponse
 import com.lagradost.cloudstream3.newMovieSearchResponse
+import com.lagradost.cloudstream3.newSearchResponseList
 import com.lagradost.cloudstream3.newTvSeriesSearchResponse
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
@@ -244,8 +246,8 @@ class BerkStreamProvider : TmdbProvider() {
                 val shelf = api.mainPage.firstOrNull() ?: return@amap emptyList()
                 api.getMainPage(1, MainPageRequest(shelf.name, shelf.data, shelf.horizontalImages))
                     ?.items?.flatMap { it.list }.orEmpty()
-            } catch (error: Exception) {
-                logError(error)
+            } catch (error: Throwable) {
+                logError(Exception(error))
                 emptyList()
             }
         }.flatten().distinctBy { normalize(it.name) }.take(36)
@@ -279,6 +281,21 @@ class BerkStreamProvider : TmdbProvider() {
         return super.search(query, 1)?.items?.take(12)
     }
 
+    /**
+     * Arama artik TMDB uzerinden degil, dogrudan gomulu kaynaklarda yapiliyor.
+     * Sonuclar ilgili saglayicinin kendi kaydi oldugu icin tiklandiginda
+     * TMDB eslestirmesine hic ugramadan o kaynak aciliyor.
+     */
+    override suspend fun search(query: String, page: Int): SearchResponseList? {
+        if (page > 1) return newSearchResponseList(emptyList(), false)
+        val direct = scanProviders(validApisFor(supportedTypes + seriesTypes)) { api ->
+            api.searchSafely(query).take(4)
+        }.flatten().distinctBy { "${it.apiName}|${normalize(it.name)}" }
+        if (direct.isNotEmpty()) return newSearchResponseList(direct, false)
+        // Hicbir kaynak cevap vermezse en azindan TMDB sonucu donsun.
+        return super.search(query, page)
+    }
+
     private fun validApisFor(types: Set<TvType>) = apis.filter {
         it.name != name && it.lang == "tr" && it.providerType != ProviderType.MetaProvider &&
             it.supportedTypes.any(types::contains)
@@ -300,12 +317,33 @@ class BerkStreamProvider : TmdbProvider() {
         providers.amap { api ->
             try {
                 withTimeoutOrNull(providerScanTimeoutMs) { block(api) }
-            } catch (error: Exception) {
-                logError(error)
+            } catch (error: Throwable) {
+                // Exception DEGIL Throwable: eski API'yi uygulamayan saglayicilar
+                // NotImplementedError firlatiyor ve o bir Error. Exception yakalanınca
+                // hata yukari kaciyor, CloudStream de tum icerik sayfasini
+                // "An operation is not implemented" diye dusuruyordu.
+                logError(Exception("${api.name}: ${error.message}", error))
                 null
             }
         }
     }.orEmpty().filterNotNull()
+
+    /**
+     * Saglayicilarin bir kismi eski `search(query)`, bir kismi yeni
+     * `search(query, page)` imzasini uyguluyor. Uygulanmayan taraf
+     * NotImplementedError firlattigi icin ikisi de denenir.
+     */
+    private suspend fun MainAPI.searchSafely(query: String): List<SearchResponse> {
+        try {
+            return search(query).orEmpty()
+        } catch (_: NotImplementedError) {
+        }
+        return try {
+            search(query, 1)?.items.orEmpty()
+        } catch (_: NotImplementedError) {
+            emptyList()
+        }
+    }
 
     private fun aliasesFor(url: String, fallback: String): List<String> {
         val tmdbId = Regex("themoviedb\\.org/(?:movie|tv)/(\\d+)")
@@ -321,7 +359,7 @@ class BerkStreamProvider : TmdbProvider() {
         val normalizedNames = queryNames.map(::normalize).toSet()
         val matches = scanProviders(validApisFor(seriesTypes)) { api ->
             val hit = queryNames.firstNotNullOfOrNull { query ->
-                api.search(query)?.firstOrNull { result ->
+                api.searchSafely(query).firstOrNull { result ->
                     normalize(result.name) in normalizedNames && result.type in seriesTypes &&
                         (result !is TvSeriesSearchResponse || result.year == null ||
                             base.year == null || result.year == base.year)
@@ -343,7 +381,7 @@ class BerkStreamProvider : TmdbProvider() {
         val normalizedNames = queryNames.map(::normalize).toSet()
         val matches = scanProviders(validApisFor(setOf(TvType.Movie, TvType.AnimeMovie))) { api ->
             val hit = queryNames.firstNotNullOfOrNull { query ->
-                api.search(query)?.firstOrNull { result ->
+                api.searchSafely(query).firstOrNull { result ->
                     normalize(result.name) in normalizedNames &&
                         (result !is MovieSearchResponse || result.year == null ||
                             base.year == null || result.year == base.year)
@@ -369,8 +407,8 @@ class BerkStreamProvider : TmdbProvider() {
                 getApiFromNameNull(providerName)?.loadLinks(
                     providerData, isCasting, subtitleCallback, callback,
                 )
-            } catch (error: Exception) {
-                logError(error)
+            } catch (error: Throwable) {
+                logError(Exception(error))
             }
         }
         return true
