@@ -623,7 +623,6 @@ class BerkStreamProvider : TmdbProvider() {
 
     private data class TmdbOverview(
         @JsonProperty("overview") val overview: String? = null,
-        @JsonProperty("tagline") val tagline: String? = null,
     )
 
     /**
@@ -633,14 +632,13 @@ class BerkStreamProvider : TmdbProvider() {
     override suspend fun load(url: String): LoadResponse? {
         val base = super.load(url) ?: return null
         runCatching {
-            val match = Regex("themoviedb\.org/(movie|tv)/(\d+)").find(url) ?: return@runCatching
+            val match = Regex("""themoviedb\.org/(movie|tv)/(\d+)""").find(url) ?: return@runCatching
             val kind = match.groupValues[1]
             val id = match.groupValues[2]
             val turkish = tryParseJson<TmdbOverview>(
                 app.get("$tmdbApiUrl/$kind/$id?api_key=$tmdbApiKey&language=tr-TR").text,
             )
             turkish?.overview?.takeIf { it.isNotBlank() }?.let { base.plot = it }
-            turkish?.tagline?.takeIf { it.isNotBlank() }?.let { base.tagline = it }
         }
         return base
     }
