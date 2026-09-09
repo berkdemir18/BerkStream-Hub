@@ -1,6 +1,6 @@
 # BerkStream
 
-BerkStream artık **tek eklenti**. PLT Stream'in yaptığı gibi bütün kaynaklar
+BerkStream artık **tek eklenti**. Bütün kaynaklar
 tek `.cs3` dosyasının içine gömülüdür: kurulumda tek satır eklersin, 60+ Türkçe
 kaynak birden açılır. Tek tek eklenti kurmak, tek tek güncellemek yok.
 
@@ -37,14 +37,14 @@ https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/repo-full.js
 `scripts/vendor-sources.mjs`, upstream depolardaki her sağlayıcı modülünün Kotlin
 kaynağını çeker ve `BerkStream/src/main/kotlin/com/berkstream/vendor/` altına
 kopyalar. Her modül kendine özel bir pakete taşınır
-(`com.keyiflerolsun` → `com.berkstream.vendor.feroxx.dizipal.keyiflerolsun`), böylece
-farklı depolardaki aynı isimli sınıflar (`DiziPal`, `SearchItem`, `IptvPlaylistParser`…)
+(her modül kendine özel bir pakete taşınır), böylece
+farklı depolardaki aynı isimli sınıflar
 birbirini ezmez. Alt eklentilerin `@CloudstreamPlugin` işareti kaldırılır — bir `.cs3`
 içinde tek giriş noktası olabilir — ve hepsi üretilen `VendoredSources.kt` listesi
 üzerinden `BerkStreamPlugin` tarafından kaydedilir.
 
 Her kaynak ayrı ayrı `runCatching` içinde yüklenir: biri patlarsa diğerleri açılmaya
-devam eder. Kapalı kaynak olan PLT Stream motoru derlenemediği için CI, PLT'nin
+devam eder. Kapalı kaynak olan birleşik motor derlenemediği için CI, PLT'nin
 yayımladığı `.cs3`in dex'ini pakete ekler ve motor yansımayla ayağa kaldırılır.
 
 Kaynak listesi ve neyin neden atlandığı `vendor-report.json` dosyasında.
@@ -57,13 +57,13 @@ npm run vendor
 
 ## Kaynaklar
 
-- `recloudstream/extensions`: resmî, kamuya açık provider'lar
-- `pltmustafa/plt-stream`: PLT Stream, PLT TV, Party ve senkron araçları
-- `feroxx/Kekik-cloudstream`: birincil Türkçe provider kaynağı
-- `nikyokki/nik-cloudstream`: birincil kaynakta bulunmayan ek Türkçe provider'lar
+- Resmî, kamuya açık CloudStream sağlayıcıları
+- Kapalı kaynak bir birleşik sağlayıcı motoru (ikili olarak eklenir)
+- Birincil Türkçe sağlayıcı topluluğu deposu
+- İkincil Türkçe sağlayıcı topluluğu deposu
 
 Yalnız manifestinde `status: 1` olan eklentiler alınır. Aynı eklenti birden çok
-kaynakta varsa resmî kaynak, ardından PLT Stream, Feroxx ve Nikyokki tercih edilir.
+kaynakta varsa öncelik sırası `sources.json` içindeki `priority` alanına göredir.
 Eklentilerin telif ve lisans koşulları kendi kaynak depolarına aittir; gömülen
 kaynak kodu değiştirilmeden, kaynağı ve orijinal paketi belirtilerek taşınır.
 
@@ -104,3 +104,11 @@ Dosya doğrulaması; paketin erişilebilir, eksiksiz ve bildirilen hash ile uyum
 olduğunu kanıtlar. Kaynak sitelerin arama, bölüm ve oynatma akışlarının gerçekten
 çalışması Android üzerinde CloudStream ile ayrıca denenmelidir. DRM, üyelik veya
 ödeme duvarı aşan değişiklikler bu projenin kapsamı değildir.
+
+## Yasal uyarı
+
+Bu depo yalnızca kişisel ve eğitim amaçlı bir CloudStream eklenti derlemesidir.
+Hiçbir video içeriği barındırmaz, yüklemez veya dağıtmaz; yalnızca üçüncü taraf
+kaynakları tek pakette toplar. Sağlayıcıların eriştiği içeriğin telif durumu
+ilgili sitelere aittir. Kullanıcı, bulunduğu ülkenin mevzuatına uymakla
+yükümlüdür. Hak sahibiyseniz depo sahibine ulaşarak kaldırma talep edebilirsiniz.
