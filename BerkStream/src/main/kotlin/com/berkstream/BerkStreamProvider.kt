@@ -21,7 +21,6 @@ import com.lagradost.cloudstream3.metaproviders.TmdbProvider
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.newHomePageResponse
 import com.lagradost.cloudstream3.newMovieSearchResponse
-import com.lagradost.cloudstream3.newSearchResponseList
 import com.lagradost.cloudstream3.newSubtitleFile
 import com.lagradost.cloudstream3.newTvSeriesSearchResponse
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
@@ -463,7 +462,8 @@ class BerkStreamProvider : TmdbProvider() {
 
     private val sportsWords = listOf(
         "spor", "sport", "bein", "tivibu", "smart", "futbol", "lig", "mac", "match",
-        "eurosport", "trt spor", "aspor", "tabii spor", "exxen",
+        "eurosport", "aspor", "exxen", "s tv", "ssport", "nba", "uefa", "sampiyon",
+        "super lig", "kanallar",
     )
 
     private fun isSporty(label: String): Boolean {
@@ -492,10 +492,15 @@ class BerkStreamProvider : TmdbProvider() {
             }
             .take(6)
 
+        // Spor icin once spor kategorileri denenir; hicbir kategori eslesmezse
+        // kaynagin tum raflari gezilip kanal adina gore suzulur.
+        val anySportsCategory = onlySports && providers.any { api ->
+            api.mainPage.any { isSporty(it.name) }
+        }
         return scanProviders(providers) { api ->
             val shelves = api.mainPage
-                .filter { !onlySports || isSporty(it.name) }
-                .take(if (onlySports) 6 else 12)
+                .filter { !onlySports || !anySportsCategory || isSporty(it.name) }
+                .take(if (onlySports) 8 else 12)
             shelves.mapNotNull { shelf ->
                 runCatching {
                     api.getMainPage(
@@ -507,10 +512,11 @@ class BerkStreamProvider : TmdbProvider() {
         }
             .flatten()
             .let { items ->
-                // Kategori adi spor degilse bile kanal adi spor olabilir.
                 if (!onlySports) items else {
-                    val byShelf = items.filter { isSporty(it.name) }
-                    if (byShelf.size >= 8) byShelf else items
+                    val byName = items.filter { isSporty(it.name) }
+                    // Kanal adindan hicbir sey cikmazsa eldeki listeyi bos
+                    // gostermek yerine oldugu gibi veriyoruz.
+                    if (byName.size >= 5) byName else items
                 }
             }
             .distinctBy { "${it.apiName}|${normalize(it.name)}" }
@@ -588,25 +594,17 @@ class BerkStreamProvider : TmdbProvider() {
     }
 
     /**
-     * TMDB sonuclari once gelir (Turkce baslik, afis, dogru yil); arkasina
-     * kaynaklarin kendi kayitlari eklenir, boylece TMDB'de olmayan bir icerik de
-     * bulunabiliyor.
+     * CloudStream arama sonuclarini **cevap verme sirasina** gore diziyor
+     * (LinkedHashMap, paralel amap). Onceki surumde burada 18 kaynak taraniyordu
+     * ve BerkStream satiri en son doluyordu. Artik yalnizca tek TMDB istegi
+     * yapiliyor: satir ilk donenlerden biri oluyor ve listenin ustunde cikiyor.
+     * Kaynaklarin kendi sonuclari zaten kendi satirlarinda listeleniyor.
      */
-    override suspend fun search(query: String, page: Int): SearchResponseList? {
-        val meta = try {
-            super.search(query, page)?.items.orEmpty()
-        } catch (error: Throwable) {
-            logError(Exception(error))
-            emptyList()
-        }
-        ensureDomains()
-        val direct = if (page > 1) emptyList() else scanProviders(
-            validApisFor(movieTypes + seriesTypes),
-        ) { api -> api.searchSafely(query).take(3) }.flatten()
-        // Berk'in istegi: kaynak sonuclari once. Onlar dogrudan oynatilabiliyor,
-        // TMDB kaydi ise once eslestirme gerektiriyor.
-        val combined = (direct + meta).distinctBy { "${it.apiName}|${normalize(it.name)}" }
-        return newSearchResponseList(combined, meta.isNotEmpty())
+    override suspend fun search(query: String, page: Int): SearchResponseList? = try {
+        super.search(query, page)
+    } catch (error: Throwable) {
+        logError(Exception(error))
+        null
     }
 
     /**
@@ -712,10 +710,14 @@ class BerkStreamProvider : TmdbProvider() {
 
     private fun validApisFor(types: Set<TvType>) = apis.filter {
         it.name != name && it.lang == "tr" && it.providerType != ProviderType.MetaProvider &&
-            it.supportedTypes.any(types::contains) &&
-            normalize(it.name) !in disabledProviders
+            it.supportedTypes.any(types::contains)
     }.sortedWith(
-        compareByDescending<MainAPI> { successScore(it) }
+        // CI taramasi GitHub'in ABD sunucularindan yapiliyor ve Turkiye'den
+        // calisan kaynaklari da olu isaretleyebiliyor. Bu yuzden o liste artik
+        // eleme yapmiyor, yalnizca siralamada geri atiyor; gercek eleme cihazda
+        // ust uste cevapsiz kalan kaynaklara uygulaniyor.
+        compareBy<MainAPI> { normalize(it.name) in disabledProviders }
+            .thenByDescending { successScore(it) }
             .thenBy { api ->
                 providerPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
                     .let { if (it == -1) Int.MAX_VALUE else it }
