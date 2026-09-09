@@ -183,7 +183,7 @@ class BerkStreamProvider : TmdbProvider() {
 
     /** Tek bir saglayicinin tarama suresi; ayar ekranindan degistirilebiliyor. */
     private val providerScanTimeoutMs: Long
-        get() = BerkStreamSettings.scanTimeoutSeconds * 1000L
+        get() = (BerkStreamSettings.scanTimeoutSeconds + 6L) * 1000L
 
     /** Butun saglayici taramasinin toplam butcesi. */
     private val providerScanBudgetMs = 26_000L
@@ -653,8 +653,15 @@ class BerkStreamProvider : TmdbProvider() {
 
         for (batch in ordered.chunked(6)) {
             scanProviders(batch) { api ->
-                val hit = api.searchSafely(title)
-                    .firstOrNull { titleMatches(it.name, title) }
+                val results = api.searchSafely(title)
+                // Anime kaynaklarinda basliklar "One Piece (TR Altyazili)" gibi
+                // ekler tasiyor; bulanik esik tutmazsa iceren sonuca dusuluyor.
+                val hit = results.firstOrNull { titleMatches(it.name, title) }
+                    ?: results.firstOrNull { candidate ->
+                        val a = looseTitle(candidate.name)
+                        val b = looseTitle(title)
+                        b.isNotBlank() && (a.contains(b) || b.contains(a))
+                    }
                     ?: return@scanProviders null
                 val response = api.load(hit.url) ?: return@scanProviders null
                 val innerData = when {
@@ -741,7 +748,7 @@ class BerkStreamProvider : TmdbProvider() {
         val ordered = orderedApis(types)
         val head = ordered.take(18)
         if (guarantee == null) return head
-        val extra = ordered.filter { guarantee in it.supportedTypes && it !in head }.take(5)
+        val extra = ordered.filter { guarantee in it.supportedTypes && it !in head }.take(12)
         return head + extra
     }
 
