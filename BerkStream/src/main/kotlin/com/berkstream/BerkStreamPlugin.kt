@@ -31,6 +31,8 @@ class BerkStreamPlugin : Plugin() {
         openSettings = { activityContext -> BerkStreamSettings.open(activityContext) }
         runCatching { registerVideoClickAction(BerkStreamLikeAction()) }
             .onFailure { Log.e(TAG, "Oynatici dugmesi eklenemedi", it) }
+        runCatching { registerMainAPI(BerkStreamLiveProvider()) }
+            .onFailure { Log.e(TAG, "Canli saglayici kaydedilemedi", it) }
         runCatching { registerMainAPI(BerkStreamProvider()) }
             .onFailure { Log.e(TAG, "BerkStream saglayicisi kaydedilemedi", it) }
         runCatching { loadPltEngine() }
