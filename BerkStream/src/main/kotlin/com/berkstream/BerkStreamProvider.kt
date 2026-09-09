@@ -732,7 +732,13 @@ class BerkStreamProvider : TmdbProvider() {
         if (winner != null) {
             ordered.firstOrNull { it.name == winner }?.let { winnerApi ->
                 scanProviders(listOf(winnerApi)) { tryProvider(it) }
-                if (linkCount.get() > 0) return true
+                // Linkler biriktirilip sonda siralandigi icin buradan cikarken de
+                // MUTLAKA gonderilmeli; aksi halde toplanan linkler hic verilmiyor
+                // ve daha once acilan icerikler "baglanti bulunamadi" veriyor.
+                if (linkCount.get() > 0) {
+                    emitSorted(collected, callback)
+                    return true
+                }
             }
         }
 
