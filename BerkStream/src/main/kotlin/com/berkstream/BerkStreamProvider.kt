@@ -65,6 +65,8 @@ class BerkStreamProvider : TmdbProvider() {
      * `media_type` alani kullanilir.
      */
     override val mainPage = listOf(
+        MainPageData("🎯  SANA ÖZEL", "personal", false),
+        MainPageData("🆕  KAYNAKLARDA YENİ", "fresh", false),
         shelf("🎬  VİZYONDAKİ FİLMLER", "movie", "movie/now_playing?region=TR"),
         shelf("🔥  GÜNÜN TRENDLERİ", "mixed", "trending/all/day"),
         shelf("📈  HAFTANIN POPÜLER FİLMLERİ", "movie", "trending/movie/week"),
@@ -82,7 +84,8 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("✨  DISNEY+ • DİZİ", "tv", "discover/tv?with_watch_providers=337"),
         shelf("🟣  HBO MAX • FİLM", "movie", "discover/movie?with_watch_providers=1899"),
         shelf("🟣  HBO MAX • DİZİ", "tv", "discover/tv?with_watch_providers=1899"),
-        shelf("  APPLE TV+ • FİLM", "movie", "discover/movie?with_watch_providers=350"),
+        shelf("  APPLE TV+ • FİLM", "movie", "discover/movie?with_watch_providers=350&watch_region=US"),
+        shelf("  APPLE TV+ • DİZİ", "tv", "discover/tv?with_watch_providers=350&watch_region=US"),
         shelf("🔴  TABİİ", "tv", "discover/tv?with_watch_providers=2235"),
         shelf("💥  AKSİYON", "movie", "discover/movie?with_genres=28&sort_by=popularity.desc"),
         shelf("😂  KOMEDİ", "movie", "discover/movie?with_genres=35&sort_by=popularity.desc"),
@@ -95,15 +98,15 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("🧒  ANİMASYON • DİZİ", "tv", "discover/tv?with_genres=16&sort_by=popularity.desc"),
         shelf("🎌  ANİME", "tv", "discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc"),
         shelf("📖  BELGESEL", "movie", "discover/movie?with_genres=99&sort_by=popularity.desc"),
-        shelf("🇰🇷  KORE DİZİLERİ", "tv", "discover/tv?with_original_language=ko&sort_by=popularity.desc"),
-        shelf("🇯🇵  JAPON SİNEMASI", "movie", "discover/movie?with_original_language=ja&sort_by=popularity.desc"),
-        shelf("🇪🇸  İSPANYOL YAPIMLARI", "tv", "discover/tv?with_original_language=es&sort_by=popularity.desc"),
         shelf("📅  BU HAFTA YENİ BÖLÜM", "tv", "tv/on_the_air"),
         shelf("💎  GİZLİ CEVHERLER", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=200&vote_count.lte=1200"),
         shelf("⏱️  KISA GECE • 95 DK ALTI", "movie", "discover/movie?with_runtime.lte=95&vote_count.gte=300&sort_by=vote_average.desc"),
-        shelf("🎂  SEN DOĞDUĞUNDA • 2007", "movie", "discover/movie?primary_release_year=2007&sort_by=popularity.desc"),
         shelf("🕰️  90'LAR KLASİKLERİ", "movie", "discover/movie?primary_release_date.gte=1990-01-01&primary_release_date.lte=1999-12-31&sort_by=vote_average.desc&vote_count.gte=500"),
         shelf("🏆  OSCAR YOLUNDA", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=1500&primary_release_date.gte=2015-01-01"),
+        MainPageData("🕐  ŞU AN İÇİN", "hour", false),
+        MainPageData("🎲  ZAR AT", "dice", false),
+        MainPageData("🗓️  YILLAR ÖNCE BUGÜN", "onthisday", false),
+        MainPageData("⚽  CANLI SPOR", "sports", true),
         MainPageData("📡  CANLI TV", "live", true),
     )
 
@@ -287,15 +290,23 @@ class BerkStreamProvider : TmdbProvider() {
 
     private suspend fun tmdbShelf(path: String, mediaType: String, page: Int): Pair<List<SearchResponse>, Boolean> {
         val separator = if (path.contains("?")) "&" else "?"
+        // Raf kendi bolgesini belirtmisse ona dokunma: Apple TV+ katalogu TR'de
+        // bos donuyor, o raf US bolgesiyle cekiliyor.
+        val region = if (path.contains("watch_region=")) "" else "&watch_region=TR"
         val url = "$tmdbApiUrl/$path$separator" +
-            "api_key=$tmdbApiKey&language=tr-TR&include_adult=false&watch_region=TR&page=$page"
+            "api_key=$tmdbApiKey&language=tr-TR&include_adult=false$region&page=$page"
         val parsed = tryParseJson<TmdbPage>(app.get(url).text) ?: return emptyList<SearchResponse>() to false
         val items = parsed.results.mapNotNull { it.toSearchResponse(mediaType) }
         val hasNext = page < (parsed.totalPages ?: 1)
         return items to hasNext
     }
 
-    private suspend fun liveShelf(): List<SearchResponse> = apis
+    private val sportsKeywords = listOf(
+        "spor", "sport", "bein", "tivibu", "s ", "trt", "smart", "exxen", "tabii",
+        "futbol", "lig", "mac", "maç",
+    )
+
+    private suspend fun liveShelf(onlySports: Boolean = false): List<SearchResponse> = apis
         .filter { api ->
             api.name != name && api.providerType != ProviderType.MetaProvider &&
                 (TvType.Live in api.supportedTypes ||
@@ -317,13 +328,144 @@ class BerkStreamProvider : TmdbProvider() {
             }
         }
         .flatten()
+        .let { items ->
+            if (!onlySports) items
+            else items.filter { item ->
+                val label = looseTitle(item.name)
+                sportsKeywords.any { label.contains(it.trim()) }
+            }
+        }
         .distinctBy { normalize(it.name) }
         .take(40)
 
+    /**
+     * Izleme gecmisi CloudStream'in uygulama modulunde duruyor ve eklenti
+     * derleme paketinde var oldugu garanti degil; bu yuzden yansimayla
+     * okunuyor. Erisilemezse sessizce bos donuyor, raf da trend listesine
+     * dusuyor.
+     */
+    private fun watchedTitles(): List<String> = runCatching {
+        val helper = Class.forName("com.lagradost.cloudstream3.utils.DataStoreHelper")
+        val instance = helper.getField("INSTANCE").get(null)
+        val ids = buildList {
+            for (method in listOf("getAllResumeStateIds", "getAllWatchStateIds")) {
+                runCatching {
+                    (helper.getMethod(method).invoke(instance) as? List<*>)?.let(::addAll)
+                }
+            }
+        }.filterIsInstance<Int>().distinct()
+        val readers = listOf("getLastWatched", "getBookmarkedData").mapNotNull { method ->
+            runCatching { helper.getMethod(method, Integer::class.java) }.getOrNull()
+        }
+        ids.takeLast(30).mapNotNull { id ->
+            readers.firstNotNullOfOrNull { reader ->
+                runCatching {
+                    val record = reader.invoke(instance, id) ?: return@runCatching null
+                    record.javaClass.getMethod("getName").invoke(record) as? String
+                }.getOrNull()
+            }
+        }.filter { it.isNotBlank() }.distinct()
+    }.getOrElse { emptyList() }
+
+    private suspend fun tmdbLookup(title: String): Pair<String, Int>? = runCatching {
+        val url = "$tmdbApiUrl/search/multi?api_key=$tmdbApiKey&language=tr-TR" +
+            "&include_adult=false&query=${title.encodeQuery()}"
+        tryParseJson<TmdbPage>(app.get(url).text)?.results
+            ?.firstOrNull { it.id != null && (it.mediaType == "movie" || it.mediaType == "tv") }
+            ?.let { it.mediaType!! to it.id!! }
+    }.getOrNull()
+
+    private fun String.encodeQuery() = java.net.URLEncoder.encode(this, "UTF-8")
+
+    /** Izlenenlere/yarim birakilanlara gore TMDB onerileri. */
+    private suspend fun personalShelf(page: Int): Pair<List<SearchResponse>, Boolean> {
+        val seeds = watchedTitles().shuffled().take(5)
+        if (seeds.isEmpty()) return tmdbShelf("trending/all/week", "mixed", page)
+        val recommendations = seeds.amap { title ->
+            val (kind, id) = tmdbLookup(title) ?: return@amap emptyList()
+            runCatching {
+                tmdbShelf("$kind/$id/recommendations", kind, page).first
+            }.getOrElse { emptyList() }
+        }.flatten()
+        val watched = watchedTitles().map(::looseTitle).toSet()
+        val filtered = recommendations
+            .distinctBy { it.url }
+            .filter { looseTitle(it.name) !in watched }
+            .shuffled()
+        return filtered to (filtered.isNotEmpty() && page < 5)
+    }
+
+    /**
+     * Kaynaklarin kendi ana sayfalarindaki taze icerik. TMDB'de olmayan ya da
+     * heniz eklenmemis yeni bolumler burada goruntuleniyor.
+     */
+    private suspend fun freshFromProviders(): List<SearchResponse> {
+        ensureDomains()
+        val providers = validApisFor(movieTypes + seriesTypes).take(8)
+        return scanProviders(providers) { api ->
+            val first = api.mainPage.firstOrNull() ?: return@scanProviders null
+            api.getMainPage(1, MainPageRequest(first.name, first.data, first.horizontalImages))
+                ?.items?.flatMap { it.list }?.take(8)
+        }.flatten().distinctBy { "${it.apiName}|${looseTitle(it.name)}" }.shuffled().take(40)
+    }
+
+    /** Saate gore degisen raf: gece korku, sabah hafif, aksam populer. */
+    private fun hourlyPath(): Pair<String, String> {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        return when (hour) {
+            in 0..5 -> "movie" to "discover/movie?with_genres=27,53&sort_by=popularity.desc&vote_count.gte=150"
+            in 6..11 -> "movie" to "discover/movie?with_genres=35,16&sort_by=popularity.desc&vote_count.gte=150"
+            in 12..17 -> "tv" to "discover/tv?sort_by=popularity.desc&vote_count.gte=100"
+            else -> "movie" to "discover/movie?with_genres=28,12&sort_by=popularity.desc&vote_count.gte=200"
+        }
+    }
+
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        if (request.data == "live") {
-            val live = if (page > 1) emptyList() else liveShelf()
-            return newHomePageResponse(request, live, false)
+        when (request.data) {
+            "live", "sports" -> {
+                val items = if (page > 1) emptyList() else liveShelf(request.data == "sports")
+                return newHomePageResponse(request, items, false)
+            }
+            "personal" -> {
+                val (items, hasNext) = try {
+                    personalShelf(page)
+                } catch (error: Throwable) {
+                    logError(Exception(error))
+                    emptyList<SearchResponse>() to false
+                }
+                return newHomePageResponse(request, items, hasNext)
+            }
+            "fresh" -> {
+                val items = if (page > 1) emptyList() else freshFromProviders()
+                return newHomePageResponse(request, items, false)
+            }
+            "hour" -> {
+                val (kind, path) = hourlyPath()
+                val (items, hasNext) = tmdbShelf(path, kind, page)
+                return newHomePageResponse(request, items, hasNext)
+            }
+            "dice" -> {
+                val randomPage = (1..25).random()
+                val (items, _) = tmdbShelf(
+                    "discover/movie?sort_by=popularity.desc&vote_count.gte=120",
+                    "movie",
+                    randomPage,
+                )
+                return newHomePageResponse(request, items.shuffled().take(20), true)
+            }
+            "onthisday" -> {
+                val calendar = java.util.Calendar.getInstance()
+                val month = calendar.get(java.util.Calendar.MONTH) + 1
+                val day = calendar.get(java.util.Calendar.DAY_OF_MONTH)
+                val year = calendar.get(java.util.Calendar.YEAR) - (5 + (page - 1) * 5)
+                val date = String.format("%04d-%02d-%02d", year, month, day)
+                val (items, _) = tmdbShelf(
+                    "discover/movie?primary_release_date.gte=$date&primary_release_date.lte=$date",
+                    "movie",
+                    1,
+                )
+                return newHomePageResponse(request, items, page < 6)
+            }
         }
         val mediaType = request.data.substringBefore('|', "movie")
         val path = request.data.substringAfter('|')
@@ -357,7 +499,9 @@ class BerkStreamProvider : TmdbProvider() {
         val direct = if (page > 1) emptyList() else scanProviders(
             validApisFor(movieTypes + seriesTypes),
         ) { api -> api.searchSafely(query).take(3) }.flatten()
-        val combined = (meta + direct).distinctBy { "${it.apiName}|${normalize(it.name)}" }
+        // Berk'in istegi: kaynak sonuclari once. Onlar dogrudan oynatilabiliyor,
+        // TMDB kaydi ise once eslestirme gerektiriyor.
+        val combined = (direct + meta).distinctBy { "${it.apiName}|${normalize(it.name)}" }
         return newSearchResponseList(combined, meta.isNotEmpty())
     }
 
