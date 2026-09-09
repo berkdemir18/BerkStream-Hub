@@ -26,6 +26,7 @@ import com.lagradost.cloudstream3.newSubtitleFile
 import com.lagradost.cloudstream3.newTvSeriesSearchResponse
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.Qualities
 import kotlinx.coroutines.withTimeoutOrNull
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import java.text.Normalizer
@@ -766,10 +767,34 @@ class BerkStreamProvider : TmdbProvider() {
         }
     }
 
+    /**
+     * CloudStream linkleri `sortUrls` ile YALNIZCA kaliteye gore siraliyor
+     * (`urls.sortedBy { -it.quality }`), gonderim sirasi yok sayiliyor. Bu yuzden
+     * "once dublaj" istegi sadece siralamayla karsilanamiyor: dublaj linkinin
+     * kalite degeri en uste tasiniyor, gercek kalite ad icinde korunuyor.
+     * Ayardan kapatilabiliyor.
+     */
     private fun emitSorted(links: List<ExtractorLink>, callback: (ExtractorLink) -> Unit) {
-        synchronized(links) { links.toList() }
-            .sortedBy { linkRank(it) }
-            .forEach(callback)
+        val ordered = synchronized(links) { links.toList() }.sortedBy { linkRank(it) }
+        val boost = BerkStreamSettings.preferTurkishDub
+        ordered.forEach { link ->
+            runCatching {
+                when (linkRank(link)) {
+                    0 -> {
+                        val realQuality = Qualities.getStringByInt(link.quality)
+                        link.name = "🇹🇷 Dublaj • ${link.name} ($realQuality)"
+                        if (boost) link.quality = Qualities.P2160.value + 100
+                    }
+                    1 -> {
+                        val realQuality = Qualities.getStringByInt(link.quality)
+                        link.name = "🇹🇷 Altyazı • ${link.name} ($realQuality)"
+                        if (boost) link.quality = Qualities.P2160.value + 50
+                    }
+                    else -> Unit
+                }
+            }
+            callback(link)
+        }
     }
 
     /**

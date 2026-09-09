@@ -30,6 +30,7 @@ object BerkStreamSettings {
     private const val KEY_GENRES = "genre_shelves_enabled"
     private const val KEY_DISCOVERY = "discovery_shelves_enabled"
     private const val KEY_LINK_TARGET = "link_target"
+    private const val KEY_PREFER_DUB = "prefer_turkish_dub"
 
     private val timeoutOptions = listOf(5L, 9L, 15L, 25L)
     private val linkTargets = listOf(4, 6, 10, 20)
@@ -53,6 +54,9 @@ object BerkStreamSettings {
 
     /** Kac link toplanınca tarama durdurulsun. */
     val linkTarget: Int get() = store?.getInt(KEY_LINK_TARGET, 6) ?: 6
+
+    /** Turkce dublaj kaynagi listenin en ustune tasinsin mi. */
+    val preferTurkishDub: Boolean get() = store?.getBoolean(KEY_PREFER_DUB, true) ?: true
 
     fun watchCount(): Int = store?.getString(WATCH_HISTORY_KEY, "").orEmpty()
         .split('\n').count { it.isNotBlank() }
@@ -146,6 +150,7 @@ object BerkStreamSettings {
             "Altyazı: ${if (subtitlesEnabled) "açık" else "kapalı"}",
             "Altyazı dili: ${subtitleLanguages[subtitleLanguage]}",
             "Yeterli link sayısı: ${linkTarget}  (bulunca taramayı durdur)",
+            "Türkçe dublajı öne al: ${if (preferTurkishDub) "açık" else "kapalı"}",
         )
         AlertDialog.Builder(context)
             .setTitle("Oynatma ve altyazı")
@@ -167,6 +172,11 @@ object BerkStreamSettings {
                         ]
                         prefs(context).edit().putInt(KEY_LINK_TARGET, next).apply()
                         toast(context, "Yeterli link: $next")
+                    }
+                    3 -> {
+                        val next = !preferTurkishDub
+                        prefs(context).edit().putBoolean(KEY_PREFER_DUB, next).apply()
+                        toast(context, "Türkçe dublaj önceliği ${if (next) "açık" else "kapalı"}")
                     }
                 }
                 dialog.dismiss()
