@@ -243,12 +243,23 @@ class BerkStreamProvider : TmdbProvider() {
         if (a.isBlank() || b.isBlank()) return false
         if (a == b) return true
         if (normalize(candidate) == normalize(target)) return true
-        return FuzzySearch.tokenSetRatio(a, b) >= 88
+
+        // Adayda hedefte gecmeyen anlamli bir kelime varsa bu baska bir yapimdir:
+        // "dexter resurrection" ve "dexters laboratory", "dexter" degildir.
+        val targetWords = b.split(" ").filter { it.isNotBlank() }.toSet()
+        val extraWords = a.split(" ").filter { it.length > 2 && it !in targetWords }
+        if (extraWords.isNotEmpty()) return false
+
+        return FuzzySearch.tokenSetRatio(a, b) >= 92
     }
 
     private data class DomainConfig(
         @JsonProperty("overrides") val overrides: Map<String, String> = emptyMap(),
         @JsonProperty("disabled") val disabled: List<String> = emptyList(),
+    )
+
+    private data class TmdbExternalIds(
+        @JsonProperty("imdb_id") val imdbId: String? = null,
     )
 
     private data class StremioSubtitle(
@@ -654,14 +665,11 @@ class BerkStreamProvider : TmdbProvider() {
         for (batch in ordered.chunked(6)) {
             scanProviders(batch) { api ->
                 val results = api.searchSafely(title)
-                // Anime kaynaklarinda basliklar "One Piece (TR Altyazili)" gibi
-                // ekler tasiyor; bulanik esik tutmazsa iceren sonuca dusuluyor.
-                val hit = results.firstOrNull { titleMatches(it.name, title) }
-                    ?: results.firstOrNull { candidate ->
-                        val a = looseTitle(candidate.name)
-                        val b = looseTitle(title)
-                        b.isNotBlank() && (a.contains(b) || b.contains(a))
-                    }
+                // Once tam eslesme, sonra bulanik. "Iceren" esleme KULLANILMIYOR:
+                // "Dexter" aramasi "Dexter: Resurrection" ve "Dexter's Laboratory"
+                // ile eslesip yanlis icerik aciyordu.
+                val hit = results.firstOrNull { looseTitle(it.name) == looseTitle(title) }
+                    ?: results.firstOrNull { titleMatches(it.name, title) }
                     ?: return@scanProviders null
                 val response = api.load(hit.url) ?: return@scanProviders null
                 val innerData = when {
@@ -712,7 +720,19 @@ class BerkStreamProvider : TmdbProvider() {
      * durumlarda tek secenek bu.
      */
     private suspend fun loadStremioSubtitles(link: TmdbLink, subtitleCallback: (SubtitleFile) -> Unit) {
-        val imdbId = link.imdbID?.takeIf { it.startsWith("tt") } ?: return
+        // DiziBal gibi kaynaklarda altyazi hic gorunmuyordu: TmdbLink'te imdbID
+        // bos geldiginde altyazi istegi hic yapilmiyordu. Bos ise TMDB'den
+        // cekiliyor.
+        val imdbId = link.imdbID?.takeIf { it.startsWith("tt") }
+            ?: link.tmdbID?.let { tmdbId ->
+                val kind = if (link.season != null || link.episode != null) "tv" else "movie"
+                runCatching {
+                    tryParseJson<TmdbExternalIds>(
+                        app.get("$tmdbApiUrl/$kind/$tmdbId/external_ids?api_key=$tmdbApiKey").text,
+                    )?.imdbId?.takeIf { it.startsWith("tt") }
+                }.getOrNull()
+            }
+            ?: return
         val suffix = if (link.season != null && link.episode != null) {
             "series/$imdbId:${link.season}:${link.episode}"
         } else {
