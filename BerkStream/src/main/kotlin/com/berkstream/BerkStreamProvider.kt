@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.APIHolder.apis
 import com.lagradost.cloudstream3.APIHolder.getApiFromNameNull
 import com.lagradost.cloudstream3.ErrorLoadingException
 import com.lagradost.cloudstream3.LoadResponse
+import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.MainPageData
 import com.lagradost.cloudstream3.MainPageRequest
 import com.lagradost.cloudstream3.MovieLoadResponse
@@ -25,6 +26,7 @@ import com.lagradost.cloudstream3.newTvSeriesSearchResponse
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jsoup.nodes.Document
@@ -62,11 +64,30 @@ class BerkStreamProvider : TmdbProvider() {
     private val aliases = ConcurrentHashMap<Int, Set<String>>()
     private val shelfCache = ConcurrentHashMap<String, CachedShelf>()
 
+    /**
+     * Adlar gomulu saglayicilarin gercek `name` degerleriyle birebir ayni olmali;
+     * eslesmeyen ad listenin sonuna dusuyor ve iyi kaynak taramanin disinda kaliyor.
+     */
     private val providerPriority = listOf(
-        "BerkStream Kaynakları", "plt-stream", "Dizilla", "DiziPal", "DiziYou", "FilmMakinesi",
-        "FullHDFilm", "FullHDFilmizlesene", "HDFilmCehennemi", "JetFilmizle",
-        "SinemaCX", "SetFilmIzle", "WebteIzle",
+        "BerkStream Kaynakları", "plt-stream",
+        // Dizi
+        "Dizilla", "DiziPal", "DiziYou", "DiziBox", "SezonlukDizi", "DiziGom", "DiziMag",
+        "RoketDizi", "YabanciDizi", "TvDiziler", "DiziMom", "DDizi", "DiziKorea",
+        "powerDizi", "DiziPalOriginal", "WebdramaTurkey2", "KoreanTurk",
+        // Film
+        "HDFilmCehennemi", "HDFilmCehennemi2", "HDFilmDelisi", "HDFilmİzle", "HDFilmSitesi",
+        "FilmMakinesi", "FullHDFilm", "FullHDFilmizlesene", "FullHDFilmİzlede",
+        "SuperFilmGeldi", "JetFilmizle", "SinemaCX", "SetFilmIzle", "WebteIzle",
+        "FilmModu", "FilmKovası", "SelcukFlix", "UgurFilm", "XPrime", "Sinewix",
+        "4KFilmİzlesene", "WFilmİzle", "Filmİzleİlk", "Watch2Movies", "KultFilmler",
+        "RareFilmm", "RecTV", "powerSinema",
     )
+
+    /** Tek bir saglayicinin tarama suresi. */
+    private val providerScanTimeoutMs = 9_000L
+
+    /** Butun saglayici taramasinin toplam butcesi. */
+    private val providerScanBudgetMs = 26_000L
 
     private val liveProviderPriority = listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "vavooSpor")
 
@@ -266,6 +287,26 @@ class BerkStreamProvider : TmdbProvider() {
             .let { if (it == -1) Int.MAX_VALUE else it }
     }.take(18)
 
+    /**
+     * Saglayicilari paralel tarar ama hem tek tek hem de toplamda sureyi
+     * sinirlar. Zaman asimi olmadan olu bir site tum icerik sayfasini sonsuza
+     * kadar "yukleniyor"da tutuyordu; pakete 60+ kaynak girince bu kacinilmaz
+     * hale geldi.
+     */
+    private suspend fun <T : Any> scanProviders(
+        providers: List<MainAPI>,
+        block: suspend (MainAPI) -> T?,
+    ): List<T> = withTimeoutOrNull(providerScanBudgetMs) {
+        providers.amap { api ->
+            try {
+                withTimeoutOrNull(providerScanTimeoutMs) { block(api) }
+            } catch (error: Exception) {
+                logError(error)
+                null
+            }
+        }
+    }.orEmpty().filterNotNull()
+
     private fun aliasesFor(url: String, fallback: String): List<String> {
         val tmdbId = Regex("themoviedb\\.org/(?:movie|tv)/(\\d+)")
             .find(url)?.groupValues?.getOrNull(1)?.toIntOrNull()
@@ -278,22 +319,17 @@ class BerkStreamProvider : TmdbProvider() {
     private suspend fun loadSeriesFromProviders(base: TvSeriesLoadResponse, url: String): LoadResponse {
         val queryNames = aliasesFor(url, base.name)
         val normalizedNames = queryNames.map(::normalize).toSet()
-        val matches = validApisFor(seriesTypes).amap { api ->
-            try {
-                val hit = queryNames.firstNotNullOfOrNull { query ->
-                    api.search(query)?.firstOrNull { result ->
-                        normalize(result.name) in normalizedNames && result.type in seriesTypes &&
-                            (result !is TvSeriesSearchResponse || result.year == null ||
-                                base.year == null || result.year == base.year)
-                    }
-                } ?: return@amap null
-                api.load(hit.url)?.takeIf { it !is MovieLoadResponse }
-            } catch (error: Exception) {
-                logError(error)
-                null
-            }
+        val matches = scanProviders(validApisFor(seriesTypes)) { api ->
+            val hit = queryNames.firstNotNullOfOrNull { query ->
+                api.search(query)?.firstOrNull { result ->
+                    normalize(result.name) in normalizedNames && result.type in seriesTypes &&
+                        (result !is TvSeriesSearchResponse || result.year == null ||
+                            base.year == null || result.year == base.year)
+                }
+            } ?: return@scanProviders null
+            api.load(hit.url)?.takeIf { it !is MovieLoadResponse }
         }
-        return matches.firstOrNull { it != null } ?: base
+        return matches.firstOrNull() ?: base
     }
 
     override suspend fun load(url: String): LoadResponse? {
@@ -305,21 +341,16 @@ class BerkStreamProvider : TmdbProvider() {
 
         val queryNames = aliasesFor(url, base.name)
         val normalizedNames = queryNames.map(::normalize).toSet()
-        val matches = validApisFor(setOf(TvType.Movie, TvType.AnimeMovie)).amap { api ->
-            try {
-                val hit = queryNames.firstNotNullOfOrNull { query ->
-                    api.search(query)?.firstOrNull { result ->
-                        normalize(result.name) in normalizedNames &&
-                            (result !is MovieSearchResponse || result.year == null ||
-                                base.year == null || result.year == base.year)
-                    }
-                } ?: return@amap null
-                (api.load(hit.url) as? MovieLoadResponse)?.let { it.apiName to it.dataUrl }
-            } catch (error: Exception) {
-                logError(error)
-                null
-            }
-        }.filterNotNull()
+        val matches = scanProviders(validApisFor(setOf(TvType.Movie, TvType.AnimeMovie))) { api ->
+            val hit = queryNames.firstNotNullOfOrNull { query ->
+                api.search(query)?.firstOrNull { result ->
+                    normalize(result.name) in normalizedNames &&
+                        (result !is MovieSearchResponse || result.year == null ||
+                            base.year == null || result.year == base.year)
+                }
+            } ?: return@scanProviders null
+            (api.load(hit.url) as? MovieLoadResponse)?.let { it.apiName to it.dataUrl }
+        }
 
         base.dataUrl = CrossMetaData(matches.isNotEmpty(), matches).toJson()
         return base
