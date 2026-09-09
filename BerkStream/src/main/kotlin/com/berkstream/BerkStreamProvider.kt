@@ -653,14 +653,15 @@ class BerkStreamProvider : TmdbProvider() {
                     isSeries && response is TvSeriesLoadResponse -> {
                         val episodes = response.episodes
                         // Kaynaklar sezon numarasini her zaman TMDB ile ayni vermiyor;
-                        // tam eslesme tutmazsa once bolum numarasina, en son sıraya bakilir.
-                        episodes.firstOrNull {
+                        // tam eslesme tutmazsa once bolum numarasina, en son siraya bakilir.
+                        val match = episodes.firstOrNull {
                             (season == null || it.season == season) &&
                                 (episode == null || it.episode == episode)
                         }
                             ?: episodes.firstOrNull { episode != null && it.episode == episode }
                             ?: episode?.let { episodes.getOrNull(it - 1) }
-                    }?.data
+                        match?.data
+                    }
                     !isSeries && response is MovieLoadResponse -> response.dataUrl
                     else -> null
                 } ?: return@scanProviders null
