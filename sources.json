@@ -63,5 +63,6 @@
       "priority": 80
     }
   ],
-  "vendorExcludedPlugins": []
+  "vendorExcludedPlugins": [],
+  "bundlePltEngine": false
 }

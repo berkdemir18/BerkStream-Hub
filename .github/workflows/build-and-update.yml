@@ -49,6 +49,13 @@ jobs:
       - name: Bundle closed-source PLT engine
         run: |
           set -euo pipefail
+          # PLT'nin dex'i hazir derlenmis geliyor ve d8 onu yeniden islerken
+          # desugar uyarisi veriyor. Kurulum hatasi arastirilirken bu adim
+          # sources.json'daki bayrakla kapatilabiliyor.
+          if [ "$(node -p "require('./sources.json').bundlePltEngine === true")" != "true" ]; then
+            echo "PLT dex birlestirme kapali (sources.json: bundlePltEngine=false)."
+            exit 0
+          fi
           temp_dir="$(mktemp -d)"
           curl -fsSL "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plt-stream.cs3" -o "$temp_dir/plt-stream.cs3"
           mkdir -p "$temp_dir/berk" "$temp_dir/plt" "$temp_dir/merged"

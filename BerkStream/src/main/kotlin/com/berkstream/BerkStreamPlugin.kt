@@ -19,10 +19,19 @@ import com.lagradost.cloudstream3.plugins.Plugin
 class BerkStreamPlugin : Plugin() {
     private val loadedSources = mutableListOf<BasePlugin>()
 
+    /**
+     * CloudStream, `load` icinden cikan tek bir Throwable'da paketin tamamini
+     * "yuklenemedi" sayip hicbir saglayiciyi kaydetmiyor. Bu yuzden her adim
+     * kendi basina korunur: en kotu ihtimalde eksik kaynakla acilir, hic
+     * acilmamis olmaz.
+     */
     override fun load(context: Context) {
-        registerMainAPI(BerkStreamProvider())
-        loadPltEngine()
-        loadVendoredSources(context)
+        runCatching { registerMainAPI(BerkStreamProvider()) }
+            .onFailure { Log.e(TAG, "BerkStream saglayicisi kaydedilemedi", it) }
+        runCatching { loadPltEngine() }
+            .onFailure { Log.e(TAG, "PLT motoru atlandi", it) }
+        runCatching { loadVendoredSources(context) }
+            .onFailure { Log.e(TAG, "Gomulu kaynak listesi acilamadi", it) }
     }
 
     /**
