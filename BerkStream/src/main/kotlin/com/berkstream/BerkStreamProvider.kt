@@ -344,6 +344,96 @@ class BerkStreamProvider : TmdbProvider() {
         return items to hasNext
     }
 
+    /**
+     * Kendi izleme kaydimiz. CloudStream'in gecmisini yansimayla okumak her
+     * surumde tutmuyor; oynatilan her basligi kendimiz de yazinca "Sana Ozel"
+     * rafi kesin veriyle calisiyor.
+     */
+    private fun rememberWatched(title: String) {
+        val store = BerkStreamSettings.store ?: return
+        runCatching {
+            val previous = store.getString(WATCH_HISTORY_KEY, "").orEmpty()
+                .split('\n').filter { it.isNotBlank() }
+            val updated = (listOf(title) + previous).distinct().take(60)
+            store.edit().putString(WATCH_HISTORY_KEY, updated.joinToString("\n")).apply()
+        }
+    }
+
+    private fun ownWatchedTitles(): List<String> = runCatching {
+        BerkStreamSettings.store?.getString(WATCH_HISTORY_KEY, "").orEmpty()
+            .split('\n').filter { it.isNotBlank() }
+    }.getOrElse { emptyList() }
+
+    /** Varsa CloudStream'in kendi gecmisi; erisilemezse sessizce bos doner. */
+    private fun cloudstreamWatchedTitles(): List<String> = runCatching {
+        val helper = Class.forName("com.lagradost.cloudstream3.utils.DataStoreHelper")
+        val instance = helper.getField("INSTANCE").get(null)
+        val ids = buildList {
+            for (method in listOf("getAllResumeStateIds", "getAllWatchStateIds")) {
+                runCatching {
+                    (helper.getMethod(method).invoke(instance) as? List<*>)?.let(::addAll)
+                }
+            }
+        }.filterIsInstance<Int>().distinct()
+        val readers = listOf("getLastWatched", "getBookmarkedData").mapNotNull { method ->
+            runCatching { helper.getMethod(method, Integer::class.java) }.getOrNull()
+        }
+        ids.takeLast(30).mapNotNull { id ->
+            readers.firstNotNullOfOrNull { reader ->
+                runCatching {
+                    val record = reader.invoke(instance, id) ?: return@runCatching null
+                    record.javaClass.getMethod("getName").invoke(record) as? String
+                }.getOrNull()
+            }
+        }.filter { it.isNotBlank() }.distinct()
+    }.getOrElse { emptyList() }
+
+    private fun watchedTitles(): List<String> =
+        (ownWatchedTitles() + cloudstreamWatchedTitles()).distinct()
+
+    private fun String.encodeQuery(): String = java.net.URLEncoder.encode(this, "UTF-8")
+
+    private suspend fun tmdbLookup(title: String): Pair<String, Int>? = runCatching {
+        val url = "$tmdbApiUrl/search/multi?api_key=$tmdbApiKey&language=tr-TR" +
+            "&include_adult=false&query=${title.encodeQuery()}"
+        tryParseJson<TmdbPage>(app.get(url).text)?.results
+            ?.firstOrNull { it.id != null && (it.mediaType == "movie" || it.mediaType == "tv") }
+            ?.let { it.mediaType!! to it.id!! }
+    }.getOrNull()
+
+    /** Izlenenlere/yarim birakilanlara gore TMDB onerileri. */
+    private suspend fun personalShelf(page: Int): Pair<List<SearchResponse>, Boolean> {
+        val history = watchedTitles()
+        val seeds = history.take(12).shuffled().take(4)
+        if (seeds.isEmpty()) return tmdbShelf("trending/all/week", "mixed", page)
+        val recommendations = seeds.amap { title ->
+            val found = tmdbLookup(title) ?: return@amap emptyList()
+            runCatching { tmdbShelf("${found.first}/${found.second}/recommendations", found.first, page).first }
+                .getOrElse { emptyList() }
+        }.flatten()
+        val seen = history.map(::looseTitle).toSet()
+        val filtered = recommendations
+            .distinctBy { it.url }
+            .filter { looseTitle(it.name) !in seen }
+            .shuffled()
+        if (filtered.isEmpty()) return tmdbShelf("trending/all/week", "mixed", page)
+        return filtered to (page < 5)
+    }
+
+    /**
+     * Kaynaklarin kendi ana sayfalarindaki taze icerik. TMDB'ye heniz girmemis
+     * yeni bolumler burada goruntuleniyor.
+     */
+    private suspend fun freshFromProviders(): List<SearchResponse> {
+        ensureDomains()
+        val providers = validApisFor(movieTypes + seriesTypes).take(5)
+        return scanProviders(providers) { api ->
+            val first = api.mainPage.firstOrNull() ?: return@scanProviders null
+            api.getMainPage(1, MainPageRequest(first.name, first.data, first.horizontalImages))
+                ?.items?.flatMap { it.list }?.take(8)
+        }.flatten().distinctBy { "${it.apiName}|${looseTitle(it.name)}" }.shuffled().take(40)
+    }
+
     private val sportsWords = listOf(
         "spor", "sport", "bein", "tivibu", "smart", "futbol", "lig", "mac", "match",
         "eurosport", "trt spor", "aspor", "tabii spor", "exxen",
