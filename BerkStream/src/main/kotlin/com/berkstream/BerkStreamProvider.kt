@@ -183,10 +183,10 @@ class BerkStreamProvider : TmdbProvider() {
 
     /** Tek bir saglayicinin tarama suresi; ayar ekranindan degistirilebiliyor. */
     private val providerScanTimeoutMs: Long
-        get() = (BerkStreamSettings.scanTimeoutSeconds + 6L) * 1000L
+        get() = BerkStreamSettings.scanTimeoutSeconds * 1000L
 
     /** Butun saglayici taramasinin toplam butcesi. */
-    private val providerScanBudgetMs = 26_000L
+    private val providerScanBudgetMs = 18_000L
 
     private fun shelf(title: String, mediaType: String, path: String) =
         MainPageData(title, "$mediaType|$path", false)
@@ -322,7 +322,7 @@ class BerkStreamProvider : TmdbProvider() {
      * vermeyen kaynaklar da taramaya hic sokulmuyor.
      */
     init {
-        BerkStreamSettings.cacheCleaner = { shelfCache.clear() }
+        BerkStreamSettings.cacheCleaner = { shelfCache.clear(); tmdbCache.clear() }
         BerkStreamSettings.domainRefresher = {
             domainsApplied = false
             disabledProviders.clear()
@@ -376,7 +376,13 @@ class BerkStreamProvider : TmdbProvider() {
         }
     }
 
+    private val tmdbCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, Pair<List<SearchResponse>, Boolean>>>()
+
     private suspend fun tmdbShelf(path: String, mediaType: String, page: Int): Pair<List<SearchResponse>, Boolean> {
+        val cacheKey = "$mediaType|$path|$page"
+        tmdbCache[cacheKey]
+            ?.takeIf { System.currentTimeMillis() - it.first < shelfCacheMs }
+            ?.let { return it.second }
         val separator = if (path.contains("?")) "&" else "?"
         // Raf kendi bolgesini belirtmisse ona dokunma: Apple TV+ katalogu TR'de
         // bos donuyor, o raf US bolgesiyle cekiliyor.
@@ -386,7 +392,9 @@ class BerkStreamProvider : TmdbProvider() {
         val parsed = tryParseJson<TmdbPage>(app.get(url).text) ?: return emptyList<SearchResponse>() to false
         val items = parsed.results.mapNotNull { it.toSearchResponse(mediaType) }
         val hasNext = page < (parsed.totalPages ?: 1)
-        return items to hasNext
+        val result = items to hasNext
+        if (items.isNotEmpty()) tmdbCache[cacheKey] = System.currentTimeMillis() to result
+        return result
     }
 
     /**
@@ -660,55 +668,60 @@ class BerkStreamProvider : TmdbProvider() {
         val ordered = validApisFor(
             if (isSeries) seriesTypes else movieTypes,
             if (isSeries) TvType.Anime else TvType.AnimeMovie,
-        ).sortedByDescending { it.name == winner }
+        )
 
-        for (batch in ordered.chunked(6)) {
-            scanProviders(batch) { api ->
-                val results = api.searchSafely(title)
-                // Once tam eslesme, sonra bulanik. "Iceren" esleme KULLANILMIYOR:
-                // "Dexter" aramasi "Dexter: Resurrection" ve "Dexter's Laboratory"
-                // ile eslesip yanlis icerik aciyordu.
-                val hit = results.firstOrNull { looseTitle(it.name) == looseTitle(title) }
-                    ?: results.firstOrNull { titleMatches(it.name, title) }
-                    ?: return@scanProviders null
-                val response = api.load(hit.url) ?: return@scanProviders null
-                val innerData = when {
-                    // Anime kaynaklari (TurkAnime, AnimeciX, RecTV...) TvSeriesLoadResponse
-                    // degil AnimeLoadResponse donuyor; bu dal olmadigi icin One Piece
-                    // gibi basliklarda hicbir link bulunamiyordu.
-                    isSeries && response is AnimeLoadResponse -> {
-                        val episodes = response.episodes.values.flatten()
-                        val match = episodes.firstOrNull {
-                            (season == null || it.season == season) &&
-                                (episode == null || it.episode == episode)
-                        }
-                            ?: episodes.firstOrNull { episode != null && it.episode == episode }
-                            ?: episode?.let { episodes.getOrNull(it - 1) }
-                        match?.data
-                    }
-                    isSeries && response is TvSeriesLoadResponse -> {
-                        val episodes = response.episodes
-                        // Kaynaklar sezon numarasini her zaman TMDB ile ayni vermiyor;
-                        // tam eslesme tutmazsa once bolum numarasina, en son siraya bakilir.
-                        val match = episodes.firstOrNull {
-                            (season == null || it.season == season) &&
-                                (episode == null || it.episode == episode)
-                        }
-                            ?: episodes.firstOrNull { episode != null && it.episode == episode }
-                            ?: episode?.let { episodes.getOrNull(it - 1) }
-                        match?.data
-                    }
-                    !isSeries && response is MovieLoadResponse -> response.dataUrl
-                    else -> null
-                } ?: return@scanProviders null
-                val before = linkCount.get()
-                api.loadLinks(innerData, isCasting, subtitleCallback, countingCallback)
-                if (linkCount.get() > before) {
-                    noteSuccess(api)
-                    rememberWinner(contentKey, api.name)
+        // Tek bir kaynakta: ara, dogru bolumu bul, linkleri cikar.
+        suspend fun tryProvider(api: MainAPI): Boolean? {
+            val results = api.searchSafely(title)
+            // Once tam eslesme, sonra bulanik. "Iceren" esleme KULLANILMIYOR:
+            // "Dexter" aramasi "Dexter: Resurrection" ve "Dexter's Laboratory"
+            // ile eslesip yanlis icerik aciyordu.
+            val hit = results.firstOrNull { looseTitle(it.name) == looseTitle(title) }
+                ?: results.firstOrNull { titleMatches(it.name, title) }
+                ?: return null
+            val response = api.load(hit.url) ?: return null
+
+            // Kaynaklar sezon numarasini TMDB ile ayni vermiyor; tam eslesme
+            // tutmazsa bolum numarasina, en son siraya bakilir.
+            fun pick(episodes: List<com.lagradost.cloudstream3.Episode>): String? {
+                val match = episodes.firstOrNull {
+                    (season == null || it.season == season) &&
+                        (episode == null || it.episode == episode)
                 }
-                true
+                    ?: episodes.firstOrNull { episode != null && it.episode == episode }
+                    ?: episode?.let { episodes.getOrNull(it - 1) }
+                return match?.data
             }
+
+            val innerData = when {
+                // Anime kaynaklari AnimeLoadResponse donuyor ve bolumleri
+                // dublaj/altyazi durumuna gore gruplanmis halde tutuyor.
+                isSeries && response is AnimeLoadResponse -> pick(response.episodes.values.flatten())
+                isSeries && response is TvSeriesLoadResponse -> pick(response.episodes)
+                !isSeries && response is MovieLoadResponse -> response.dataUrl
+                else -> null
+            } ?: return null
+
+            val before = linkCount.get()
+            api.loadLinks(innerData, isCasting, subtitleCallback, countingCallback)
+            if (linkCount.get() > before) {
+                noteSuccess(api)
+                rememberWinner(contentKey, api.name)
+            }
+            return true
+        }
+
+        // Bu icerik daha once hangi kaynaktan acildiysa once YALNIZ o deneniyor.
+        // Tutarsa digerlerine hic bakilmiyor; tekrar izlemede bekleme kalkiyor.
+        if (winner != null) {
+            ordered.firstOrNull { it.name == winner }?.let { winnerApi ->
+                scanProviders(listOf(winnerApi)) { tryProvider(it) }
+                if (linkCount.get() > 0) return true
+            }
+        }
+
+        for (batch in ordered.filter { it.name != winner }.chunked(4)) {
+            scanProviders(batch) { tryProvider(it) }
             if (linkCount.get() >= BerkStreamSettings.linkTarget) break
         }
         return linkCount.get() > 0
