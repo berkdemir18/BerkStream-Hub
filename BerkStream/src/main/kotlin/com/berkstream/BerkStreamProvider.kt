@@ -109,6 +109,11 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("🧒  ANİMASYON • DİZİ", "tv", "discover/tv?with_genres=16&sort_by=popularity.desc"),
         shelf("🎌  ANİME", "tv", "discover/tv?with_genres=16&with_original_language=ja&sort_by=popularity.desc"),
         shelf("📖  BELGESEL", "movie", "discover/movie?with_genres=99&sort_by=popularity.desc"),
+        shelf("🏛️  TARİH • FİLM", "movie", "discover/movie?with_genres=36&sort_by=popularity.desc"),
+        shelf("🎖️  SAVAŞ • FİLM", "movie", "discover/movie?with_genres=10752&sort_by=popularity.desc"),
+        shelf("🤠  WESTERN • FİLM", "movie", "discover/movie?with_genres=37&sort_by=popularity.desc"),
+        shelf("🎖️  SAVAŞ • DİZİ", "tv", "discover/tv?with_genres=10768&sort_by=popularity.desc"),
+        shelf("🤠  WESTERN • DİZİ", "tv", "discover/tv?with_genres=37&sort_by=popularity.desc"),
         shelf("📅  BU HAFTA YENİ BÖLÜM", "tv", "tv/on_the_air"),
         shelf("💎  GİZLİ CEVHERLER", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=200&vote_count.lte=1200"),
         shelf("⏱️  KISA GECE • 95 DK ALTI", "movie", "discover/movie?with_runtime.lte=95&vote_count.gte=300&sort_by=vote_average.desc"),
@@ -654,9 +659,13 @@ class BerkStreamProvider : TmdbProvider() {
         rememberWatched(title)
 
         val linkCount = AtomicInteger(0)
+        // Linkler once toplaniyor, sonra dublaj -> altyazi sirasiyla veriliyor.
+        // Callback'e geldigi sirayla verilseydi hangi kaynak once cevap verirse
+        // o uste cikiyordu.
+        val collected = java.util.Collections.synchronizedList(mutableListOf<ExtractorLink>())
         val countingCallback: (ExtractorLink) -> Unit = { extractor ->
             linkCount.incrementAndGet()
-            callback(extractor)
+            collected.add(extractor)
         }
 
         if (BerkStreamSettings.subtitlesEnabled) loadStremioSubtitles(link, subtitleCallback)
@@ -696,7 +705,14 @@ class BerkStreamProvider : TmdbProvider() {
             val innerData = when {
                 // Anime kaynaklari AnimeLoadResponse donuyor ve bolumleri
                 // dublaj/altyazi durumuna gore gruplanmis halde tutuyor.
-                isSeries && response is AnimeLoadResponse -> pick(response.episodes.values.flatten())
+                isSeries && response is AnimeLoadResponse -> {
+                    // Dublaj varsa once o deneniyor; anime kaynaklari bolumleri
+                    // zaten dublaj/altyazi durumuna gore ayirmis tutuyor.
+                    val dubbedFirst = response.episodes.entries
+                        .sortedBy { if (it.key.name.contains("Dub", true)) 0 else 1 }
+                        .flatMap { it.value }
+                    pick(dubbedFirst)
+                }
                 isSeries && response is TvSeriesLoadResponse -> pick(response.episodes)
                 !isSeries && response is MovieLoadResponse -> response.dataUrl
                 else -> null
@@ -724,7 +740,30 @@ class BerkStreamProvider : TmdbProvider() {
             scanProviders(batch) { tryProvider(it) }
             if (linkCount.get() >= BerkStreamSettings.linkTarget) break
         }
+        emitSorted(collected, callback)
         return linkCount.get() > 0
+    }
+
+    private val dubbedWords = listOf("dublaj", "dublajli", "dubbed", "turkce dublaj", "tr dublaj")
+    private val subbedWords = listOf("altyazi", "altyazili", "subbed", "turkce altyazi", "tr altyazi")
+
+    /**
+     * Babanin istegi: once Turkce dublaj, sonra Turkce altyazili kaynaklar.
+     * Kaynak adlari serbest metin oldugu icin etiketten anlasiliyor.
+     */
+    private fun linkRank(link: ExtractorLink): Int {
+        val label = looseTitle("${link.name} ${link.source}")
+        return when {
+            dubbedWords.any { label.contains(it) } -> 0
+            subbedWords.any { label.contains(it) } -> 1
+            else -> 2
+        }
+    }
+
+    private fun emitSorted(links: List<ExtractorLink>, callback: (ExtractorLink) -> Unit) {
+        synchronized(links) { links.toList() }
+            .sortedBy { linkRank(it) }
+            .forEach(callback)
     }
 
     /**
