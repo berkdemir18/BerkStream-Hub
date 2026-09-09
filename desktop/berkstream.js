@@ -1,4 +1,4 @@
-// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.2.1","description":"BerkStream Hub'ın Windows motoru: çeşitli raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
+// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.3.0","description":"BerkStream Hub'ın Windows motoru: çeşitli raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
 //
 // BerkStream Hub - masaüstü (JavaScript) sürümü.
 //
@@ -23,7 +23,8 @@
 
 var TMDB_KEY = "e6333b32409e02a4a6eba6fb7ff866bb";
 var TMDB = "https://api.themoviedb.org/3";
-var IMAGE = "https://image.tmdb.org/t/p/w500";
+var IMAGE = "https://image.tmdb.org/t/p/w342";
+var BACKDROP = "https://image.tmdb.org/t/p/w1280";
 
 var UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -719,6 +720,7 @@ function toCards(list, forcedType) {
       title: x.title || x.name,
       original_title: x.original_title || x.original_name || null,
       poster_url: IMAGE + x.poster_path,
+      backdrop_url: x.backdrop_path ? BACKDROP + x.backdrop_path : null,
       media_type: type === "tv" ? "show" : "movie",
       year: parseInt(date.slice(0, 4), 10) || null,
       rating: x.vote_average || null,
@@ -788,6 +790,7 @@ async function search(query) {
       title: x.title || x.name,
       original_title: x.original_title || x.original_name || null,
       poster_url: x.poster_path ? IMAGE + x.poster_path : null,
+      backdrop_url: x.backdrop_path ? BACKDROP + x.backdrop_path : null,
       media_type: x.media_type === "movie" ? "movie" : "show",
       year: parseInt(date.slice(0, 4), 10) || null,
       rating: x.vote_average || null,
