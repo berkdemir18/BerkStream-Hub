@@ -3,7 +3,7 @@ package com.berkstream
 import android.content.Context
 import android.widget.Toast
 import com.lagradost.cloudstream3.actions.VideoClickAction
-import com.lagradost.cloudstream3.ui.player.LinkLoadingResult
+import com.lagradost.cloudstream3.ui.result.LinkLoadingResult
 import com.lagradost.cloudstream3.ui.result.ResultEpisode
 import com.lagradost.cloudstream3.utils.txt
 
