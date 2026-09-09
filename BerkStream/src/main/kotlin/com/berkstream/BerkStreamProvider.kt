@@ -8,6 +8,7 @@ import com.lagradost.cloudstream3.MainPageData
 import com.lagradost.cloudstream3.MainPageRequest
 import com.lagradost.cloudstream3.MovieLoadResponse
 import com.lagradost.cloudstream3.ProviderType
+import com.lagradost.cloudstream3.Score
 import com.lagradost.cloudstream3.SearchResponse
 import com.lagradost.cloudstream3.SearchResponseList
 import com.lagradost.cloudstream3.SubtitleFile
@@ -103,7 +104,6 @@ class BerkStreamProvider : TmdbProvider() {
         shelf("⏱️  KISA GECE • 95 DK ALTI", "movie", "discover/movie?with_runtime.lte=95&vote_count.gte=300&sort_by=vote_average.desc"),
         shelf("🕰️  90'LAR KLASİKLERİ", "movie", "discover/movie?primary_release_date.gte=1990-01-01&primary_release_date.lte=1999-12-31&sort_by=vote_average.desc&vote_count.gte=500"),
         shelf("🏆  OSCAR YOLUNDA", "movie", "discover/movie?sort_by=vote_average.desc&vote_count.gte=1500&primary_release_date.gte=2015-01-01"),
-        MainPageData("🕐  ŞU AN İÇİN", "hour", false),
         MainPageData("🎲  ZAR AT", "dice", false),
         MainPageData("🗓️  YILLAR ÖNCE BUGÜN", "onthisday", false),
         MainPageData("⚽  CANLI SPOR", "sports", true),
@@ -144,8 +144,27 @@ class BerkStreamProvider : TmdbProvider() {
         "RareFilmm", "RecTV", "powerSinema",
     )
 
-    /** Tek bir saglayicinin tarama suresi. */
-    private val providerScanTimeoutMs = 9_000L
+    private class CachedShelf(val savedAt: Long, val items: List<SearchResponse>)
+
+    private val shelfCache = java.util.concurrent.ConcurrentHashMap<String, CachedShelf>()
+
+    /**
+     * "Sana Ozel" ve "Kaynaklarda Yeni" raflari onlarca ag istegi yapiyor ve
+     * ana sayfanin en ustunde duruyorlar; onbelleksiz her acilista uygulamayi
+     * bekletiyorlardi.
+     */
+    private fun cachedShelf(key: String): List<SearchResponse>? =
+        shelfCache[key]?.takeIf { System.currentTimeMillis() - it.savedAt < shelfCacheMs }?.items
+
+    private fun putShelf(key: String, items: List<SearchResponse>) {
+        if (items.isNotEmpty()) shelfCache[key] = CachedShelf(System.currentTimeMillis(), items)
+    }
+
+    private val shelfCacheMs = 10 * 60 * 1000L
+
+    /** Tek bir saglayicinin tarama suresi; ayar ekranindan degistirilebiliyor. */
+    private val providerScanTimeoutMs: Long
+        get() = BerkStreamSettings.scanTimeoutSeconds * 1000L
 
     /** Butun saglayici taramasinin toplam butcesi. */
     private val providerScanBudgetMs = 26_000L
@@ -162,6 +181,7 @@ class BerkStreamProvider : TmdbProvider() {
         @JsonProperty("release_date") val releaseDate: String? = null,
         @JsonProperty("first_air_date") val firstAirDate: String? = null,
         @JsonProperty("adult") val adult: Boolean? = null,
+        @JsonProperty("vote_average") val voteAverage: Double? = null,
     )
 
     private data class TmdbPage(
@@ -278,12 +298,14 @@ class BerkStreamProvider : TmdbProvider() {
                 this.id = itemId
                 this.posterUrl = poster
                 this.year = releaseYear
+                this.score = Score.from10(voteAverage?.takeIf { it > 0.0 })
             }
         } else {
             newMovieSearchResponse(label, url, TvType.Movie, false) {
                 this.id = itemId
                 this.posterUrl = poster
                 this.year = releaseYear
+                this.score = Score.from10(voteAverage?.takeIf { it > 0.0 })
             }
         }
     }
@@ -344,7 +366,27 @@ class BerkStreamProvider : TmdbProvider() {
      * okunuyor. Erisilemezse sessizce bos donuyor, raf da trend listesine
      * dusuyor.
      */
-    private fun watchedTitles(): List<String> = runCatching {
+    /**
+     * Kendi izleme kaydimiz. CloudStream'in gecmisini yansimayla okumak her
+     * surumde tutmuyor; oynatilan her basligi kendimiz de yazinca "Sana Ozel"
+     * rafi kesin veriyle calisiyor. [BerkStreamPlugin] baslarken dolduruluyor.
+     */
+    private fun rememberWatched(title: String) {
+        val store = BerkStreamSettings.store ?: return
+        runCatching {
+            val previous = store.getString(WATCH_HISTORY_KEY, "").orEmpty()
+                .split('\n').filter { it.isNotBlank() }
+            val updated = (listOf(title) + previous).distinct().take(60)
+            store.edit().putString(WATCH_HISTORY_KEY, updated.joinToString("\n")).apply()
+        }
+    }
+
+    private fun ownWatchedTitles(): List<String> = runCatching {
+        BerkStreamSettings.store?.getString(WATCH_HISTORY_KEY, "").orEmpty()
+            .split('\n').filter { it.isNotBlank() }
+    }.getOrElse { emptyList() }
+
+    private fun cloudstreamWatchedTitles(): List<String> = runCatching {
         val helper = Class.forName("com.lagradost.cloudstream3.utils.DataStoreHelper")
         val instance = helper.getField("INSTANCE").get(null)
         val ids = buildList {
@@ -367,6 +409,9 @@ class BerkStreamProvider : TmdbProvider() {
         }.filter { it.isNotBlank() }.distinct()
     }.getOrElse { emptyList() }
 
+    private fun watchedTitles(): List<String> =
+        (ownWatchedTitles() + cloudstreamWatchedTitles()).distinct()
+
     private suspend fun tmdbLookup(title: String): Pair<String, Int>? = runCatching {
         val url = "$tmdbApiUrl/search/multi?api_key=$tmdbApiKey&language=tr-TR" +
             "&include_adult=false&query=${title.encodeQuery()}"
@@ -379,7 +424,7 @@ class BerkStreamProvider : TmdbProvider() {
 
     /** Izlenenlere/yarim birakilanlara gore TMDB onerileri. */
     private suspend fun personalShelf(page: Int): Pair<List<SearchResponse>, Boolean> {
-        val seeds = watchedTitles().shuffled().take(5)
+        val seeds = watchedTitles().take(12).shuffled().take(4)
         if (seeds.isEmpty()) return tmdbShelf("trending/all/week", "mixed", page)
         val recommendations = seeds.amap { title ->
             val (kind, id) = tmdbLookup(title) ?: return@amap emptyList()
@@ -409,17 +454,6 @@ class BerkStreamProvider : TmdbProvider() {
         }.flatten().distinctBy { "${it.apiName}|${looseTitle(it.name)}" }.shuffled().take(40)
     }
 
-    /** Saate gore degisen raf: gece korku, sabah hafif, aksam populer. */
-    private fun hourlyPath(): Pair<String, String> {
-        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-        return when (hour) {
-            in 0..5 -> "movie" to "discover/movie?with_genres=27,53&sort_by=popularity.desc&vote_count.gte=150"
-            in 6..11 -> "movie" to "discover/movie?with_genres=35,16&sort_by=popularity.desc&vote_count.gte=150"
-            in 12..17 -> "tv" to "discover/tv?sort_by=popularity.desc&vote_count.gte=100"
-            else -> "movie" to "discover/movie?with_genres=28,12&sort_by=popularity.desc&vote_count.gte=200"
-        }
-    }
-
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         when (request.data) {
             "live", "sports" -> {
@@ -428,7 +462,10 @@ class BerkStreamProvider : TmdbProvider() {
             }
             "personal" -> {
                 val (items, hasNext) = try {
-                    personalShelf(page)
+                    if (page == 1) {
+                        cachedShelf("personal")?.let { return newHomePageResponse(request, it, true) }
+                    }
+                    personalShelf(page).also { if (page == 1) putShelf("personal", it.first) }
                 } catch (error: Throwable) {
                     logError(Exception(error))
                     emptyList<SearchResponse>() to false
@@ -436,13 +473,13 @@ class BerkStreamProvider : TmdbProvider() {
                 return newHomePageResponse(request, items, hasNext)
             }
             "fresh" -> {
-                val items = if (page > 1) emptyList() else freshFromProviders()
+                if (page > 1 || !BerkStreamSettings.freshShelfEnabled) {
+                    return newHomePageResponse(request, emptyList<SearchResponse>(), false)
+                }
+                cachedShelf("fresh")?.let { return newHomePageResponse(request, it, false) }
+                val items = freshFromProviders()
+                putShelf("fresh", items)
                 return newHomePageResponse(request, items, false)
-            }
-            "hour" -> {
-                val (kind, path) = hourlyPath()
-                val (items, hasNext) = tmdbShelf(path, kind, page)
-                return newHomePageResponse(request, items, hasNext)
             }
             "dice" -> {
                 val randomPage = (1..25).random()
@@ -522,6 +559,7 @@ class BerkStreamProvider : TmdbProvider() {
         val season = link.season
         val episode = link.episode
         val isSeries = season != null || episode != null
+        rememberWatched(title)
 
         val linkCount = AtomicInteger(0)
         val countingCallback: (ExtractorLink) -> Unit = { extractor ->
@@ -529,7 +567,7 @@ class BerkStreamProvider : TmdbProvider() {
             callback(extractor)
         }
 
-        loadStremioSubtitles(link, subtitleCallback)
+        if (BerkStreamSettings.subtitlesEnabled) loadStremioSubtitles(link, subtitleCallback)
 
         // Saglayicilar oncelik sirasina gore obekler halinde taraniyor: yeterli
         // link toplanınca kalan obekler hic denenmiyor. Hepsini birden beklemek
