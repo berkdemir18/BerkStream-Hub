@@ -79,8 +79,11 @@ class BerkStreamProvider : TmdbProvider() {
         }
 
     private val allShelves = listOf(
-        shelf("🎬  VİZYONDAKİ FİLMLER", "movie", "movie/now_playing?region=TR"),
+        // Gunun trendleri ilk sirada: CloudStream ust afisi TUM raflarin
+        // ogelerini karistirip secitiyor, ama ilk yuklenen raf bir an icin
+        // havuzun tamami oldugu icin acilista afis buradan geliyor.
         shelf("🔥  GÜNÜN TRENDLERİ", "mixed", "trending/all/day"),
+        shelf("🎬  VİZYONDAKİ FİLMLER", "movie", "movie/now_playing?region=TR"),
         MainPageData("🎯  SANA ÖZEL", "personal", false),
         shelf("📈  HAFTANIN POPÜLER FİLMLERİ", "movie", "trending/movie/week"),
         shelf("📺  HAFTANIN POPÜLER DİZİLERİ", "tv", "trending/tv/week"),
