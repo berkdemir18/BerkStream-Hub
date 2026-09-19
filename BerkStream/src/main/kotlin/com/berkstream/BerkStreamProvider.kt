@@ -285,11 +285,22 @@ class BerkStreamProvider : TmdbProvider() {
     private val disabledProviders = java.util.Collections.synchronizedSet(mutableSetOf<String>())
     private val failureCounts = java.util.concurrent.ConcurrentHashMap<String, Int>()
 
+    /** Calisma aninda susturulan kaynaklar: ad -> ne zamana kadar susturuldu. */
+    private val mutedUntil = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    /** Kac GERCEK cevapsizliktan sonra kaynak gecici olarak susturulur. */
+    private val failuresBeforeMute = 3
+
+    /** Susturma suresi; dolunca kaynak kendiliginden taramaya geri girer. */
+    private val muteDurationMs = 10 * 60 * 1000L
+
     /**
      * CI taramasi GitHub'in sunucularindan yapiliyor; Turkiye'den erisilemeyen
      * bir site oradan ayakta gorunebiliyor, yani yayimlanan liste kullanicinin
      * agini birebir yansitmiyor. Bu yuzden cihaz tarafinda da olcuyoruz: ust uste
-     * cevap veremeyen kaynak bu oturumda taramaya sokulmuyor.
+     * GERCEKTEN cevap veremeyen kaynak bir sureligine taramadan cikarilir
+     * (bkz. [noteFailure] / [isMuted]). "Bu baslik bu sitede yok" cevabi
+     * ariza DEGILDIR -- bkz. [scanProviders].
      */
     /**
      * Hangi kaynagin gercekten link urettigini ogreniyoruz. Elle yazilan
@@ -303,6 +314,7 @@ class BerkStreamProvider : TmdbProvider() {
             store.edit().putInt(key, (store.getInt(key, 0) + 1).coerceAtMost(500)).apply()
         }
         failureCounts.remove(normalize(api.name))
+        mutedUntil.remove(normalize(api.name))
     }
 
     private fun successScore(api: MainAPI): Int =
@@ -318,10 +330,31 @@ class BerkStreamProvider : TmdbProvider() {
     private fun winnerFor(contentKey: String): String? =
         BerkStreamSettings.store?.getString("win_$contentKey", null)
 
+    /**
+     * Gercekten cevap vermeyen kaynagi gecici olarak susturur.
+     *
+     * Iki degisiklik (2026-09-19): esik 2'den 3'e cikti ve eleme artik KALICI
+     * degil. Eskiden susturulan kaynak uygulama kapanana kadar bir daha hic
+     * denenmiyordu; telefon wifi'dan 4G'ye gecerken olusan tek bir kesinti bile
+     * saglam kaynaklari oturumun sonuna kadar oldurebiliyordu.
+     */
     private fun noteFailure(api: MainAPI) {
         val key = normalize(api.name)
         val total = failureCounts.merge(key, 1, Int::plus) ?: 1
-        if (total >= 2) disabledProviders.add(key)
+        if (total >= failuresBeforeMute) {
+            mutedUntil[key] = System.currentTimeMillis() + muteDurationMs
+        }
+    }
+
+    /** Susturma suresi dolduysa kaynak kendiliginden geri gelir. */
+    private fun isMuted(key: String): Boolean {
+        val until = mutedUntil[key] ?: return false
+        if (System.currentTimeMillis() >= until) {
+            mutedUntil.remove(key)
+            failureCounts.remove(key)
+            return false
+        }
+        return true
     }
 
     /**
@@ -336,6 +369,7 @@ class BerkStreamProvider : TmdbProvider() {
             domainsApplied = false
             disabledProviders.clear()
             failureCounts.clear()
+            mutedUntil.clear()
         }
     }
 
@@ -519,6 +553,7 @@ class BerkStreamProvider : TmdbProvider() {
             .filter { api ->
                 api.name != name && api.providerType != ProviderType.MetaProvider &&
                     normalize(api.name) !in disabledProviders &&
+                    !isMuted(normalize(api.name)) &&
                     (TvType.Live in api.supportedTypes ||
                         liveProviderPriority.any { it.equals(api.name, ignoreCase = true) })
             }
@@ -894,7 +929,8 @@ class BerkStreamProvider : TmdbProvider() {
         // calisan kaynaklari da olu isaretleyebiliyor. Bu yuzden o liste artik
         // eleme yapmiyor, yalnizca siralamada geri atiyor; gercek eleme cihazda
         // ust uste cevapsiz kalan kaynaklara uygulaniyor.
-        compareBy<MainAPI> { normalize(it.name) in disabledProviders }
+        compareBy<MainAPI> { isMuted(normalize(it.name)) }
+            .thenBy { normalize(it.name) in disabledProviders }
             .thenByDescending { successScore(it) }
             .thenBy { api ->
                 providerPriority.indexOfFirst { it.equals(api.name, ignoreCase = true) }
@@ -913,9 +949,21 @@ class BerkStreamProvider : TmdbProvider() {
     ): List<T> = withTimeoutOrNull(providerScanBudgetMs) {
         providers.amap { api ->
             try {
-                withTimeoutOrNull(providerScanTimeoutMs) { block(api) } ?: run {
+                // Sarmalayici SART: `withTimeoutOrNull` zaman asiminda da null
+                // doner, `block` "bu baslik bu sitede yok" dediginde de null
+                // doner. Ayrim yapilmadigi icin her basarili ama sonucsuz arama
+                // ariza sayiliyordu -- hicbir Turkce kaynakta butun katalog
+                // olmadigindan iki film actiktan sonra saglayicilarin neredeyse
+                // tamami susturuluyordu (2026-09-09'da girdi, "artik hicbir sey
+                // acilmiyor"un sebebi buydu). Tek elemanli liste ile sariyoruz:
+                // liste null ise GERCEKTEN zaman asimi, listenin ici null ise
+                // sadece sonuc yok.
+                val boxed = withTimeoutOrNull(providerScanTimeoutMs) { listOf(block(api)) }
+                if (boxed == null) {
                     noteFailure(api)
                     null
+                } else {
+                    boxed.firstOrNull()
                 }
             } catch (error: Throwable) {
                 noteFailure(api)

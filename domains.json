@@ -1,27 +1,26 @@
 {
-  "generatedAt": "2026-09-09T12:06:42.293Z",
+  "generatedAt": "2026-09-19T09:54:23.823Z",
   "overrides": {
+    "DiziPal": "https://dizipal1582.com",
     "HDFilmİzle": "https://www.hdfilmizle.vip",
-    "RoketDizi": "https://roketdizi.life",
     "YabanciDizi": "https://yabancidizi.news"
   },
   "disabled": [
     "4KFilmİzlesene",
-    "CanliTV",
     "CizgiDuo",
     "DiziGom",
-    "DiziKorea",
     "DiziMag",
     "HDStreamAble",
+    "DiziPalOriginal",
     "Filmİzleİlk",
     "FilmKovası",
     "FullHDFilm",
     "FullHDFilmİzlede",
     "HDFilmCehennemi2",
     "KoreanTurk",
-    "powerDizi",
     "SetFilmIzle",
     "SuperFilmGeldi",
+    "TrAnimeci",
     "TvDiziler",
     "UgurFilm",
     "WFilmİzle"
