@@ -29,6 +29,13 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Varsayilan olarak `sdkmanager tools` calistiriliyor; Google o eski
+          # paketi depodan kaldirdi ve adim "Failed to find package 'tools'"
+          # deyip patliyor (2026-09-19). Calistirici imajinda Android SDK ve
+          # platform-tools zaten kurulu, tek ihtiyacimiz ANDROID_HOME'un
+          # ayarlanmasi -- bos liste verince adim sdkmanager'i hic cagirmiyor.
+          packages: ''
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
