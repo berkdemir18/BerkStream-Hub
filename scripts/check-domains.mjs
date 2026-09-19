@@ -103,11 +103,28 @@ const upstreamByKey = new Map(
 );
 
 const checked = await mapLimit(providers, 16, async (provider) => {
+  // Elle yazilan adres SORGUSUZ kazanir. Tarama GitHub'in ABD sunucularindan
+  // yapiliyor; Turkiye'den olu olan bir adres oradan pekala ayakta gorunuyor
+  // ve o zaman "zaten calisiyor" deyip override hic uretilmiyordu. DiziPal
+  // 2026-09-19'da tam olarak boyle kayboldu: yerelde olu, CI'da canli.
+  // `manualDomains` insan karari -- probe'a sorulmaz.
+  const manual = manualByKey.get(provider.key);
+  if (manual && manual !== provider.mainUrl) {
+    return {
+      ...provider,
+      status: 0,
+      alive: true,
+      replacement: manual,
+      replacedFrom: provider.mainUrl,
+      manual: true,
+    };
+  }
+
   const first = await probe(provider.mainUrl);
   if (first.ok) return { ...provider, status: first.status, alive: true };
 
-  // Olu: once elle bakilan liste, sonra PLT'nin guncel adresi denenir.
-  const candidate = manualByKey.get(provider.key) ?? upstreamByKey.get(provider.key);
+  // Olu ve elle yazilmis adresi yok: PLT'nin guncel adresi denenir.
+  const candidate = upstreamByKey.get(provider.key);
   if (candidate && candidate !== provider.mainUrl) {
     const second = await probe(candidate);
     if (second.ok) {

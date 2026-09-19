@@ -66,6 +66,7 @@
   "vendorExcludedPlugins": [],
   "bundlePltEngine": true,
   "manualDomains": {
-    "RoketDizi": "https://roketdizi.life"
+    "RoketDizi": "https://roketdizi.life",
+    "DiziPal": "https://dizipal1582.com"
   }
 }
