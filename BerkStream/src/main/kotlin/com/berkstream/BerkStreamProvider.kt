@@ -3,18 +3,21 @@ package com.berkstream
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lagradost.cloudstream3.APIHolder.apis
 import com.lagradost.cloudstream3.AnimeLoadResponse
+import com.lagradost.cloudstream3.AnimeSearchResponse
 import com.lagradost.cloudstream3.HomePageResponse
 import com.lagradost.cloudstream3.LoadResponse
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.MainPageData
 import com.lagradost.cloudstream3.MainPageRequest
 import com.lagradost.cloudstream3.MovieLoadResponse
+import com.lagradost.cloudstream3.MovieSearchResponse
 import com.lagradost.cloudstream3.ProviderType
 import com.lagradost.cloudstream3.Score
 import com.lagradost.cloudstream3.SearchResponse
 import com.lagradost.cloudstream3.SearchResponseList
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.TvSeriesLoadResponse
+import com.lagradost.cloudstream3.TvSeriesSearchResponse
 import com.lagradost.cloudstream3.TvType
 import com.lagradost.cloudstream3.amap
 import com.lagradost.cloudstream3.app
@@ -194,8 +197,15 @@ class BerkStreamProvider : TmdbProvider() {
     private val providerScanTimeoutMs: Long
         get() = BerkStreamSettings.scanTimeoutSeconds * 1000L
 
-    /** Butun saglayici taramasinin toplam butcesi. */
+    /** Tek bir scanProviders cagrisinin varsayilan butcesi (raflar icin). */
     private val providerScanBudgetMs = 18_000L
+
+    /**
+     * Oynat'a basildiktan sonra link aramanin TOPLAM ustu.
+     * Bunun asilmasi kullanici icin "acilmiyor" demek; bos donmek bile
+     * dakikalarca beklemekten iyi.
+     */
+    private val totalLinkScanBudgetMs = 30_000L
 
     private fun shelf(title: String, mediaType: String, path: String) =
         MainPageData(title, "$mediaType|$path", false)
@@ -246,6 +256,14 @@ class BerkStreamProvider : TmdbProvider() {
         .replace(Regex("\\s+"), " ")
         .trim()
 
+    /** `year` [SearchResponse] arayuzunde yok, yalnizca alt siniflarda var. */
+    private fun yearOf(result: SearchResponse): Int? = when (result) {
+        is MovieSearchResponse -> result.year
+        is TvSeriesSearchResponse -> result.year
+        is AnimeSearchResponse -> result.year
+        else -> null
+    }
+
     private fun titleMatches(candidate: String, target: String): Boolean {
         val a = looseTitle(candidate)
         val b = looseTitle(target)
@@ -266,6 +284,51 @@ class BerkStreamProvider : TmdbProvider() {
         @JsonProperty("overrides") val overrides: Map<String, String> = emptyMap(),
         @JsonProperty("disabled") val disabled: List<String> = emptyList(),
     )
+
+    private data class TmdbTitleInfo(
+        @JsonProperty("title") val title: String? = null,
+        @JsonProperty("name") val name: String? = null,
+        @JsonProperty("original_title") val originalTitle: String? = null,
+        @JsonProperty("original_name") val originalName: String? = null,
+        @JsonProperty("release_date") val releaseDate: String? = null,
+        @JsonProperty("first_air_date") val firstAirDate: String? = null,
+    )
+
+    /** Oynat'a basildiginda hangi adlarla aranacagi + dogrulama yili. */
+    private data class TitleSet(val names: List<String>, val year: Int?)
+
+    /**
+     * Aranacak ad listesi.
+     *
+     * Neden gerekli: `TmdbProvider` detay cagrisini `language=en-US` ile yapiyor,
+     * yani [TmdbLink.movieName] TMDB'nin INGILIZCE adi. Turkce kaynaklar ayni
+     * yapimi Turkce adiyla listeliyor. Site aramada Ingilizce adi bulsa bile
+     * DONDURDUGU ad Turkce oluyor ve [titleMatches] onu "baska yapim" sayip
+     * atiyordu: "The Bridge on the River Kwai" arandi, site "Kwai Koprusu"
+     * dondu, eslesme reddedildi, eski filmler hic acilmadi (2026-09-19 olcumu).
+     * Artik Turkce ad da adaylar arasinda; eslesme adaylardan HERHANGI biriyle
+     * tutarsa kabul ediliyor.
+     */
+    private suspend fun titleCandidates(link: TmdbLink, fallback: String, isSeries: Boolean): TitleSet {
+        val id = link.tmdbID ?: return TitleSet(listOf(fallback), null)
+        val kind = if (isSeries) "tv" else "movie"
+        val info = runCatching {
+            tryParseJson<TmdbTitleInfo>(
+                app.get("$tmdbApiUrl/$kind/$id?api_key=$tmdbApiKey&language=tr-TR").text,
+            )
+        }.getOrNull()
+
+        val names = listOfNotNull(
+            // Turkce ad once: kaynaklarin tamami Turkce site.
+            info?.title ?: info?.name,
+            fallback,
+            info?.originalTitle ?: info?.originalName,
+        ).map { it.trim() }.filter { it.isNotBlank() }
+            .distinctBy { looseTitle(it) }
+
+        val year = (info?.releaseDate ?: info?.firstAirDate)?.take(4)?.toIntOrNull()
+        return TitleSet(names.ifEmpty { listOf(fallback) }, year)
+    }
 
     private data class TmdbExternalIds(
         @JsonProperty("imdb_id") val imdbId: String? = null,
@@ -718,6 +781,7 @@ class BerkStreamProvider : TmdbProvider() {
         val episode = link.episode
         val isSeries = season != null || episode != null
         rememberWatched(title)
+        val titles = titleCandidates(link, title, isSeries)
 
         val linkCount = AtomicInteger(0)
         // Linkler once toplaniyor, sonra dublaj -> altyazi sirasiyla veriliyor.
@@ -742,14 +806,45 @@ class BerkStreamProvider : TmdbProvider() {
 
         // Tek bir kaynakta: ara, dogru bolumu bul, linkleri cikar.
         suspend fun tryProvider(api: MainAPI): Boolean? {
-            val results = api.searchSafely(title)
+            // Yil uyusmuyorsa bu baska yapim. Diller arasi esleme acildigi icin
+            // sart oldu: "Avci" aramasi 1978 yapimini da 2024 yapimini da
+            // getiriyor ve ikisi de ada birebir uyuyor.
+            fun yearFits(candidate: SearchResponse): Boolean {
+                val want = titles.year ?: return true
+                val got = yearOf(candidate) ?: return true
+                return kotlin.math.abs(got - want) <= 1
+            }
+
             // Once tam eslesme, sonra bulanik. "Iceren" esleme KULLANILMIYOR:
             // "Dexter" aramasi "Dexter: Resurrection" ve "Dexter's Laboratory"
             // ile eslesip yanlis icerik aciyordu.
-            val hit = results.firstOrNull { looseTitle(it.name) == looseTitle(title) }
-                ?: results.firstOrNull { titleMatches(it.name, title) }
-                ?: return null
+            fun pickHit(results: List<SearchResponse>): SearchResponse? {
+                val usable = results.filter(::yearFits)
+                for (name in titles.names) {
+                    usable.firstOrNull { looseTitle(it.name) == looseTitle(name) }?.let { return it }
+                }
+                for (name in titles.names) {
+                    usable.firstOrNull { titleMatches(it.name, name) }?.let { return it }
+                }
+                return null
+            }
+
+            // Ilk ad genelde yetiyor (Turkce siteler Ingilizce adi da indeksliyor);
+            // bulamazsa diger adlarla tekrar araniyor.
+            var hit: SearchResponse? = null
+            for (query in titles.names) {
+                hit = pickHit(api.searchSafely(query))
+                if (hit != null) break
+            }
+            if (hit == null) return null
             val response = api.load(hit.url) ?: return null
+
+            // Arama sonucu yil tasimiyorsa dogrulama ancak burada yapilabiliyor.
+            val wantYear = titles.year
+            val gotYear = response.year
+            if (wantYear != null && gotYear != null && kotlin.math.abs(gotYear - wantYear) > 1) {
+                return null
+            }
 
             // Kaynaklar sezon numarasini TMDB ile ayni vermiyor; tam eslesme
             // tutmazsa bolum numarasina, en son siraya bakilir.
@@ -792,7 +887,7 @@ class BerkStreamProvider : TmdbProvider() {
         // Tutarsa digerlerine hic bakilmiyor; tekrar izlemede bekleme kalkiyor.
         if (winner != null) {
             ordered.firstOrNull { it.name == winner }?.let { winnerApi ->
-                scanProviders(listOf(winnerApi)) { tryProvider(it) }
+                scanProviders(listOf(winnerApi), providerScanTimeoutMs + 2_000L) { tryProvider(it) }
                 // Linkler biriktirilip sonda siralandigi icin buradan cikarken de
                 // MUTLAKA gonderilmeli; aksi halde toplanan linkler hic verilmiyor
                 // ve daha once acilan icerikler "baglanti bulunamadi" veriyor.
@@ -803,9 +898,25 @@ class BerkStreamProvider : TmdbProvider() {
             }
         }
 
-        for (batch in ordered.filter { it.name != winner }.chunked(4)) {
-            scanProviders(batch) { tryProvider(it) }
+        // Obek obek ve SIRAYLA taraniyordu; her obegin kendi 18 sn'lik butcesi
+        // vardi ve 30 kaynak / 4 = 8 tur ediyordu. Hicbir kaynakta olmayan bir
+        // baslikta (eski filmler) hicbir tur erken kesilmiyor, kullanici
+        // ~70 saniye bekleyip "baglanti bulunamadi" goruyordu. Artik TEK bir
+        // kuresel son tarih var ve obekler genisledi: en kotu ihtimal 30 sn.
+        val deadline = System.currentTimeMillis() + totalLinkScanBudgetMs
+        for (batch in ordered.filter { it.name != winner }.chunked(6)) {
+            val remaining = deadline - System.currentTimeMillis()
+            if (remaining <= 1_000L) break
+            scanProviders(batch, remaining) { tryProvider(it) }
             if (linkCount.get() >= BerkStreamSettings.linkTarget) break
+            // Elde oynatilabilir link varken kalan kaynaklari kovalamiyoruz;
+            // hedefe ulasmak icin 20 sn daha beklemek kullaniciya "acilmiyor"
+            // gibi geliyor.
+            if (linkCount.get() > 0 &&
+                System.currentTimeMillis() > deadline - totalLinkScanBudgetMs / 2
+            ) {
+                break
+            }
         }
         emitSorted(collected, callback)
         return linkCount.get() > 0
@@ -945,8 +1056,9 @@ class BerkStreamProvider : TmdbProvider() {
      */
     private suspend fun <T : Any> scanProviders(
         providers: List<MainAPI>,
+        budgetMs: Long = providerScanBudgetMs,
         block: suspend (MainAPI) -> T?,
-    ): List<T> = withTimeoutOrNull(providerScanBudgetMs) {
+    ): List<T> = withTimeoutOrNull(budgetMs.coerceAtLeast(1_000L)) {
         providers.amap { api ->
             try {
                 // Sarmalayici SART: `withTimeoutOrNull` zaman asiminda da null
