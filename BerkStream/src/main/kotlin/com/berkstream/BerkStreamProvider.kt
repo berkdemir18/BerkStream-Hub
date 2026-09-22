@@ -6,6 +6,7 @@ import com.lagradost.cloudstream3.AnimeLoadResponse
 import com.lagradost.cloudstream3.AnimeSearchResponse
 import com.lagradost.cloudstream3.HomePageResponse
 import com.lagradost.cloudstream3.LoadResponse
+import com.lagradost.cloudstream3.LoadResponse.Companion.addTrailer
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.MainPageData
 import com.lagradost.cloudstream3.MainPageRequest
@@ -32,6 +33,8 @@ import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.newExtractorLink
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import java.text.Normalizer
@@ -82,10 +85,15 @@ class BerkStreamProvider : TmdbProvider() {
         }
 
     private val allShelves = listOf(
-        // Gunun trendleri ilk sirada: CloudStream ust afisi TUM raflarin
-        // ogelerini karistirip secitiyor, ama ilk yuklenen raf bir an icin
-        // havuzun tamami oldugu icin acilista afis buradan geliyor.
+        // Gunun trendleri ilk sirada. BerkStream uygulamasi ust afise once
+        // "SANA ÖZEL", sonra populer/trend/vizyon raflarindan film seciyor.
         shelf("🔥  GÜNÜN TRENDLERİ", "mixed", "trending/all/day"),
+        // BerkStream uygulamasi adinda "İLK 10" gecen raflari Netflix gibi
+        // buyuk sira numarali seride gosteriyor (1, 2, 3...).
+        // Turkiye'deki abonelik platformlarinda en populer olanlar; "Gunun trendleri"
+        // rafiyla ayni listeyi tekrarlamasin diye ayri kaynak.
+        shelf("🏆  BUGÜN İLK 10 FİLM", "movie", "discover/movie?sort_by=popularity.desc&with_watch_monetization_types=flatrate&vote_count.gte=50"),
+        shelf("🏆  BUGÜN İLK 10 DİZİ", "tv", "discover/tv?sort_by=popularity.desc&with_watch_monetization_types=flatrate&vote_count.gte=50"),
         shelf("🎬  VİZYONDAKİ FİLMLER", "movie", "movie/now_playing?region=TR"),
         MainPageData("🎯  SANA ÖZEL", "personal", false),
         shelf("📈  HAFTANIN POPÜLER FİLMLERİ", "movie", "trending/movie/week"),
@@ -724,24 +732,70 @@ class BerkStreamProvider : TmdbProvider() {
 
     private data class TmdbOverview(
         @JsonProperty("overview") val overview: String? = null,
+        @JsonProperty("videos") val videos: TmdbVideos? = null,
     )
+
+    private data class TmdbVideos(
+        @JsonProperty("results") val results: List<TmdbVideo> = emptyList(),
+    )
+
+    private data class TmdbVideo(
+        @JsonProperty("key") val key: String? = null,
+        @JsonProperty("site") val site: String? = null,
+        @JsonProperty("type") val type: String? = null,
+        @JsonProperty("iso_639_1") val language: String? = null,
+        @JsonProperty("official") val official: Boolean? = null,
+    )
+
+    /** Once Turkce fragman, sonra Ingilizce; tur olarak Trailer > Teaser > digerleri. */
+    private fun TmdbVideos.youtubeTrailers(): List<String> = results
+        .filter { it.site.equals("YouTube", true) && !it.key.isNullOrBlank() }
+        .filter { it.type == "Trailer" || it.type == "Teaser" }
+        .sortedWith(
+            compareBy<TmdbVideo>(
+                { if (it.language == "tr") 0 else 1 },
+                { if (it.type == "Trailer") 0 else 1 },
+                { if (it.official == true) 0 else 1 },
+            )
+        )
+        .map { "https://www.youtube.com/watch?v=${it.key}" }
+        .distinct()
 
     /**
      * TmdbProvider detay cagrisini `language=en-US` ile yapiyor, bu yuzden ozetler
      * Ingilizce geliyordu. Turkce ozet ayrica cekilip uzerine yaziliyor.
      */
-    override suspend fun load(url: String): LoadResponse? {
-        val base = super.load(url) ?: return null
-        runCatching {
-            val match = Regex("""themoviedb\.org/(movie|tv)/(\d+)""").find(url) ?: return@runCatching
-            val kind = match.groupValues[1]
-            val id = match.groupValues[2]
-            val turkish = tryParseJson<TmdbOverview>(
-                app.get("$tmdbApiUrl/$kind/$id?api_key=$tmdbApiKey&language=tr-TR").text,
-            )
-            turkish?.overview?.takeIf { it.isNotBlank() }?.let { base.plot = it }
+    override suspend fun load(url: String): LoadResponse? = coroutineScope {
+        // Turkce ozet + fragman istegi, TMDB detay cagrisiyla ayni anda gider;
+        // icerik sayfasi iki istegin toplami yerine en yavasi kadar bekler.
+        val match = Regex("""themoviedb\.org/(movie|tv)/(\d+)""").find(url)
+        val turkishRequest = match?.let {
+            val kind = it.groupValues[1]
+            val id = it.groupValues[2]
+            async {
+                runCatching {
+                    tryParseJson<TmdbOverview>(
+                        app.get(
+                            "$tmdbApiUrl/$kind/$id?api_key=$tmdbApiKey&language=tr-TR" +
+                                "&append_to_response=videos&include_video_language=tr,en,null",
+                        ).text,
+                    )
+                }.getOrNull()
+            }
         }
-        return base
+        val base = super.load(url) ?: return@coroutineScope null
+        val turkish = turkishRequest?.await()
+        turkish?.overview?.takeIf { it.isNotBlank() }?.let { base.plot = it }
+        // Ana sayfa ve detay fragmani icin Turkce fragman one alinir.
+        val trailers = turkish?.videos?.youtubeTrailers().orEmpty()
+        if (trailers.isNotEmpty()) {
+            val previous = base.trailers.toList()
+            base.trailers.clear()
+            base.addTrailer(trailers)
+            previous.filter { old -> base.trailers.none { it.extractorUrl == old.extractorUrl } }
+                .forEach { base.trailers.add(it) }
+        }
+        base
     }
 
     override suspend fun quickSearch(query: String): List<SearchResponse>? {
