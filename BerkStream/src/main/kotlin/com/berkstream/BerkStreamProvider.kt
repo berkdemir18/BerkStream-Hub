@@ -35,6 +35,8 @@ import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.newExtractorLink
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -99,9 +101,9 @@ class BerkStreamProvider : TmdbProvider() {
         // rafiyla ayni listeyi tekrarlamasin diye ayri kaynak.
         shelf("🏆  BUGÜN İLK 10 FİLM", "movie", "discover/movie?sort_by=popularity.desc&with_watch_monetization_types=flatrate&vote_count.gte=50"),
         shelf("🏆  BUGÜN İLK 10 DİZİ", "tv", "discover/tv?sort_by=popularity.desc&with_watch_monetization_types=flatrate&vote_count.gte=50"),
-        // v34 (Berk 2026-09-27: "Bu hafta vizyonda diye filmleri göstersin"): once bu hafta
-        // Turkiye'de sinemaya girenler, arkasindan vizyonda olmaya devam edenler.
-        MainPageData("🎬  BU HAFTA VİZYONDA", "thisweek", false),
+        // v35 (Berk 2026-09-27): "Bu hafta vizyonda" kalkti, yerine izlenebilir hale gelecekler:
+        // onumuzdeki 7 gunde dijitale dusen filmler + ilk bolumu / yeni sezonu baslayan diziler.
+        MainPageData("📅  GELECEK HAFTA YAYINDA", "upcoming", false),
         shelf("🎬  VİZYONDAKİ FİLMLER", "movie", "movie/now_playing?region=TR"),
         MainPageData("🎯  SANA ÖZEL", "personal", false),
         shelf("📈  HAFTANIN POPÜLER FİLMLERİ", "movie", "trending/movie/week"),
@@ -241,6 +243,7 @@ class BerkStreamProvider : TmdbProvider() {
         @JsonProperty("vote_average") val voteAverage: Double? = null,
         @JsonProperty("vote_count") val voteCount: Int? = null,
         @JsonProperty("genre_ids") val genreIds: List<Int> = emptyList(),
+        @JsonProperty("popularity") val popularity: Double? = null,
     )
 
     private data class TmdbPage(
@@ -536,24 +539,78 @@ class BerkStreamProvider : TmdbProvider() {
         return result
     }
 
+    private data class TmdbNextEpisode(
+        @JsonProperty("air_date") val airDate: String? = null,
+        @JsonProperty("episode_number") val episodeNumber: Int? = null,
+        @JsonProperty("season_number") val seasonNumber: Int? = null,
+    )
+
+    private data class TmdbShowNext(
+        @JsonProperty("next_episode_to_air") val next: TmdbNextEpisode? = null,
+    )
+
     /**
-     * "Bu hafta vizyonda": Turkiye'de son 9 gunde (gecen cumadan beri) sinemaya giren filmler,
-     * populerlige gore; ardindan vizyonda kalanlar (TMDB now_playing TR). Tarihler TR vizyon
-     * tarihi (region=TR + with_release_type=3), filmin dunya prömiyeri degil.
+     * "Gelecek hafta yayinda": yarindan itibaren 7 gun icinde izlenebilir olacaklar.
+     *  - Filmler: dijital cikis (release_type=4). Turkiye verisi TMDB'de neredeyse bos
+     *    (2026-09-27: 1 film), platform filmleri de genelde ayni gun her yerde cikiyor;
+     *    o yuzden TR + ABD dijital tarihleri. Yeniden basimlar (eski filmler) disarida.
+     *  - Diziler: ilk bolumu o hafta olan yeni diziler + yeni sezonu baslayan diziler
+     *    (yayindaki/populer dizilerde siradaki bolum "1. bolum" ve tarihi aralikta).
+     *    Her hafta yeni bolumu cikan dizileri (Simpsonlar, WWE...) almiyor.
+     * Populerlige gore karisik siralanir; kartlarin cogu henuz izlenemez, detayda hatirlatici var.
      */
-    private suspend fun thisWeekInCinemas(): List<SearchResponse> {
+    private suspend fun comingNextWeek(): List<SearchResponse> = coroutineScope {
         val fmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-        val now = java.util.Calendar.getInstance()
-        val to = fmt.format(now.time)
-        now.add(java.util.Calendar.DAY_OF_YEAR, -9)
-        val from = fmt.format(now.time)
-        val fresh = tmdbPage(
-            "discover/movie?region=TR&with_release_type=3&release_date.gte=$from&release_date.lte=$to&sort_by=popularity.desc",
-            1,
-        )?.results.orEmpty()
-        val running = (1..2).flatMap { tmdbPage("movie/now_playing?region=TR", it)?.results.orEmpty() }
-        return (fresh + running).distinctBy { it.id }
-            .mapNotNull { it.toSearchResponse("movie") }
+        val cal = java.util.Calendar.getInstance()
+        val thisYear = cal.get(java.util.Calendar.YEAR)
+        cal.add(java.util.Calendar.DAY_OF_YEAR, 1)
+        val from = fmt.format(cal.time)
+        cal.add(java.util.Calendar.DAY_OF_YEAR, 6)
+        val to = fmt.format(cal.time)
+
+        val films = listOf("TR", "US").map { region ->
+            async {
+                runCatching {
+                    tmdbPage(
+                        "discover/movie?region=$region&with_release_type=4&release_date.gte=$from&release_date.lte=$to&sort_by=popularity.desc",
+                        1,
+                    )?.results.orEmpty()
+                }.getOrDefault(emptyList())
+            }
+        }.awaitAll().flatten()
+            .filter { (it.releaseDate?.take(4)?.toIntOrNull() ?: 0) >= thisYear - 1 }
+            .filter { (it.popularity ?: 0.0) >= 3.0 }
+            .map { it.copy(mediaType = "movie") }
+
+        val premieres = runCatching {
+            tmdbPage("discover/tv?first_air_date.gte=$from&first_air_date.lte=$to&sort_by=popularity.desc", 1)
+                ?.results.orEmpty()
+        }.getOrDefault(emptyList()).filter { (it.popularity ?: 0.0) >= 4.0 }
+
+        // Yeni sezonlar: yayindaki + populer dizilerden siradaki bolumu 1. bolum olanlar.
+        val candidates = (1..2).flatMap { page ->
+            runCatching { tmdbPage("tv/on_the_air", page)?.results.orEmpty() }.getOrDefault(emptyList())
+        } + runCatching { tmdbPage("tv/popular", 1)?.results.orEmpty() }.getOrDefault(emptyList())
+        val gate = kotlinx.coroutines.sync.Semaphore(6)
+        val newSeasons = candidates.distinctBy { it.id }.map { show ->
+            async {
+                gate.withPermit {
+                    runCatching {
+                        val next = tryParseJson<TmdbShowNext>(
+                            app.get("$tmdbApiUrl/tv/${show.id}?api_key=$tmdbApiKey&language=tr-TR").text
+                        )?.next
+                        show.takeIf {
+                            next?.episodeNumber == 1 && (next.airDate ?: "") in from..to
+                        }
+                    }.getOrNull()
+                }
+            }
+        }.awaitAll().filterNotNull()
+
+        val shows = (newSeasons + premieres).map { it.copy(mediaType = "tv") }
+        (films + shows).distinctBy { "${it.mediaType}:${it.id}" }
+            .sortedByDescending { it.popularity ?: 0.0 }
+            .mapNotNull { it.toSearchResponse(it.mediaType ?: "movie") }
             .take(30)
     }
 
@@ -1028,16 +1085,16 @@ class BerkStreamProvider : TmdbProvider() {
                 putShelf("fresh", items)
                 return newHomePageResponse(request, items, false)
             }
-            "thisweek" -> {
+            "upcoming" -> {
                 if (page > 1) return newHomePageResponse(request, emptyList<SearchResponse>(), false)
-                cachedShelf("thisweek")?.let { return newHomePageResponse(request, it, false) }
+                cachedShelf("upcoming")?.let { return newHomePageResponse(request, it, false) }
                 val items = try {
-                    thisWeekInCinemas()
+                    comingNextWeek()
                 } catch (error: Throwable) {
                     logError(Exception(error))
                     emptyList()
                 }
-                if (items.isNotEmpty()) putShelf("thisweek", items)
+                if (items.isNotEmpty()) putShelf("upcoming", items)
                 return newHomePageResponse(request, items, false)
             }
             "dice" -> {
