@@ -244,6 +244,14 @@ class BerkStreamProvider : TmdbProvider() {
         @JsonProperty("vote_count") val voteCount: Int? = null,
         @JsonProperty("genre_ids") val genreIds: List<Int> = emptyList(),
         @JsonProperty("popularity") val popularity: Double? = null,
+        @JsonProperty("images") val images: TmdbImageSet? = null,
+    )
+
+    private data class TmdbImageSet(@JsonProperty("posters") val posters: List<TmdbImage> = emptyList())
+    private data class TmdbImage(
+        @JsonProperty("file_path") val filePath: String? = null,
+        @JsonProperty("iso_639_1") val language: String? = null,
+        @JsonProperty("vote_average") val voteAverage: Double? = null,
     )
 
     private data class TmdbPage(
@@ -682,6 +690,138 @@ class BerkStreamProvider : TmdbProvider() {
     @Volatile
     private var tasteCache: Pair<String, Map<Int, Double>>? = null
 
+    // ---- v36: "Yakinda" (JustWatch UPCOMING): hangi gun hangi platforma ne geliyor ----
+    private data class JwUpResponse(@JsonProperty("data") val data: JwUpData? = null)
+    private data class JwUpData(@JsonProperty("newTitles") val newTitles: JwUpTitles? = null)
+    private data class JwUpTitles(@JsonProperty("edges") val edges: List<JwUpEdge> = emptyList())
+    private data class JwUpEdge(@JsonProperty("node") val node: JwUpNode? = null)
+    private data class JwUpNode(
+        @JsonProperty("objectType") val objectType: String? = null,
+        @JsonProperty("content") val content: JwUpContent? = null,
+        @JsonProperty("show") val show: JwUpShow? = null,
+    )
+    private data class JwUpShow(@JsonProperty("content") val content: JwUpContent? = null)
+    private data class JwUpContent(
+        @JsonProperty("seasonNumber") val seasonNumber: Int? = null,
+        @JsonProperty("externalIds") val externalIds: JwIds? = null,
+        @JsonProperty("upcomingReleases") val upcoming: List<JwUpRelease>? = null,
+    )
+    private data class JwUpRelease(
+        @JsonProperty("releaseDate") val releaseDate: String? = null,
+        @JsonProperty("package") val pkg: JwUpPackage? = null,
+    )
+    private data class JwUpPackage(@JsonProperty("shortName") val shortName: String? = null)
+
+    private data class UpEntry(val tmdbId: Int, val isShow: Boolean, val date: String, val pkg: String)
+
+    private val upcomingCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, List<UpEntry>>>()
+
+    /** Bir ulkede verilen paketlere onumuzdeki gunlerde gelecekler (film + yeni dizi/sezon). */
+    private suspend fun justWatchUpcoming(country: String, packages: List<String>): List<UpEntry> {
+        val key = "$country|${packages.joinToString(",")}"
+        upcomingCache[key]
+            ?.takeIf { System.currentTimeMillis() - it.first < justWatchTtlMs }
+            ?.let { return it.second }
+        val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
+        val query = "query BerkUpcoming(\$p: [String!]) { newTitles(country: $country, date: \"$today\", " +
+            "first: 100, pageType: UPCOMING, filter: {packages: \$p}) { edges { node { objectType " +
+            "... on Movie { content(country: $country, language: tr) { externalIds { tmdbId } " +
+            "upcomingReleases { releaseDate package { shortName } } } } " +
+            "... on Season { content(country: $country, language: tr) { seasonNumber " +
+            "upcomingReleases { releaseDate package { shortName } } } " +
+            "show { content(country: $country, language: tr) { externalIds { tmdbId } } } } } } } }"
+        val entries = runCatching {
+            val text = app.post(
+                justWatchUrl,
+                json = mapOf("query" to query, "variables" to mapOf("p" to packages)),
+                headers = mapOf("Content-Type" to "application/json"),
+                timeout = 12L,
+            ).text
+            tryParseJson<JwUpResponse>(text)?.data?.newTitles?.edges.orEmpty().mapNotNull { edge ->
+                val node = edge.node ?: return@mapNotNull null
+                val isShow = node.objectType == "SHOW_SEASON" || node.objectType == "SHOW"
+                val ids = if (isShow) node.show?.content?.externalIds else node.content?.externalIds
+                val tmdbId = ids?.tmdbId?.toIntOrNull() ?: return@mapNotNull null
+                // Ayni yapim birden fazla pakete gelebilir; bizim paketlerden en erken tarihli olan.
+                val release = node.content?.upcoming.orEmpty()
+                    .filter { it.pkg?.shortName in packages && !it.releaseDate.isNullOrBlank() }
+                    .minByOrNull { it.releaseDate!! } ?: return@mapNotNull null
+                UpEntry(tmdbId, isShow, release.releaseDate!!, release.pkg!!.shortName!!)
+            }.distinctBy { "${it.isShow}:${it.tmdbId}" }
+        }.getOrElse {
+            logError(Exception("JustWatch yakinda alinamadi: $key", it))
+            emptyList()
+        }
+        if (entries.isNotEmpty()) upcomingCache[key] = System.currentTimeMillis() to entries
+        return entries
+    }
+
+    /**
+     * "Gelecek hafta yayinda": [platform] null ise tum platformlar (TR paketleri + Apple TV+
+     * ABD), "nfx:TR" gibi ise sadece o platform. Bugunden itibaren 7 gun; genel rafta 8'den,
+     * platform rafinda 6'dan az yapim varsa pencere 14, sonra 30 gune acilir. Siralama tarihe
+     * gore (en yakin once), ayni gun icinde TMDB populerligine gore. Afissiz yapimlar ve
+     * TMDB'de neredeyse hic ilgi gormeyenler (populerlik < 1) disarida.
+     */
+    private suspend fun upcomingShelf(platform: String?, mediaType: String): List<SearchResponse> {
+        val all = if (platform == null) {
+            coroutineScope {
+                val tr = async { justWatchUpcoming("TR", listOf("nfx", "prv", "dnp", "mxx", "tab")) }
+                val us = async { justWatchUpcoming("US", listOf("atp")) }
+                tr.await() + us.await()
+            }
+        } else {
+            justWatchUpcoming(platform.substringAfter(':', "TR"), listOf(platform.substringBefore(':')))
+        }
+        val entries = all.filter {
+            when (mediaType) {
+                "tv" -> it.isShow
+                "movie" -> !it.isShow
+                else -> true
+            }
+        }
+        if (entries.isEmpty()) return emptyList()
+        val fmt = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+        fun until(days: Int): String {
+            val cal = java.util.Calendar.getInstance()
+            cal.add(java.util.Calendar.DAY_OF_YEAR, days)
+            return fmt.format(cal.time)
+        }
+        val today = until(0)
+        val minimum = if (platform == null) 8 else 6
+        val window = listOf(7, 14, 30).firstOrNull { days ->
+            val end = until(days)
+            entries.count { it.date in today..end } >= minimum
+        } ?: 30
+        val end = until(window)
+        val picked = entries.filter { it.date in today..end }.sortedBy { it.date }.take(40)
+        val cards = picked.amap { entry ->
+            val kind = if (entry.isShow) "tv" else "movie"
+            val item = runCatching {
+                tryParseJson<TmdbItem>(
+                    app.get(
+                        "$tmdbApiUrl/$kind/${entry.tmdbId}?api_key=$tmdbApiKey&language=tr-TR" +
+                            "&append_to_response=images&include_image_language=tr,en"
+                    ).text
+                )
+            }.getOrNull()?.let { item ->
+                // Turkce afis, yoksa Ingilizce; TMDB'nin varsayilani bazen Lehce/Fransizca geliyordu.
+                val poster = listOf("tr", "en").firstNotNullOfOrNull { lang ->
+                    item.images?.posters.orEmpty().filter { it.language == lang }
+                        .maxByOrNull { it.voteAverage ?: 0.0 }?.filePath
+                }
+                item.copy(id = entry.tmdbId, mediaType = kind, posterPath = poster ?: item.posterPath)
+            }
+            item?.takeIf { !it.posterPath.isNullOrBlank() && (it.popularity ?: 0.0) >= 1.0 }
+                ?.let { entry to it }
+        }.filterNotNull()
+        return cards
+            .sortedWith(compareBy<Pair<UpEntry, TmdbItem>> { it.first.date }
+                .thenByDescending { it.second.popularity ?: 0.0 })
+            .mapNotNull { (entry, item) -> item.toSearchResponse(if (entry.isShow) "tv" else "movie") }
+            .take(30)
+    }
+
     /** Bir platformun o ulkedeki gunluk populerlik sirasi, en fazla 40 baslik. */
     private suspend fun justWatchChart(pkg: String, country: String, isShow: Boolean): List<ChartEntry> {
         val key = "$country|$pkg|$isShow"
@@ -1089,7 +1229,7 @@ class BerkStreamProvider : TmdbProvider() {
                 if (page > 1) return newHomePageResponse(request, emptyList<SearchResponse>(), false)
                 cachedShelf("upcoming")?.let { return newHomePageResponse(request, it, false) }
                 val items = try {
-                    comingNextWeek()
+                    upcomingShelf(null, "mixed").ifEmpty { comingNextWeek() }
                 } catch (error: Throwable) {
                     logError(Exception(error))
                     emptyList()
@@ -1126,6 +1266,10 @@ class BerkStreamProvider : TmdbProvider() {
             when {
                 // Uygulamanin platform sayfalari (v33): "chart:nfx:TR" = o platformun bugunku Ilk 10'u.
                 path.startsWith("chart:") -> platformChart(path, mediaType == "tv", page)
+                // v36: "upcoming:nfx:TR" = o platformda yakinda cikacaklar (uygulamanin platform sayfalari).
+                path.startsWith("upcoming:") ->
+                    if (page > 1) emptyList<SearchResponse>() to false
+                    else upcomingShelf(path.substringAfter("upcoming:"), mediaType) to false
                 isPlainPlatform(path) -> platformShelf(path, mediaType, page)
                 else -> tmdbShelf(path, mediaType, page)
             }
