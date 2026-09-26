@@ -712,6 +712,18 @@ class BerkStreamProvider : TmdbProvider() {
     )
     private data class JwUpPackage(@JsonProperty("shortName") val shortName: String? = null)
 
+    /** Turk izleyicinin okuyamayacagi alfabe (CJK, Hangul, Arapca, Kiril, Tay...). */
+    private fun nonLatin(text: String): Boolean {
+        val letters = text.filter { it.isLetter() }
+        if (letters.isEmpty()) return false
+        val foreign = letters.count {
+            Character.UnicodeScript.of(it.code) !in setOf(
+                Character.UnicodeScript.LATIN, Character.UnicodeScript.COMMON, Character.UnicodeScript.INHERITED,
+            )
+        }
+        return foreign * 2 > letters.length
+    }
+
     private data class UpEntry(val tmdbId: Int, val isShow: Boolean, val date: String, val pkg: String)
 
     private val upcomingCache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, List<UpEntry>>>()
@@ -810,7 +822,18 @@ class BerkStreamProvider : TmdbProvider() {
                     item.images?.posters.orEmpty().filter { it.language == lang }
                         .maxByOrNull { it.voteAverage ?: 0.0 }?.filePath
                 }
-                item.copy(id = entry.tmdbId, mediaType = kind, posterPath = poster ?: item.posterPath)
+                // Turkce adi olmayan Japon/Kore yapimi "劇場版モノノ怪" diye geliyordu: Ingilizce adi.
+                val label = if (kind == "tv") item.name else item.title
+                val english = if (label != null && nonLatin(label)) runCatching {
+                    tryParseJson<TmdbItem>(
+                        app.get("$tmdbApiUrl/$kind/${entry.tmdbId}?api_key=$tmdbApiKey&language=en-US").text
+                    )?.let { if (kind == "tv") it.name else it.title }
+                }.getOrNull()?.takeIf { it.isNotBlank() && !nonLatin(it) } else null
+                item.copy(
+                    id = entry.tmdbId, mediaType = kind, posterPath = poster ?: item.posterPath,
+                    title = if (kind == "movie") english ?: item.title else item.title,
+                    name = if (kind == "tv") english ?: item.name else item.name,
+                )
             }
             item?.takeIf { !it.posterPath.isNullOrBlank() && (it.popularity ?: 0.0) >= 1.0 }
                 ?.let { entry to it }
