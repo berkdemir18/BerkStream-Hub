@@ -64,7 +64,12 @@ jobs:
             exit 0
           fi
           temp_dir="$(mktemp -d)"
-          curl -fsSL "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plt-stream.cs3" -o "$temp_dir/plt-stream.cs3"
+          # Upstream dosyayi kaldirabiliyor (2026-09-28: 404). O zaman yayin PLT'siz devam eder;
+          # eklenti motoru ayri yukledigi icin motor yoksa sadece o kaynak eksik kalir.
+          if ! curl -fsSL "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plt-stream.cs3" -o "$temp_dir/plt-stream.cs3"; then
+            echo "::warning::PLT motoru indirilemedi, paket PLT'siz yayinlaniyor."
+            exit 0
+          fi
           mkdir -p "$temp_dir/berk" "$temp_dir/plt"
           unzip -q BerkStream/build/BerkStream.cs3 -d "$temp_dir/berk"
           unzip -q -o "$temp_dir/plt-stream.cs3" 'classes*.dex' -d "$temp_dir/plt"
