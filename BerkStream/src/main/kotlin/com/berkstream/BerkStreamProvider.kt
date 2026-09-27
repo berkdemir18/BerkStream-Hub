@@ -1539,10 +1539,12 @@ class BerkStreamProvider : TmdbProvider() {
 
         // Ayni icerik daha once hangi kaynaktan acildiysa o kaynak listenin
         // basina aliniyor; tekrar izlemede tarama neredeyse aninda bitiyor.
-        val contentKey = "${looseTitle(title)}_${season ?: 0}_${episode ?: 0}".take(80)
+        // Non-Latin titles ("葬送のフリーレン") cleaned to "" and all shared one key: TMDB id then.
+        val keyBase = looseTitle(title).ifBlank { "tmdb${link.tmdbID}" }
+        val contentKey = "${keyBase}_${season ?: 0}_${episode ?: 0}".take(80)
         // Dizide bolum bazli kayit yoksa dizinin son acildigi kaynak: sonraki bolum ayni
         // siteden, ayni dublaj/kaliteyle baslasin (Berk, 2026-09-25).
-        val seriesKey = "${looseTitle(title)}_series".take(80)
+        val seriesKey = "${keyBase}_series".take(80)
         // Anime: once dogrudan AnimeciX yolu (TMDB kimligiyle eslesme, tek istekte bolum,
         // 1080p gomulu Turkce altyazi). Tutarsa 60 sitelik taramaya hic girilmiyor.
         if (anime) {
@@ -1570,13 +1572,16 @@ class BerkStreamProvider : TmdbProvider() {
             // Eskiden anime siteleri listenin sonundaydi ve genel siteler bitmeden sira
             // gelmiyordu. Gomulu AnimeciX saglayicisi en sona: bolum bulmak icin butun
             // listeyi indiriyor, dogrudan yol zaten denendi.
-            if (!anime) list else list.sortedBy { api ->
-                when {
-                    api.name == AnimeSource.NAME -> 2
-                    TvType.Anime in api.supportedTypes -> 0
-                    else -> 1
-                }
-            }
+            // Muted / disabled ones stay at the back (sortedBy alone moved them forward).
+            if (!anime) list else list.sortedWith(
+                compareBy<MainAPI>({ isMuted(normalize(it.name)) }, { normalize(it.name) in disabledProviders }, { api ->
+                    when {
+                        api.name == AnimeSource.NAME -> 2
+                        TvType.Anime in api.supportedTypes -> 0
+                        else -> 1
+                    }
+                })
+            )
         }
 
         // Tek bir kaynakta: ara, dogru bolumu bul, linkleri cikar.
@@ -1636,8 +1641,9 @@ class BerkStreamProvider : TmdbProvider() {
                 }
                     ?: absolute?.takeIf { abs -> abs != episode && episodes.none { it.season == season } }
                         ?.let { abs -> episodes.firstOrNull { it.episode == abs } }
-                    ?: episodes.firstOrNull { episode != null && it.episode == episode }
-                    ?: episode?.let { episodes.getOrNull(it - 1) }
+                    // Anime specials (TMDB season 0) must not fall back to regular episode N.
+                    ?: episodes.takeIf { !(anime && season == 0) }?.firstOrNull { episode != null && it.episode == episode }
+                    ?: episode?.takeIf { !(anime && season == 0) }?.let { episodes.getOrNull(it - 1) }
                 return match?.data
             }
 
@@ -1767,6 +1773,9 @@ class BerkStreamProvider : TmdbProvider() {
         val boost = BerkStreamSettings.preferTurkishDub || anime
         val rank = linkRank(link)
         if (!boost || rank > 1) return link
+        // Anime: a dubbed general-site link must not jump over the subbed anime sources (their
+        // links rarely say "altyazi", so they stay unboosted).
+        if (anime && rank == 0) return link
         // The player sorts by quality, not callback order; keep the Turkish boost.
         return runCatching {
             val realQuality = Qualities.getStringByInt(link.quality)

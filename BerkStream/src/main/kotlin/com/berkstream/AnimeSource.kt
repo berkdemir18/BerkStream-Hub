@@ -96,11 +96,18 @@ internal object AnimeSource {
     private suspend fun findId(tmdbId: Int, names: List<String>, isSeries: Boolean): Int? {
         val key = "${if (isSeries) "tv" else "movie"}:$tmdbId"
         idCache[key]?.let { return it }
-        for (name in names.take(3)) {
+        // Frieren: its Turkish TMDB name is Japanese ("葬送のフリーレン") and that search only found
+        // the short side record. Latin names first, hits of every name merged.
+        val ordered = names.sortedBy { n -> if (n.any { it.code > 0x2E80 }) 1 else 0 }.take(3)
+        val merged = LinkedHashMap<Int, Hit>()
+        for (name in ordered) {
             val hits = runCatching {
                 tryParseJson<SearchPage>(app.get("$MAIN/secure/search/${enc(name)}?limit=20", timeout = 8L).text)
             }.getOrNull()?.results.orEmpty()
-            val same = hits.filter { it.tmdbId == tmdbId && it.id != null }
+            hits.filter { it.tmdbId == tmdbId && it.id != null }.forEach { merged[it.id!!] = it }
+        }
+        run {
+            val same = merged.values.toList()
             // Ayni TMDB kimligi bir dizinin "ozel bolumler" kaydinda da olabiliyor
             // (Frieren: iki kayit): en cok bolumu olan asil kayit.
             val hit = if (isSeries) {
@@ -150,6 +157,8 @@ internal object AnimeSource {
         episode: Int,
         tmdbSeasons: Map<Int, Int>,
     ): List<Pair<Int, Int>> {
+        // TMDB season 0 = specials/recaps: no mapping to regular episodes (played S1E1 before).
+        if (season == 0) return emptyList()
         val own = body.seasons.mapNotNull { s -> s.number?.takeIf { it > 0 }?.let { it to (s.episodeCount ?: 0) } }
             .sortedBy { it.first }
         val tmdbOrder = tmdbSeasons.filterKeys { it > 0 }.toSortedMap()
@@ -158,15 +167,20 @@ internal object AnimeSource {
         val absolute = if (seasonSize in 1 until episode) episode
         else tmdbOrder.filterKeys { it < season }.values.sum() + episode
         val out = LinkedHashSet<Pair<Int, Int>>()
+        var sizesKnown = own.size <= 1 || (own.size == tmdbOrder.size && own.map { it.second } == tmdbOrder.values.toList())
         when {
             own.size <= 1 -> out += (own.firstOrNull()?.first ?: 1) to absolute
             // Ayni bolunmus: numaralar birebir.
             own.size == tmdbOrder.size && own.map { it.second } == tmdbOrder.values.toList() -> out += season to episode
             else -> {
                 var left = absolute
-                for ((number, size) in seasonSizes(id, own.map { it.first })) {
+                val sizes = seasonSizes(id, own.map { it.first })
+                sizesKnown = sizes.isNotEmpty() && sizes.all { it.second > 0 }
+                for ((i, pair) in sizes.withIndex()) {
+                    val (number, size) = pair
                     if (size <= 0) break
-                    if (left <= size) {
+                    // The last season is not bounded: a freshly uploaded episode is past its count.
+                    if (left <= size || i == sizes.lastIndex) {
                         out += number to left
                         break
                     }
@@ -176,8 +190,11 @@ internal object AnimeSource {
         }
         // Emniyet: sitenin kendi sezonlari TMDB ile ayni numaralanmis olabilir, ya da her
         // seyi tek sezona dizmistir.
-        out += season to episode
-        if (absolute != episode) out += 1 to absolute
+        // Only when the split could not be counted: otherwise (season, episode) is another arc.
+        if (!sizesKnown) {
+            out += season to episode
+            if (absolute != episode) out += 1 to absolute
+        }
         return out.toList()
     }
 
@@ -251,10 +268,13 @@ internal object AnimeSource {
             }
             total
         } else {
-            val videos = title(id)?.videos.orEmpty().filter { !it.url.isNullOrBlank() }
+            // Only Turkish uploads: the list also carries YouTube trailers, which played as the film.
+            val videos = title(id)?.videos.orEmpty().filter {
+                !it.url.isNullOrBlank() && it.language == "tr" && !it.url.contains("youtube")
+            }
             var total = 0
             // Turkce yuklemeler once; ilk calisan yeter.
-            for (video in videos.sortedBy { if (it.language == "tr") 0 else 1 }.take(3)) {
+            for (video in videos.take(3)) {
                 val url = video.url!!
                 val embed = if (url.startsWith("http")) url else resolveEmbed("$MAIN/${url.trimStart('/')}") ?: continue
                 total = emitEmbed(embed, subtitleCallback, callback)
@@ -262,6 +282,8 @@ internal object AnimeSource {
             }
             total
         }
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        throw e
     } catch (error: Throwable) {
         logError(Exception("AnimeciX dogrudan yol: ${error.message}", error))
         0
