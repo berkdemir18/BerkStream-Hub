@@ -324,10 +324,39 @@ class BerkStreamProvider : TmdbProvider() {
         @JsonProperty("original_name") val originalName: String? = null,
         @JsonProperty("release_date") val releaseDate: String? = null,
         @JsonProperty("first_air_date") val firstAirDate: String? = null,
+        @JsonProperty("original_language") val originalLanguage: String? = null,
+        @JsonProperty("genres") val genres: List<TmdbGenre> = emptyList(),
+        @JsonProperty("seasons") val seasons: List<TmdbSeasonInfo> = emptyList(),
     )
 
-    /** Oynat'a basildiginda hangi adlarla aranacagi + dogrulama yili. */
-    private data class TitleSet(val names: List<String>, val year: Int?)
+    private data class TmdbGenre(@JsonProperty("id") val id: Int? = null)
+
+    private data class TmdbSeasonInfo(
+        @JsonProperty("season_number") val seasonNumber: Int? = null,
+        @JsonProperty("episode_count") val episodeCount: Int? = null,
+    )
+
+    /**
+     * Oynat'a basildiginda hangi adlarla aranacagi + dogrulama yili.
+     * [anime]: Japon/Cin/Kore animasyonu; tarama anime yolundan gider (bkz. [AnimeSource]).
+     * [seasons]: TMDB sezon -> bolum sayisi; animede mutlak bolum sirasi icin.
+     */
+    private data class TitleSet(
+        val names: List<String>,
+        val year: Int?,
+        val anime: Boolean = false,
+        val seasons: Map<Int, Int> = emptyMap(),
+    ) {
+        /** TMDB'de S3B5 -> dizinin bastan kacinci bolumu (0. sezon/ozel bolumler sayilmaz). */
+        fun absoluteEpisode(season: Int?, episode: Int?): Int? {
+            if (season == null || episode == null || seasons.isEmpty()) return null
+            // TMDB bazi uzun animelerde sezon icinde de mutlak numara veriyor (One Piece 4. sezon
+            // 92. bolumle basliyor, 39 bolumluk sezonda "92"): o zaman numara zaten mutlak.
+            val size = seasons[season] ?: 0
+            if (size in 1 until episode) return episode
+            return seasons.filterKeys { it in 1 until season }.values.sum() + episode
+        }
+    }
 
     /**
      * Aranacak ad listesi.
@@ -374,7 +403,12 @@ class BerkStreamProvider : TmdbProvider() {
             .distinctBy { looseTitle(it) }
 
         val year = (info?.releaseDate ?: info?.firstAirDate)?.take(4)?.toIntOrNull()
-        return TitleSet(names.ifEmpty { listOf(fallback) }, year)
+        val meta = info ?: english
+        val anime = meta != null && AnimeSource.isAnime(meta.originalLanguage, meta.genres.mapNotNull { it.id })
+        val seasons = meta?.seasons.orEmpty()
+            .mapNotNull { s -> s.seasonNumber?.let { it to (s.episodeCount ?: 0) } }
+            .toMap()
+        return TitleSet(names.ifEmpty { listOf(fallback) }, year, anime, seasons)
     }
 
     private data class TmdbExternalIds(
@@ -1481,6 +1515,7 @@ class BerkStreamProvider : TmdbProvider() {
         val isSeries = season != null || episode != null
         rememberWatched(title)
         val titles = titleCandidates(link, title, isSeries)
+        val anime = titles.anime
 
         val linkCount = AtomicInteger(0)
         // Pass each playable link through immediately: the player can begin
@@ -1489,12 +1524,14 @@ class BerkStreamProvider : TmdbProvider() {
             linkCount.incrementAndGet()
             // newExtractorLink's constructor is suspend but has no network wait;
             // callbacks from provider scrapers are ordinary (non-suspend) functions.
-            callback(runBlocking { prioritizeLink(extractor) })
+            callback(runBlocking { prioritizeLink(extractor, anime) })
         }
 
         // Subtitle discovery is independent of video discovery. A slow subtitle
         // endpoint must not delay the first frame on a TV box.
-        val subtitleJob = if (BerkStreamSettings.subtitlesEnabled) {
+        // Anime: Turk anime kaynaklari fansub, altyazi goruntuye gomulu. Disaridan eklenen
+        // OpenSubtitles altyazisi otomatik secilince ekranda iki altyazi ust uste biniyordu.
+        val subtitleJob = if (BerkStreamSettings.subtitlesEnabled && !anime) {
             CoroutineScope(Dispatchers.IO).launch {
                 withTimeoutOrNull(4_000L) { loadStremioSubtitles(link, subtitleCallback) }
             }
@@ -1506,11 +1543,41 @@ class BerkStreamProvider : TmdbProvider() {
         // Dizide bolum bazli kayit yoksa dizinin son acildigi kaynak: sonraki bolum ayni
         // siteden, ayni dublaj/kaliteyle baslasin (Berk, 2026-09-25).
         val seriesKey = "${looseTitle(title)}_series".take(80)
-        val winner = winnerFor(contentKey) ?: if (isSeries) winnerFor(seriesKey) else null
+        // Anime: once dogrudan AnimeciX yolu (TMDB kimligiyle eslesme, tek istekte bolum,
+        // 1080p gomulu Turkce altyazi). Tutarsa 60 sitelik taramaya hic girilmiyor.
+        if (anime) {
+            val tmdbId = link.tmdbID
+            if (tmdbId != null) {
+                withTimeoutOrNull(15_000L) {
+                    AnimeSource.links(tmdbId, titles.names, season, episode, titles.seasons, subtitleCallback) {
+                        countingCallback(it)
+                    }
+                }
+            }
+            if (linkCount.get() > 0) {
+                subtitleJob?.join()
+                return true
+            }
+        }
+
+        val winner = (winnerFor(contentKey) ?: if (isSeries) winnerFor(seriesKey) else null)
+            ?.takeUnless { anime && it == AnimeSource.NAME }
         val ordered = validApisFor(
             if (isSeries) seriesTypes else movieTypes,
             if (isSeries) TvType.Anime else TvType.AnimeMovie,
-        )
+        ).let { list ->
+            // Anime yolu tutmadiysa: anime siteleri one, genel dizi/film siteleri arkaya.
+            // Eskiden anime siteleri listenin sonundaydi ve genel siteler bitmeden sira
+            // gelmiyordu. Gomulu AnimeciX saglayicisi en sona: bolum bulmak icin butun
+            // listeyi indiriyor, dogrudan yol zaten denendi.
+            if (!anime) list else list.sortedBy { api ->
+                when {
+                    api.name == AnimeSource.NAME -> 2
+                    TvType.Anime in api.supportedTypes -> 0
+                    else -> 1
+                }
+            }
+        }
 
         // Tek bir kaynakta: ara, dogru bolumu bul, linkleri cikar.
         suspend fun tryProvider(api: MainAPI): Boolean? {
@@ -1556,11 +1623,19 @@ class BerkStreamProvider : TmdbProvider() {
 
             // Kaynaklar sezon numarasini TMDB ile ayni vermiyor; tam eslesme
             // tutmazsa bolum numarasina, en son siraya bakilir.
+            // Anime siteleri bolumleri cogu zaman tek sezonda bastan sona numaraliyor
+            // (TurkAnime: One Piece 1..1155); TMDB ise sezonlara boluyor. Sitede o sezon
+            // yoksa bolum numarasi degil mutlak sira aranir. Eskiden JJK 2x05 icin 1x05,
+            // One Piece 21x10 icin 10. bolum aciliyordu.
+            val absolute = if (anime) titles.absoluteEpisode(season, episode) else null
+
             fun pick(episodes: List<com.lagradost.cloudstream3.Episode>): String? {
                 val match = episodes.firstOrNull {
                     (season == null || it.season == season) &&
                         (episode == null || it.episode == episode)
                 }
+                    ?: absolute?.takeIf { abs -> abs != episode && episodes.none { it.season == season } }
+                        ?.let { abs -> episodes.firstOrNull { it.episode == abs } }
                     ?: episodes.firstOrNull { episode != null && it.episode == episode }
                     ?: episode?.let { episodes.getOrNull(it - 1) }
                 return match?.data
@@ -1572,8 +1647,9 @@ class BerkStreamProvider : TmdbProvider() {
                 isSeries && response is AnimeLoadResponse -> {
                     // Dublaj varsa once o deneniyor; anime kaynaklari bolumleri
                     // zaten dublaj/altyazi durumuna gore ayirmis tutuyor.
+                    // Anime icin tersi: Berk altyazili istiyor, anime dublajlari az ve zayif.
                     val dubbedFirst = response.episodes.entries
-                        .sortedBy { if (it.key.name.contains("Dub", true)) 0 else 1 }
+                        .sortedBy { if (it.key.name.contains("Dub", true) != anime) 0 else 1 }
                         .flatMap { it.value }
                     pick(dubbedFirst)
                 }
@@ -1641,7 +1717,13 @@ class BerkStreamProvider : TmdbProvider() {
      * Kaynak adlari serbest metin oldugu icin etiketten anlasiliyor.
      */
     private fun linkRank(link: ExtractorLink): Int {
-        val label = looseTitle("${link.name} ${link.source}")
+        // looseTitle KULLANILMAMALI: "dublaj", "altyazi", "turkce" kelimelerini siliyor, bu
+        // yuzden bu siralama hic calismiyordu (her link 2 donuyordu).
+        val label = Normalizer.normalize("${link.name} ${link.source}", Normalizer.Form.NFD)
+            .replace(Regex("\\p{M}+"), "")
+            .replace('ı', 'i')
+            .lowercase()
+            .replace(Regex("[^a-z0-9]+"), " ")
         return when {
             dubbedWords.any { label.contains(it) } -> 0
             subbedWords.any { label.contains(it) } -> 1
@@ -1681,21 +1763,26 @@ class BerkStreamProvider : TmdbProvider() {
         }.getOrElse { link }
     }
 
-    private suspend fun prioritizeLink(link: ExtractorLink): ExtractorLink {
-        val boost = BerkStreamSettings.preferTurkishDub
+    private suspend fun prioritizeLink(link: ExtractorLink, anime: Boolean = false): ExtractorLink {
+        val boost = BerkStreamSettings.preferTurkishDub || anime
         val rank = linkRank(link)
         if (!boost || rank > 1) return link
         // The player sorts by quality, not callback order; keep the Turkish boost.
         return runCatching {
             val realQuality = Qualities.getStringByInt(link.quality)
             val label = if (rank == 0) "🇹🇷 Dublaj" else "🇹🇷 Altyazı"
+            // Film/dizide dublaj once (babanin istegi), animede altyazi once (Berk).
+            val first = if (anime) rank == 1 else rank == 0
+            // Ayni gruptaki linkler kendi aralarinda gercek kaliteye gore dizilsin: eskiden
+            // hepsi ayni degeri aliyordu, AnimeciX'in 480p'si 1080p'nin onune gecebiliyordu.
+            val within = link.quality.coerceIn(0, Qualities.P2160.value) / 60
             newExtractorLink(
                 source = link.source,
                 name = "$label • ${link.name} ($realQuality)",
                 url = link.url,
                 type = link.type,
             ) {
-                this.quality = Qualities.P2160.value + if (rank == 0) 100 else 50
+                this.quality = Qualities.P2160.value + (if (first) 100 else 50) + within
                 this.referer = link.referer
                 this.headers = link.headers
                 this.extractorData = link.extractorData
