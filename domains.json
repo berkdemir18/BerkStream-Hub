@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-09-28T19:22:09.862Z",
+  "overrides": {
+    "DiziPal": "https://dizipal1582.com",
+    "RoketDizi": "https://roketdizi.life"
+  },
+  "disabled": [
+    "CizgiDuo",
+    "DiziGom",
+    "HDStreamAble",
+    "FilmKovası",
+    "FilmMakinesi",
+    "FullHDFilmİzlede",
+    "HDFilmCehennemi",
+    "KoreanTurk",
+    "MixPlayHD",
+    "SuperFilmGeldi",
+    "UgurFilm",
+    "WFilmİzle"
+  ]
+}
