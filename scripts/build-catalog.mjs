@@ -125,13 +125,25 @@ const chosen = [...selected.values()].sort((a, b) =>
 );
 const verification = [];
 
+const unreachable = new Set();
 if (verifyFiles) {
   await mapLimit(chosen, 8, async ({ plugin, source }) => {
     const localCs3 =
       source.id === "berkstream" && localBuildDir
         ? path.resolve(localBuildDir, `${plugin.internalName}.cs3`)
         : null;
-    const bytes = localCs3 ? await readFile(localCs3) : await fetchBytes(plugin.url);
+    // Dis bir paket kaldirilabiliyor (2026-09-28: plt-stream.cs3 404). O paket katalogdan
+    // dusulur, derlemenin tamami dusmez.
+    const bytes = localCs3
+      ? await readFile(localCs3)
+      : await fetchBytes(plugin.url).catch((error) => {
+          console.warn(`UYARI: ${plugin.name} atlandi: ${error.message}`);
+          return null;
+        });
+    if (!bytes) {
+      unreachable.add(plugin);
+      return;
+    }
     const actualHash = sha256(bytes);
     // Yerel paketin hash'i Gradle manifestinde derleme anindaki haliyle duruyor;
     // PLT dex'i sonradan eklendigi icin dogru deger yalnizca dosyanin kendisi.
@@ -169,6 +181,9 @@ if (verifyFiles) {
   });
 }
 
+for (let i = chosen.length - 1; i >= 0; i--) {
+  if (unreachable.has(chosen[i].plugin)) chosen.splice(i, 1);
+}
 const plugins = chosen.map(({ plugin }) => plugin);
 // Ana katalog artik tek eklenti: BerkStream butun kaynaklari kendi icinde tasiyor.
 // Tekil paketler yedek katalogda (plugins-all.json) yayinlanmaya devam ediyor.
