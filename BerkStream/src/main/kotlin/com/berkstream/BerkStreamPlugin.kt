@@ -2,6 +2,8 @@ package com.berkstream
 
 import android.content.Context
 import android.util.Log
+import com.berkstream.extra.Dizigecesi
+import com.berkstream.extra.DramaDizilerim
 import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.plugins.BasePlugin
 import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
@@ -39,6 +41,18 @@ class BerkStreamPlugin : Plugin() {
             .onFailure { Log.e(TAG, "PLT motoru atlandi", it) }
         runCatching { loadVendoredSources(context) }
             .onFailure { Log.e(TAG, "Gomulu kaynak listesi acilamadi", it) }
+        registerExtraSources()
+    }
+
+    /**
+     * Upstream'den otomatik gomulemeyen, elle tasinmis kaynaklar (`extra/`).
+     * `vendor/` klasoru her derlemede bastan yazildigi icin bunlar ayri duruyor.
+     */
+    private fun registerExtraSources() {
+        listOf(::Dizigecesi, ::DramaDizilerim).forEach { create ->
+            runCatching { registerMainAPI(create()) }
+                .onFailure { Log.e(TAG, "Ek kaynak kaydedilemedi", it) }
+        }
     }
 
     /**

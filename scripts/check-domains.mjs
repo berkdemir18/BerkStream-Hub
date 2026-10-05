@@ -98,6 +98,12 @@ if (!skipNetwork) {
 const manualByKey = new Map(
   Object.entries(config.manualDomains ?? {}).map(([name, url]) => [normalizedName(name), url]),
 );
+// Turkiye'den erisilemeyen ama ABD'deki CI'dan ayakta gorunen siteler. Ad
+// cozuluyor, ayni Cloudflare IP'sindeki baska siteler aciliyor, ama bu
+// adlara baglanti asili kaliyor: site adina gore (SNI) engel. Probe bunu
+// goremiyor, eklenti de her acilista bu kaynaklari bekleyip yavasliyordu.
+// Olcum: 2026-10-05, Ankara ev baglantisi.
+const manualDisabled = new Set((config.manualDisabled ?? []).map(normalizedName));
 const upstreamByKey = new Map(
   Object.entries(upstream).map(([name, url]) => [normalizedName(name), url]),
 );
@@ -144,7 +150,7 @@ const overrides = {};
 const disabled = [];
 for (const provider of checked) {
   if (provider.replacement) overrides[provider.name] = provider.replacement;
-  if (!provider.alive) disabled.push(provider.name);
+  if (!provider.alive || manualDisabled.has(provider.key)) disabled.push(provider.name);
 }
 
 const domains = {

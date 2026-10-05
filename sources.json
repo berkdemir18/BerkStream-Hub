@@ -63,10 +63,23 @@
       "priority": 80
     }
   ],
-  "vendorExcludedPlugins": [],
+  "vendorExcludedPlugins": [
+    "Dizigecesi",
+    "DramaDizilerim"
+  ],
   "bundlePltEngine": true,
   "manualDomains": {
     "RoketDizi": "https://roketdizi.life",
-    "DiziPal": "https://dizipal1582.com"
-  }
+    "DiziPal": "https://dizipal1586.com",
+    "YabanciDizi": "https://yabancidizi.news"
+  },
+  "manualDisabled": [
+    "4KFilmİzlesene",
+    "DiziMag",
+    "Filmİzleİlk",
+    "FullHDFilm",
+    "HDFilmCehennemi2",
+    "HDFilmİzle",
+    "TvDiziler"
+  ]
 }
