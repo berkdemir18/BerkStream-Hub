@@ -182,6 +182,7 @@ class BerkStreamProvider : TmdbProvider() {
         "Dizilla", "DiziPal", "DiziYou", "DiziBox", "SezonlukDizi", "DiziGom", "DiziMag",
         "RoketDizi", "YabanciDizi", "TvDiziler", "DiziMom", "DDizi", "DiziKorea",
         "powerDizi", "DiziPalOriginal", "WebdramaTurkey2", "KoreanTurk",
+        "Dizigecesi", "DiziPod", "DramaDizilerim",
         // Film
         "HDFilmCehennemi", "HDFilmCehennemi2", "HDFilmDelisi", "HDFilmİzle", "HDFilmSitesi",
         "FilmMakinesi", "FullHDFilm", "FullHDFilmizlesene", "FullHDFilmİzlede",
