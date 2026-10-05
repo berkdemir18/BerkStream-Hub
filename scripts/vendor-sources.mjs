@@ -30,6 +30,21 @@ const blockedNamePatterns = (config.blockedNamePatterns ?? []).map(normalizedNam
 const excluded = new Set((config.excludedPlugins ?? []).map(normalizedName));
 const vendorExcluded = new Set((config.vendorExcludedPlugins ?? []).map(normalizedName));
 
+/**
+ * Upstream kodu degistirilmeden tasiniyor, ama site degisip upstream geride
+ * kalinca kaynak haftalarca olu duruyor (2026-10-05: JetFilmizle aramayi
+ * GET'e cevirmis, upstream hala POST atiyordu). `vendorPatches` kucuk,
+ * gerekceli duzeltmeleri her vendor turunda yeniden uyguluyor. Desen artik
+ * eslesmiyorsa (upstream duzeltmis ya da kod degismis) yama UYARI verip
+ * atlanir; derleme dusmez.
+ */
+const vendorPatches = (config.vendorPatches ?? []).map((patch) => ({
+  ...patch,
+  key: normalizedName(patch.module),
+  regex: new RegExp(patch.pattern, "g"),
+  hits: 0,
+}));
+
 function normalizedName(value) {
   return String(value)
     .normalize("NFKD")
@@ -178,7 +193,13 @@ for (const item of [...selected.values()].sort((a, b) => a.module.localeCompare(
   const parsed = [];
   const packageCounts = new Map();
   for (const file of files) {
-    const text = await readFile(file, "utf8");
+    let text = await readFile(file, "utf8");
+    for (const patch of vendorPatches) {
+      if (patch.key !== normalizedName(item.module)) continue;
+      const patched = text.replace(patch.regex, patch.replace);
+      if (patched !== text) patch.hits++;
+      text = patched;
+    }
     const oldPackage = (text.match(/^[ \t]*package\s+([\w.]+)/m) || [])[1] ?? null;
     if (oldPackage) packageCounts.set(oldPackage, (packageCounts.get(oldPackage) ?? 0) + 1);
     parsed.push({ file, text, oldPackage });
@@ -332,6 +353,11 @@ const report = {
   skipped: skipped.sort((a, b) => a.module.localeCompare(b.module, "tr")),
   failures,
 };
+for (const patch of vendorPatches) {
+  if (patch.hits === 0) console.warn(`! yama uygulanmadi (upstream degismis olabilir): ${patch.module} -- ${patch.reason}`);
+  else console.log(`  yama: ${patch.module} -- ${patch.reason}`);
+}
+
 await writeFile(reportFile, `${JSON.stringify(report, null, 2)}\n`);
 
 console.log(`BerkStream tek eklenti: ${vendored.length} kaynak gomuldu (${entries.length} plugin sinifi).`);

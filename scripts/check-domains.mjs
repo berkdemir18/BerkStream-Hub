@@ -115,6 +115,12 @@ const checked = await mapLimit(providers, 16, async (provider) => {
   // 2026-09-19'da tam olarak boyle kayboldu: yerelde olu, CI'da canli.
   // `manualDomains` insan karari -- probe'a sorulmaz.
   const manual = manualByKey.get(provider.key);
+  // Adres ayniysa da probe'a sorulmaz: HDFilmCehennemi Cloudflare'in
+  // arkasinda ve GitHub'in veri merkezi IP'lerine kapali; CI onu her hafta
+  // "olu" deyip kapatiyordu, Turkiye'den ise acik (2026-10-05).
+  if (manual && manual === provider.mainUrl) {
+    return { ...provider, status: 0, alive: true, manual: true };
+  }
   if (manual && manual !== provider.mainUrl) {
     return {
       ...provider,

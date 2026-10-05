@@ -71,7 +71,8 @@
   "manualDomains": {
     "RoketDizi": "https://roketdizi.life",
     "DiziPal": "https://dizipal1586.com",
-    "YabanciDizi": "https://yabancidizi.news"
+    "YabanciDizi": "https://yabancidizi.news",
+    "HDFilmCehennemi": "https://www.hdfilmcehennemi.nl"
   },
   "manualDisabled": [
     "4KFilmİzlesene",
@@ -81,5 +82,19 @@
     "HDFilmCehennemi2",
     "HDFilmİzle",
     "TvDiziler"
+  ],
+  "vendorPatches": [
+    {
+      "module": "JetFilmizle",
+      "reason": "site aramayi GET /arama?q= yapti, upstream POST atip 404 aliyordu (2026-10-05)",
+      "pattern": "app\\.post\\(\\s*\"\\$\\{mainUrl\\}/arama\\?q=\",\\s*referer\\s*=\\s*\"\\$\\{mainUrl\\}/\",\\s*data\\s*=\\s*mapOf\\(\"s\" to query\\)\\s*\\)",
+      "replace": "app.get(\"${mainUrl}/arama?q=${java.net.URLEncoder.encode(query, \"UTF-8\")}\", referer = \"${mainUrl}/\")"
+    },
+    {
+      "module": "HDFilmCehennemi",
+      "reason": "arama istegi Cloudflare asicisini kullanmiyordu; Turkiye'den arama hep bos donuyordu (2026-10-05)",
+      "pattern": "(\"\\$\\{mainUrl\\}/search\\?q=\\$\\{query\\}\",\\s*headers\\s*=\\s*mapOf\\(\"X-Requested-With\" to \"fetch\"\\))(\\s*\\))",
+      "replace": "$1,\n            interceptor = interceptor$2"
+    }
   ]
 }
