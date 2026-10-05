@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-10-05T18:09:33.002Z",
+  "overrides": {
+    "RoketDizi": "https://roketdizi.life",
+    "YabanciDizi": "https://yabancidizi.news"
+  },
+  "disabled": [
+    "4KFilmİzlesene",
+    "CizgiDuo",
+    "DiziGom",
+    "DiziMag",
+    "HDStreamAble",
+    "Filmİzleİlk",
+    "FilmKovası",
+    "FilmMakinesi",
+    "FullHDFilm",
+    "FullHDFilmİzlede",
+    "HDFilmCehennemi2",
+    "HDFilmİzle",
+    "KoreanTurk",
+    "MixPlayHD",
+    "SuperFilmGeldi",
+    "TvDiziler",
+    "UgurFilm",
+    "WFilmİzle"
+  ]
+}
