@@ -864,7 +864,7 @@ class HDFilmCehennemi : MainAPI() {
         var foundScript: String? = null
         var foundUnpacked: String? = null
 
-        val unpackedFromHtml = unpackPackerJs(rawHtml)
+        val unpackedFromHtml = if (decryptedUrl != null) null else unpackPackerJs(rawHtml)
         if (unpackedFromHtml != null) {
             val res = decryptLocalUrl(unpackedFromHtml, rawHtml)
             if (res != null) {

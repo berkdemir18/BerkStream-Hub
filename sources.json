@@ -150,6 +150,12 @@
       "reason": "site Close oynaticisinin adresini yeni fonksiyonla sifreliyor; upstream bozuk adres veriyordu, once BerkStream cozucusu deneniyor (2026-10-28, Attack Force Z)",
       "pattern": "var decryptedUrl: String\\? = null",
       "replace": "var decryptedUrl: String? = com.berkstream.extra.HdfcCloseDecoder.decode(rawHtml, url)"
+    },
+    {
+      "module": "HDFilmCehennemi",
+      "reason": "upstream'in ilk cozum adimi kosulsuz calisip BerkStream cozucusunun dogru adresini bozuk sonucla eziyordu (2026-10-28)",
+      "pattern": "val unpackedFromHtml = unpackPackerJs\\(rawHtml\\)",
+      "replace": "val unpackedFromHtml = if (decryptedUrl != null) null else unpackPackerJs(rawHtml)"
     }
   ]
 }
