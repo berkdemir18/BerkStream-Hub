@@ -27,7 +27,9 @@ object HdfcCloseDecoder {
         val parts = splitArg.find(call)?.let { m -> m.groupValues[1].split(m.groupValues[2]) }
             ?: if (call.startsWith("[")) quoted.findAll(call).map { it.groupValues[1] }.toList() else return null
         if (parts.size < 13) return null
-        val host = java.net.URI(embedUrl).host ?: return null
+        // URI kullanilmiyor: upstream adresi "/{rapidrame_id}" ekiyle veriyor ve
+        // URI o suslu parantezde patlayip cozucuyu sessizce null'a dusuruyordu.
+        val host = Regex("""^https?://([^/:?#]+)""").find(embedUrl)?.groupValues?.get(1) ?: return null
         decrypt(parts, host).takeIf { it.startsWith("http") }
     }.getOrNull()
 
