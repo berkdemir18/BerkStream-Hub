@@ -1525,6 +1525,16 @@ class BerkStreamProvider : TmdbProvider() {
         val anime = titles.anime
 
         val linkCount = AtomicInteger(0)
+        // "Neden acilmadi" karti icin: kac site tarandi, yapim hangilerinde bulundu.
+        val scanned = AtomicInteger(0)
+        val foundOn = java.util.Collections.synchronizedSet(LinkedHashSet<String>())
+        fun finish(result: Boolean): Boolean {
+            BerkStreamSettings.noteScan(
+                title, if (isSeries) "${season ?: 1}. Sezon ${episode ?: 1}. Bölüm" else null,
+                scanned.get(), synchronized(foundOn) { foundOn.toList() }, linkCount.get(),
+            )
+            return result
+        }
         // Pass each playable link through immediately: the player can begin
         // buffering while other sites scan. The app caches and deduplicates links.
         val countingCallback: (ExtractorLink) -> Unit = { extractor ->
@@ -1565,7 +1575,7 @@ class BerkStreamProvider : TmdbProvider() {
             }
             if (linkCount.get() > 0) {
                 subtitleJob?.join()
-                return true
+                return finish(true)
             }
         }
 
@@ -1593,6 +1603,7 @@ class BerkStreamProvider : TmdbProvider() {
 
         // Tek bir kaynakta: ara, dogru bolumu bul, linkleri cikar.
         suspend fun tryProvider(api: MainAPI): Boolean? {
+            scanned.incrementAndGet()
             // Yil uyusmuyorsa bu baska yapim. Diller arasi esleme acildigi icin
             // sart oldu: "Avci" aramasi 1978 yapimini da 2024 yapimini da
             // getiriyor ve ikisi de ada birebir uyuyor.
@@ -1670,6 +1681,7 @@ class BerkStreamProvider : TmdbProvider() {
                 !isSeries && response is MovieLoadResponse -> response.dataUrl
                 else -> null
             } ?: return null
+            foundOn.add(api.name)
 
             val before = linkCount.get()
             api.loadLinks(innerData, isCasting, subtitleCallback) { link -> countingCallback(withSite(link, api.name)) }
@@ -1691,7 +1703,7 @@ class BerkStreamProvider : TmdbProvider() {
                 // ve daha once acilan icerikler "baglanti bulunamadi" veriyor.
                 if (linkCount.get() > 0) {
                     subtitleJob?.join()
-                    return true
+                    return finish(true)
                 }
             }
         }
@@ -1719,7 +1731,7 @@ class BerkStreamProvider : TmdbProvider() {
         // The player already received video callbacks, so subtitles can finish
         // without delaying the first frame; join before the caller closes its callback.
         subtitleJob?.join()
-        return linkCount.get() > 0
+        return finish(linkCount.get() > 0)
     }
 
     private val dubbedWords = listOf("dublaj", "dublajli", "dubbed", "turkce dublaj", "tr dublaj")

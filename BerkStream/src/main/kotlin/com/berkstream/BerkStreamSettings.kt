@@ -52,6 +52,23 @@ object BerkStreamSettings {
     val genreShelvesEnabled: Boolean get() = store?.getBoolean(KEY_GENRES, true) ?: true
     val discoveryShelvesEnabled: Boolean get() = store?.getBoolean(KEY_DISCOVERY, true) ?: true
 
+    /**
+     * Son "Oynat" taramasinin ozeti. BerkStream uygulamasi "Baglanti bulunamadi"
+     * yerine nedenini gosterebilsin diye ayni "berkstream" deposuna yaziliyor
+     * (uygulama: ui/berk/NoSourceNotice.kt; anahtar adlari iki tarafta ayni kalmali).
+     * `foundOn`: yapimi (dizide o bolumu) bulan siteler; bos ise hicbir sitede yok.
+     */
+    fun noteScan(title: String, episodeLabel: String?, scanned: Int, foundOn: Collection<String>, links: Int) {
+        store?.edit()
+            ?.putString("last_scan_title", title)
+            ?.putString("last_scan_episode", episodeLabel)
+            ?.putInt("last_scan_scanned", scanned)
+            ?.putString("last_scan_found_on", foundOn.joinToString("|"))
+            ?.putInt("last_scan_links", links)
+            ?.putLong("last_scan_at", System.currentTimeMillis())
+            ?.apply()
+    }
+
     /** Kac link toplanınca tarama durdurulsun. */
     val linkTarget: Int get() = store?.getInt(KEY_LINK_TARGET, 6) ?: 6
 
