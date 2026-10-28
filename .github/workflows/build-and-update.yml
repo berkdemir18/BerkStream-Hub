@@ -53,42 +53,6 @@ jobs:
           chmod +x gradlew
           ./gradlew make makePluginsJson ensureJarCompatibility
 
-      - name: Bundle closed-source PLT engine
-        run: |
-          set -euo pipefail
-          # PLT'nin dex'i hazir derlenmis geliyor ve d8 onu yeniden islerken
-          # desugar uyarisi veriyor. Kurulum hatasi arastirilirken bu adim
-          # sources.json'daki bayrakla kapatilabiliyor.
-          if [ "$(node -p "require('./sources.json').bundlePltEngine === true")" != "true" ]; then
-            echo "PLT dex birlestirme kapali (sources.json: bundlePltEngine=false)."
-            exit 0
-          fi
-          temp_dir="$(mktemp -d)"
-          # Upstream dosyayi kaldirabiliyor (2026-09-28: 404). O zaman yayin PLT'siz devam eder;
-          # eklenti motoru ayri yukledigi icin motor yoksa sadece o kaynak eksik kalir.
-          if ! curl -fsSL "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plt-stream.cs3" -o "$temp_dir/plt-stream.cs3"; then
-            echo "::warning::PLT motoru indirilemedi, paket PLT'siz yayinlaniyor."
-            exit 0
-          fi
-          mkdir -p "$temp_dir/berk" "$temp_dir/plt"
-          unzip -q BerkStream/build/BerkStream.cs3 -d "$temp_dir/berk"
-          unzip -q -o "$temp_dir/plt-stream.cs3" 'classes*.dex' -d "$temp_dir/plt"
-          # PLT'nin dex'i d8'den GECIRILMIYOR. Yeniden isleyince desugar
-          # uyarisi veriyordu ve tek dex'e karistigi icin bir sorun cikarsa
-          # BerkStreamPlugin de yuklenemiyordu. Ayri bir classesN.dex olarak
-          # eklenince PathClassLoader ikisini de okuyor ama PLT tarafindaki
-          # bir bozukluk yalnizca PLT motorunu dusuruyor.
-          index=2
-          for dex in "$temp_dir"/plt/classes*.dex; do
-            while [ -e "$temp_dir/berk/classes${index}.dex" ]; do index=$((index + 1)); done
-            cp "$dex" "$temp_dir/berk/classes${index}.dex"
-            index=$((index + 1))
-          done
-          echo "Paketteki dex dosyalari:"
-          ls -la "$temp_dir/berk"
-          rm -f BerkStream/build/BerkStream.cs3
-          (cd "$temp_dir/berk" && zip -qr "$GITHUB_WORKSPACE/BerkStream/build/BerkStream.cs3" .)
-
       - name: Build and verify merged catalog
         env:
           BERKSTREAM_REPOSITORY: ${{ github.repository }}

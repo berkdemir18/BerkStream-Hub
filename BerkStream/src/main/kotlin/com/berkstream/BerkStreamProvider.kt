@@ -161,7 +161,7 @@ class BerkStreamProvider : TmdbProvider() {
     private val wantedSubtitleLanguages = setOf("tur", "tr", "eng", "en")
 
     private val liveProviderPriority =
-        listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "İnatBox", "RecTV BC", "vavooSpor", "BerkStream Canlı")
+        listOf("CanliTV", "InatBox", "RecTV", "İnatBox", "RecTV BC", "vavooSpor", "BerkStream Canlı")
 
     private val movieTypes = setOf(TvType.Movie, TvType.AnimeMovie)
 
@@ -177,7 +177,6 @@ class BerkStreamProvider : TmdbProvider() {
      * eslesmeyen ad listenin sonuna dusuyor ve iyi kaynak taramanin disinda kaliyor.
      */
     private val providerPriority = listOf(
-        "BerkStream Kaynakları", "plt-stream",
         // Dizi
         "Dizilla", "DiziPal", "DiziYou", "DiziBox", "SezonlukDizi", "DiziGom", "DiziMag",
         "RoketDizi", "YabanciDizi", "TvDiziler", "DiziMom", "DDizi", "DiziKorea",

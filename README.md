@@ -8,8 +8,8 @@ Pakette ayrıca `BerkStream` adlı özel bir ana provider bulunur. Ana sayfası 
 günün popülerleri, en çok izlenen filmler, gündemdeki diziler, Netflix, Prime Video,
 Disney+, HBO Max, tabii, canlı TV ve günlük sürpriz seçki raflarından oluşur.
 Platform rafları Türkiye kataloğuna göre film ve dizileri ayrı ayrı toplayıp
-dönüşümlü gösterir. Film açıldığında kurulu Türkçe provider'ları tarar;
-paketin içine gömülü birleşik kaynak motoru ilk tercihidir. Film ve dizilerde
+dönüşümlü gösterir. Film açıldığında kurulu Türkçe provider'ları tarar.
+Film ve dizilerde
 bulunan farklı sunucular ile altyazılar CloudStream oynatıcısının kaynak ve altyazı
 menülerinde birlikte seçilebilir.
 
@@ -44,8 +44,8 @@ içinde tek giriş noktası olabilir — ve hepsi üretilen `VendoredSources.kt`
 üzerinden `BerkStreamPlugin` tarafından kaydedilir.
 
 Her kaynak ayrı ayrı `runCatching` içinde yüklenir: biri patlarsa diğerleri açılmaya
-devam eder. Kapalı kaynak olan birleşik motor derlenemediği için CI, PLT'nin
-yayımladığı `.cs3`in dex'ini pakete ekler ve motor yansımayla ayağa kaldırılır.
+devam eder. PLT Stream motoru 2026-10-28'de paketten çıkarıldı (kendi deposundan
+kaldırılmıştı); PLT'nin yalnızca adres listesi domain taramasında kullanılıyor.
 
 Kaynak listesi ve neyin neden atlandığı `vendor-report.json` dosyasında.
 
@@ -58,7 +58,6 @@ npm run vendor
 ## Kaynaklar
 
 - Resmî, kamuya açık CloudStream sağlayıcıları
-- Kapalı kaynak bir birleşik sağlayıcı motoru (ikili olarak eklenir)
 - Birincil Türkçe sağlayıcı topluluğu deposu
 - İkincil Türkçe sağlayıcı topluluğu deposu
 - Kraptor deposu (asıl depo 2026-08'de kapandı; topluluğun bakımını sürdürdüğü

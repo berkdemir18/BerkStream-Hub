@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import com.berkstream.extra.Dizigecesi
 import com.berkstream.extra.DramaDizilerim
-import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.plugins.BasePlugin
 import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
 import com.lagradost.cloudstream3.plugins.Plugin
@@ -37,8 +36,6 @@ class BerkStreamPlugin : Plugin() {
             .onFailure { Log.e(TAG, "Canli saglayici kaydedilemedi", it) }
         runCatching { registerMainAPI(BerkStreamProvider()) }
             .onFailure { Log.e(TAG, "BerkStream saglayicisi kaydedilemedi", it) }
-        runCatching { loadPltEngine() }
-            .onFailure { Log.e(TAG, "PLT motoru atlandi", it) }
         runCatching { loadVendoredSources(context) }
             .onFailure { Log.e(TAG, "Gomulu kaynak listesi acilamadi", it) }
         registerExtraSources()
@@ -53,19 +50,6 @@ class BerkStreamPlugin : Plugin() {
             runCatching { registerMainAPI(create()) }
                 .onFailure { Log.e(TAG, "Ek kaynak kaydedilemedi", it) }
         }
-    }
-
-    /**
-     * PLT Stream kapali kaynak oldugu icin kodu derlenemiyor; CI derlemesi onun
-     * dex'ini bu pakete ekliyor ve motor buradan yansimayla ayaga kaldiriliyor.
-     */
-    private fun loadPltEngine() {
-        runCatching {
-            val engine = Class.forName("com.pltmustafa.pltstream.PLTStream")
-                .getDeclaredConstructor().newInstance() as MainAPI
-            engine.name = "BerkStream Kaynakları"
-            registerMainAPI(engine)
-        }.onFailure { Log.w(TAG, "PLT motoru yuklenemedi", it) }
     }
 
     /**

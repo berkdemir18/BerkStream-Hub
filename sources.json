@@ -1,13 +1,6 @@
 {
   "sources": [
     {
-      "id": "plt-stream",
-      "name": "PLT Stream",
-      "manifest": "https://raw.githubusercontent.com/pltmustafa/plt-stream/builds/plugins.json",
-      "repository": "https://github.com/pltmustafa/plt-stream",
-      "priority": 110
-    },
-    {
       "id": "kraptor",
       "name": "Kraptor Turkish Providers",
       "manifest": "https://raw.githubusercontent.com/aytzey/cs-kraptor/builds/plugins.json",
@@ -124,7 +117,6 @@
     "YouTube",
     "WebDramaTurkey"
   ],
-  "bundlePltEngine": true,
   "manualDomains": {
     "RoketDizi": "https://roketdizi.life",
     "DiziPal": "https://dizipal1586.com",
