@@ -1,6 +1,7 @@
 package com.berkstream.extra
 
 import android.util.Base64
+import android.util.Log
 
 /**
  * HDFilmCehennemi "Close" oynaticisinin video adresi cozucusu.
@@ -31,10 +32,17 @@ object HdfcCloseDecoder {
         // URI o suslu parantezde patlayip cozucuyu sessizce null'a dusuruyordu.
         val host = Regex("""^https?://([^/:?#]+)""").find(embedUrl)?.groupValues?.get(1) ?: return null
         decrypt(parts, host).takeIf { it.startsWith("http") }
-    }.getOrNull()
+            ?: null.also { Log.w(TAG, "Cozum adres vermedi: $embedUrl") }
+    }.onFailure { Log.e(TAG, "Cozulemedi: $embedUrl", it) }.getOrNull()
 
-    private fun atob(s: String): String =
-        String(Base64.decode(s, Base64.DEFAULT), Charsets.ISO_8859_1)
+    private const val TAG = "BerkStreamHdfc"
+
+    // Android'in cozucusu eksik '=' dolgusunda "bad base-64" atiyor; tarayicinin
+    // atob'u ve JVM'deki testler bunu tolere ettigi icin ilk surum cihazda susuyordu.
+    private fun atob(s: String): String {
+        val padded = s.trim().let { it + "=".repeat((4 - it.length % 4) % 4) }
+        return String(Base64.decode(padded, Base64.DEFAULT), Charsets.ISO_8859_1)
+    }
 
     fun decrypt(input: List<String>, host: String): String {
         val parts = input.toMutableList()
