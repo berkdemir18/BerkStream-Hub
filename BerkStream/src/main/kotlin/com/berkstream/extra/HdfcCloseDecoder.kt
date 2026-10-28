@@ -23,12 +23,12 @@ object HdfcCloseDecoder {
 
     /** @return cozulen adres; sayfa bu duzende degilse null. */
     fun decode(html: String, embedUrl: String): String? = runCatching {
-        val variable = fileVar.find(html)?.groupValues?.get(1) ?: return null
+        val variable = fileVar.find(html)?.groupValues?.get(1) ?: return miss("file degiskeni yok", html, "jwplayer")
         val call = Regex("""(?:var|let|const)\s+${Regex.escape(variable)}\s*=\s*[A-Za-z_$][\w$]*\s*\((.*?)\)\s*;""", RegexOption.DOT_MATCHES_ALL)
-            .find(html)?.groupValues?.get(1)?.trim() ?: return null
+            .find(html)?.groupValues?.get(1)?.trim() ?: return miss("$variable atamasi yok", html, variable)
         val parts = splitArg.find(call)?.let { m -> m.groupValues[1].split(m.groupValues[2]) }
-            ?: if (call.startsWith("[")) quoted.findAll(call).map { it.groupValues[1] }.toList() else return null
-        if (parts.size < 13) return null
+            ?: if (call.startsWith("[")) quoted.findAll(call).map { it.groupValues[1] }.toList() else return miss("arguman tanınmadı", call, "")
+        if (parts.size < 13) return miss("parca az: ${parts.size}", call, "")
         // Parcalar JS dizgesi: tarayici "\/" gibi kacislari cozerek okuyor.
         // Ham birakinca bazi sayfalarda base64 bozuluyordu (15 istekte 4).
         val unescaped = parts.map { it.replace(jsEscape) { m -> m.groupValues[1] } }
@@ -40,6 +40,13 @@ object HdfcCloseDecoder {
     }.onFailure { Log.e(TAG, "Cozulemedi: $embedUrl", it) }.getOrNull()
 
     private const val TAG = "BerkStreamHdfc"
+
+    /** Sayfa beklenen duzende degil: nedenini ve ilgili kesiti loga yaz. */
+    private fun miss(reason: String, text: String, near: String): String? {
+        val at = if (near.isEmpty()) 0 else text.indexOf(near).coerceAtLeast(0)
+        Log.w(TAG, "$reason (uzunluk ${text.length}): ${text.substring(at, minOf(text.length, at + 300))}")
+        return null
+    }
 
     // Android'in cozucusu eksik '=' dolgusunda "bad base-64" atiyor; tarayicinin
     // atob'u ve JVM'deki testler bunu tolere ettigi icin ilk surum cihazda susuyordu.
