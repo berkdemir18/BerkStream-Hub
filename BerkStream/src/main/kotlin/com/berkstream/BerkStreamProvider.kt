@@ -183,10 +183,6 @@ class BerkStreamProvider : TmdbProvider() {
         "RoketDizi", "YabanciDizi", "TvDiziler", "DiziMom", "DDizi", "DiziKorea",
         "powerDizi", "DiziPalOriginal", "WebdramaTurkey2", "KoreanTurk",
         "Dizigecesi", "DiziPod", "DramaDizilerim",
-        // Kraptor (v39): yerli diziler kanallarin kendi sitesinden de aranir.
-        "DiziPalGuncel", "DiziPalOrjinal",
-        "Dizilife", "DiziYo", "DiziBal", "DiziBol", "DiziPalOrg", "BirAsyaDizi",
-        "Kanal D", "ATV", "Show TV", "Star TV", "Tv8",
         // Film
         "HDFilmCehennemi", "HDFilmCehennemi2", "HDFilmDelisi", "HDFilmİzle", "HDFilmSitesi",
         "FilmMakinesi", "FullHDFilm", "FullHDFilmizlesene", "FullHDFilmİzlede",
@@ -194,6 +190,11 @@ class BerkStreamProvider : TmdbProvider() {
         "FilmModu", "FilmKovası", "SelcukFlix", "UgurFilm", "XPrime", "Sinewix",
         "4KFilmİzlesene", "WFilmİzle", "Filmİzleİlk", "Watch2Movies", "KultFilmler",
         "RareFilmm", "RecTV", "powerSinema",
+        // v39 ile gelen Kraptor/neowatch kaynaklari: denenmis kaynaklarin
+        // arkasinda duruyor ki take(18) onlari kesmesin; link dondurdukce
+        // successScore zaten one aliyor. Yerli diziler kanal sitelerinden de aranir.
+        "DiziPalGuncel", "DiziPalOrjinal", "Dizilife", "DiziYo", "DiziBal", "DiziBol",
+        "DiziPalOrg", "BirAsyaDizi", "Kanal D", "ATV", "Show TV", "Star TV", "Tv8",
         "HDFilmCehennemi1", "FilmEkseni", "Sinefy", "Sinezy", "Filmzal", "LoveFilm",
         "FilmIzyon", "RecTV BC", "İnatBox",
         // Anime/cizgi: listede olmadiklari icin hepsi en sona dusuyor ve
