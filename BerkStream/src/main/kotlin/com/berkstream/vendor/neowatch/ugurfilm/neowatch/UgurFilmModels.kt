@@ -1,9 +1,7 @@
-// BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (UgurFilm).
-// Kaynak paket: com.keyiflerolsun -> com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun
+// BerkStream tarafindan NeO Turkish Providers deposundan derlendi (UgurFilm).
+// Kaynak paket: com.neowatch -> com.berkstream.vendor.neowatch.ugurfilm.neowatch
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
-// ! Bu araç @keyiflerolsun tarafından | @KekikAkademi için yazılmıştır.
-
-package com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun
+package com.berkstream.vendor.neowatch.ugurfilm.neowatch
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

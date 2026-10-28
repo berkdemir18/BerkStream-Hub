@@ -1,9 +1,7 @@
-// BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (SuperFilmGeldi).
-// Kaynak paket: com.keyiflerolsun -> com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun
+// BerkStream tarafindan NeO Turkish Providers deposundan derlendi (SuperFilmGeldi).
+// Kaynak paket: com.neowatch -> com.berkstream.vendor.neowatch.superfilmgeldi.neowatch
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
-// ! Bu araç @keyiflerolsun tarafından | @KekikAkademi için yazılmıştır.
-
-package com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun
+package com.berkstream.vendor.neowatch.superfilmgeldi.neowatch
 
 import android.util.Log
 import com.lagradost.cloudstream3.*
@@ -19,7 +17,7 @@ open class MixTiger : ExtractorApi() {
         val m3uLink:String?
         val extRef  = referer ?: ""
         val postUrl = "${url}?do=getVideo"
-        Log.d("Kekik_${this.name}", "postUrl » $postUrl")
+        Log.d("NeO_${this.name}", "postUrl » $postUrl")
 
         val response = app.post(
             postUrl,
@@ -36,11 +34,11 @@ open class MixTiger : ExtractorApi() {
         )
 
         val videoResponse = response.parsedSafe<FirePlayer>() ?: throw ErrorLoadingException("peace response is null")
-        Log.d("Kekik_${this.name}", "videoResponse » $videoResponse")
+        Log.d("NeO_${this.name}", "videoResponse » $videoResponse")
 
         if (videoResponse.videoSrc != null) {
             m3uLink = videoResponse.videoSrc
-            Log.d("Kekik_${this.name}", "m3uLink » $m3uLink")
+            Log.d("NeO_${this.name}", "m3uLink » $m3uLink")
 
             loadExtractor(m3uLink, extRef, subtitleCallback, callback)
         } else {
@@ -51,14 +49,13 @@ open class MixTiger : ExtractorApi() {
                 null
             }
 
-            Log.d("Kekik_${this.name}", "m3uLink » $m3uLink")
+            Log.d("NeO_${this.name}", "m3uLink » $m3uLink")
 
             callback.invoke(
                 newExtractorLink(
-                    source  = this.name,
-                    name    = this.name,
-                    url     = m3uLink ?: throw ErrorLoadingException("m3u link not found"),
-                    type    = INFER_TYPE
+                    source = this.name,
+                    name   = this.name,
+                    url    = m3uLink ?: throw ErrorLoadingException("m3u link not found")
                 ) {
                     this.referer = if (m3uLink.contains("disk.yandex")) "" else extRef
                     this.quality = Qualities.Unknown.value

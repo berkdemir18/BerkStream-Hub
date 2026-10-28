@@ -94,8 +94,10 @@ const allCandidates = loadedSources.flatMap((source) =>
     })),
   );
 const candidates = allCandidates
-  .filter(({ plugin, key }) =>
-    allowedStatuses.has(plugin.status) &&
+  // Kaynak bazinda `includeStatuses` verilebilir: bazi depolar calisan
+  // eklentilerini de beta (status 3) olarak yayimliyor.
+  .filter(({ plugin, source, key }) =>
+    (source.includeStatuses ? source.includeStatuses.includes(plugin.status) : allowedStatuses.has(plugin.status)) &&
     !excluded.has(key) &&
     plugin.isAdult !== true &&
     !blockedNamePatterns.some((pattern) => key.includes(pattern)),

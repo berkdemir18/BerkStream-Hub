@@ -1,9 +1,7 @@
-// BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (UgurFilm).
-// Kaynak paket: com.keyiflerolsun -> com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun
+// BerkStream tarafindan NeO Turkish Providers deposundan derlendi (UgurFilm).
+// Kaynak paket: com.neowatch -> com.berkstream.vendor.neowatch.ugurfilm.neowatch
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
-// ! Bu araç @keyiflerolsun tarafından | @KekikAkademi için yazılmıştır.
-
-package com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun
+package com.berkstream.vendor.neowatch.ugurfilm.neowatch
 
 import android.util.Log
 import com.lagradost.cloudstream3.*
@@ -16,30 +14,29 @@ open class MailRu : ExtractorApi() {
     override val requiresReferer = false
 
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit) {
-        Log.d("Kekik_${this.name}", "url » $url")
+        Log.d("NeO_${this.name}", "url » $url")
 
         val vidId     = url.substringAfter("video/embed/").trim()
         val videoReq  = app.get("${mainUrl}/+/video/meta/${vidId}", referer=url)
         val videoKey  = videoReq.cookies["video_key"].toString()
-        Log.d("Kekik_${this.name}", "videoKey » $videoKey")
+        Log.d("NeO_${this.name}", "videoKey » $videoKey")
 
-        val videoData = AppUtils.tryParseJson<MailRuData>(videoReq.text) ?: throw ErrorLoadingException("Video not found")
+        val videoData = jsonOku<MailRuData>(videoReq.text) ?: throw ErrorLoadingException("Video not found")
 
         for (video in videoData.videos) {
-            Log.d("Kekik_${this.name}", "video » $video")
+            Log.d("NeO_${this.name}", "video » $video")
 
             val videoUrl = if (video.url.startsWith("//")) "https:${video.url}" else video.url
 
             callback.invoke(
                 newExtractorLink(
-                    source  = this.name,
-                    name    = this.name,
-                    url     = videoUrl,
-                    ExtractorLinkType.M3U8
+                    source = this.name,
+                    name   = this.name,
+                    url    = videoUrl
                 ) {
                     this.referer = url
-                    this.headers = mapOf("Cookie" to "video_key=${videoKey}")
                     this.quality = getQualityFromName(video.key)
+                    this.headers = mapOf("Cookie" to "video_key=${videoKey}")
                 }
             )
         }

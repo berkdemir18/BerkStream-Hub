@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-10-28T12:54:29.579Z",
-  "vendoredCount": 88,
-  "pluginClassCount": 88,
+  "generatedAt": "2026-10-28T12:58:26.443Z",
+  "vendoredCount": 90,
+  "pluginClassCount": 90,
   "originCounts": {
     "official": 5,
     "feroxx": 37,
     "kraptor": 31,
-    "nikyokki": 15
+    "neowatch": 5,
+    "nikyokki": 12
   },
   "vendored": [
     {
@@ -590,6 +591,34 @@
       "fileCount": 4
     },
     {
+      "id": "DiziPalGuncel",
+      "slug": "dizipalguncel",
+      "origin": "neowatch",
+      "originName": "NeO Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziPalGuncel",
+          "mainUrl": "https://dizipal1592.com"
+        }
+      ],
+      "version": 4,
+      "description": "Dizipal Orijinal / Güncel — yabancı dizi ve film izle",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Movie",
+        "Anime"
+      ],
+      "authors": [
+        "NeO"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://dizipal1592.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.neowatch.dizipalguncel.neowatch.DiziPalGuncelPlugin"
+      ],
+      "fileCount": 5
+    },
+    {
       "id": "DiziPalOriginal",
       "slug": "dizipaloriginal",
       "origin": "feroxx",
@@ -644,6 +673,33 @@
       "iconUrl": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://dizipal1580.com&size=128",
       "pluginClasses": [
         "com.berkstream.vendor.kraptor.dizipalorijinal.UmayTrade.DiziPalOrijinalPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "DiziPalOrjinal",
+      "slug": "dizipalorjinal",
+      "origin": "neowatch",
+      "originName": "NeO Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziPalOrjinal",
+          "mainUrl": "https://dizipalorjinal15.com"
+        }
+      ],
+      "version": 4,
+      "description": "Dizipal Orijinal — Türkçe dublaj ve altyazılı dizi, film izle",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Movie"
+      ],
+      "authors": [
+        "NeO"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://dizipalorjinal14.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.neowatch.dizipalorjinal.neowatch.DiziPalOrjinalPlugin"
       ],
       "fileCount": 4
     },
@@ -1350,26 +1406,27 @@
     {
       "id": "KoreanTurk",
       "slug": "koreanturk",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "neowatch",
+      "originName": "NeO Turkish Providers",
       "providers": [
         {
           "name": "KoreanTurk",
-          "mainUrl": "https://www.koreanturk.net"
+          "mainUrl": "https://koreanturk.tv"
         }
       ],
       "version": 6,
       "description": "Güney Kore sevdalılarının vazgeçemediği ve Türkiye'nin en çok ziyaret edilen Güney Kore Portalı; Koreantürk'e hoşgeldiniz!",
       "language": "tr",
       "tvTypes": [
-        "AsianDrama"
+        "AsianDrama",
+        "Movie"
       ],
       "authors": [
-        "keyiflerolsun"
+        "NeO"
       ],
-      "iconUrl": "https://www.google.com/s2/favicons?domain=www.koreanturk.com&sz=%size%",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=koreanturk.tv&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.koreanturk.keyiflerolsun.KoreanTurkPlugin"
+        "com.berkstream.vendor.neowatch.koreanturk.neowatch.KoreanTurkPlugin"
       ],
       "fileCount": 2
     },
@@ -1870,8 +1927,8 @@
     {
       "id": "SuperFilmGeldi",
       "slug": "superfilmgeldi",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "neowatch",
+      "originName": "NeO Turkish Providers",
       "providers": [
         {
           "name": "MixPlayHD",
@@ -1879,24 +1936,25 @@
         },
         {
           "name": "SuperFilmGeldi",
-          "mainUrl": "https://www.superfilmgeldi13.art"
+          "mainUrl": "https://superfilmizle.org"
         }
       ],
-      "version": 25,
-      "description": "Hd film izliyerek arkadaşlarınızla ve sevdiklerinizle iyi bir vakit geçirmek istiyorsanız açın bir film eğlenmeye bakın. Bilim kurgu filmleri, aşk drama vahşet aşk romantik sıradışı korku filmlerini izle.",
+      "version": 6,
+      "description": "SuperFilmGeldi (artık superfilmizle.org) — film, dizi ve anime izle. Türkçe dublaj ve altyazı seçenekleriyle.",
       "language": "tr",
       "tvTypes": [
-        "Movie"
+        "Movie",
+        "TvSeries",
+        "Anime"
       ],
       "authors": [
-        "keyiflerolsun",
-        "nikyokki"
+        "NeO"
       ],
-      "iconUrl": "https://www.google.com/s2/favicons?domain=www.superfilmgeldi.biz&sz=%size%",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=superfilmizle.org&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun.SuperFilmGeldiPlugin"
+        "com.berkstream.vendor.neowatch.superfilmgeldi.neowatch.SuperFilmGeldiPlugin"
       ],
-      "fileCount": 5
+      "fileCount": 4
     },
     {
       "id": "TLC",
@@ -2109,27 +2167,26 @@
     {
       "id": "UgurFilm",
       "slug": "ugurfilm",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "neowatch",
+      "originName": "NeO Turkish Providers",
       "providers": [
         {
           "name": "UgurFilm",
-          "mainUrl": "https://ugurfilm1.xyz"
+          "mainUrl": "https://ugurfilm8.com"
         }
       ],
-      "version": 6,
+      "version": 4,
       "description": "Yabancı film izle, Türkçe dublaj ve Türkçe altyazılı film seçenekleriyle 720p ve 1080p HD kalitesinde film izle - Uğur Film full hd film izle.",
       "language": "tr",
       "tvTypes": [
         "Movie"
       ],
       "authors": [
-        "keyiflerolsun",
-        "nikyokki"
+        "NeO"
       ],
       "iconUrl": "https://www.google.com/s2/favicons?domain=ugurfilm7.com&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun.UgurFilmPlugin"
+        "com.berkstream.vendor.neowatch.ugurfilm.neowatch.UgurFilmPlugin"
       ],
       "fileCount": 6
     },
@@ -2390,6 +2447,11 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "AnimeciX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "AnimeciX",
       "reason": "feroxx surumu tercih edildi"
@@ -2425,8 +2487,18 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "BelgeselX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "BelgeselX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
+      "module": "CanliTV",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -2445,6 +2517,11 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "CizgiMax",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "CizgiMax",
       "reason": "feroxx surumu tercih edildi"
@@ -2460,7 +2537,17 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "DiziBal",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
       "origin": "kraptor",
+      "module": "DiziBox",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "DiziBox",
       "reason": "feroxx surumu tercih edildi"
     },
@@ -2480,12 +2567,22 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "DiziKorea",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "DiziKorea",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "kraptor",
+      "module": "Dizilla",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "Dizilla",
       "reason": "feroxx surumu tercih edildi"
     },
@@ -2505,6 +2602,11 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "DiziMom",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "DiziMom",
       "reason": "feroxx surumu tercih edildi"
@@ -2515,12 +2617,22 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "DiziPal",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "DiziPal",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "kraptor",
+      "module": "DiziYou",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "DiziYou",
       "reason": "feroxx surumu tercih edildi"
     },
@@ -2550,13 +2662,28 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
-      "origin": "nikyokki",
+      "origin": "neowatch",
       "module": "FilmMakinesi",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "nikyokki",
+      "module": "FilmMakinesi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "FilmModu",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "FilmModu",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
+      "module": "FullHDFilm",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -2570,12 +2697,22 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "FullHDFilmizlesene",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "FullHDFilmizlesene",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "kraptor",
+      "module": "HDFilmCehennemi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "HDFilmCehennemi",
       "reason": "feroxx surumu tercih edildi"
     },
@@ -2590,6 +2727,11 @@
       "reason": "kraptor surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "InatBox",
+      "reason": "status=3"
+    },
+    {
       "origin": "nikyokki",
       "module": "InatBox",
       "reason": "status=3"
@@ -2600,12 +2742,27 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "JetFilmizle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "JetFilmizle",
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "nikyokki",
+      "module": "KoreanTurk",
+      "reason": "neowatch surumu tercih edildi"
+    },
+    {
       "origin": "kraptor",
+      "module": "KultFilmler",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "KultFilmler",
       "reason": "feroxx surumu tercih edildi"
     },
@@ -2615,8 +2772,23 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "NetflixMirror",
+      "reason": "liste disi birakildi"
+    },
+    {
       "origin": "kraptor",
       "module": "RareFilmm",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
+      "module": "RareFilmm",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
+      "module": "RecTV",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -2630,6 +2802,11 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "SelcukFlix",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "SelcukFlix",
       "reason": "feroxx surumu tercih edildi"
@@ -2640,6 +2817,11 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "SetFilmIzle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "SetFilmIzle",
       "reason": "feroxx surumu tercih edildi"
@@ -2650,12 +2832,22 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "SezonlukDizi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "SezonlukDizi",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "kraptor",
+      "module": "SinemaCX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
       "module": "SinemaCX",
       "reason": "feroxx surumu tercih edildi"
     },
@@ -2681,6 +2873,11 @@
     },
     {
       "origin": "nikyokki",
+      "module": "SuperFilmGeldi",
+      "reason": "neowatch surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
       "module": "Tafdi",
       "reason": "status=0"
     },
@@ -2700,6 +2897,11 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "TurkAnime",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "TurkAnime",
       "reason": "feroxx surumu tercih edildi"
@@ -2710,13 +2912,33 @@
       "reason": "kraptor surumu tercih edildi"
     },
     {
+      "origin": "nikyokki",
+      "module": "UgurFilm",
+      "reason": "neowatch surumu tercih edildi"
+    },
+    {
       "origin": "kraptor",
       "module": "Watch2Movies",
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "neowatch",
+      "module": "Watch2Movies",
+      "reason": "status=3"
+    },
+    {
+      "origin": "neowatch",
+      "module": "WebDramaTurkey",
+      "reason": "liste disi birakildi"
+    },
+    {
       "origin": "kraptor",
       "module": "WebdramaTurkey2",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
+      "module": "WebteIzle",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -2733,6 +2955,11 @@
       "origin": "nikyokki",
       "module": "YabanciDizi",
       "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "neowatch",
+      "module": "YouTube",
+      "reason": "liste disi birakildi"
     }
   ],
   "failures": []

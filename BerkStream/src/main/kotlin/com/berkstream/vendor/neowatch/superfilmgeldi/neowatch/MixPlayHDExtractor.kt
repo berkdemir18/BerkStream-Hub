@@ -1,9 +1,7 @@
-// BerkStream tarafindan Nikyokki Turkish Providers deposundan derlendi (SuperFilmGeldi).
-// Kaynak paket: com.keyiflerolsun -> com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun
+// BerkStream tarafindan NeO Turkish Providers deposundan derlendi (SuperFilmGeldi).
+// Kaynak paket: com.neowatch -> com.berkstream.vendor.neowatch.superfilmgeldi.neowatch
 // Bu dosyayi elle duzenleme: 'npm run vendor' her calistiginda yeniden uretilir.
-// ! Bu araç @keyiflerolsun tarafından | @KekikAkademi için yazılmıştır.
-
-package com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun
+package com.berkstream.vendor.neowatch.superfilmgeldi.neowatch
 
 import android.util.Log
 import com.lagradost.cloudstream3.*
@@ -24,16 +22,16 @@ class MixPlayHD : ExtractorApi() {
         val bePlayerPass = bePlayer[1]
         val bePlayerData = bePlayer[2]
         val encrypted    = AesHelper.cryptoAESHandler(bePlayerData, bePlayerPass.toByteArray(), false)?.replace("\\", "") ?: throw ErrorLoadingException("failed to decrypt")
-        Log.d("Kekik_${this.name}", "encrypted » $encrypted")
+        Log.d("NeO_${this.name}", "encrypted » $encrypted")
 
         m3uLink = Regex("""video_location":"([^"]+)""").find(encrypted)?.groupValues?.get(1)
 
         callback.invoke(
             newExtractorLink(
-                source  = this.name,
-                name    = this.name,
-                url     = m3uLink ?: throw ErrorLoadingException("m3u link not found"),
-                ExtractorLinkType.M3U8
+                source = this.name,
+                name   = this.name,
+                url    = m3uLink ?: throw ErrorLoadingException("m3u link not found"),
+                type   = ExtractorLinkType.M3U8
             ) {
                 this.referer = url
                 this.quality = Qualities.Unknown.value

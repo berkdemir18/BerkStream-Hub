@@ -1,6 +1,6 @@
 // BU DOSYA URETILMISTIR - elle duzenleme.
 // Ureten: scripts/vendor-sources.mjs
-// Gomulu kaynak sayisi: 88
+// Gomulu kaynak sayisi: 90
 package com.berkstream
 
 import com.lagradost.cloudstream3.plugins.BasePlugin
@@ -33,8 +33,10 @@ internal val VENDORED_SOURCES: List<VendoredSource> = listOf(
     VendoredSource("DiziMag", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.dizimag.UmayTrade.DiziMagPlugin() },
     VendoredSource("DiziMom", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.dizimom.keyiflerolsun.DiziMomPlugin() },
     VendoredSource("DiziPal", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.dizipal.keyiflerolsun.DiziPalPlugin() },
+    VendoredSource("DiziPalGuncel", "NeO Turkish Providers") { com.berkstream.vendor.neowatch.dizipalguncel.neowatch.DiziPalGuncelPlugin() },
     VendoredSource("DiziPalOriginal", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.dizipaloriginal.keyiflerolsun.DiziPalOriginalPlugin() },
     VendoredSource("DiziPalOrijinal", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.dizipalorijinal.UmayTrade.DiziPalOrijinalPlugin() },
+    VendoredSource("DiziPalOrjinal", "NeO Turkish Providers") { com.berkstream.vendor.neowatch.dizipalorjinal.neowatch.DiziPalOrjinalPlugin() },
     VendoredSource("DiziPod", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.dizipod.patr0n.DiziPodPlugin() },
     VendoredSource("DiziYo", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.diziyo.UmayTrade.DiziYoPlugin() },
     VendoredSource("DiziYou", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.diziyou.keyiflerolsun.DiziYouPlugin() },
@@ -62,7 +64,7 @@ internal val VENDORED_SOURCES: List<VendoredSource> = listOf(
     VendoredSource("inatbox-bc", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.inatboxbc.keyiflerolsun.InatBoxBCPlugin() },
     VendoredSource("JetFilmizle", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.jetfilmizle.keyiflerolsun.JetFilmizlePlugin() },
     VendoredSource("KanalD", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.kanald.kerimmkirac.KanalDPlugin() },
-    VendoredSource("KoreanTurk", "Nikyokki Turkish Providers") { com.berkstream.vendor.nikyokki.koreanturk.keyiflerolsun.KoreanTurkPlugin() },
+    VendoredSource("KoreanTurk", "NeO Turkish Providers") { com.berkstream.vendor.neowatch.koreanturk.neowatch.KoreanTurkPlugin() },
     VendoredSource("KultFilmler", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.kultfilmler.keyiflerolsun.KultFilmlerPlugin() },
     VendoredSource("LoveFilm", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.lovefilm.UmayTrade.LoveFilmPlugin() },
     VendoredSource("powerDizi", "Nikyokki Turkish Providers") { com.berkstream.vendor.nikyokki.powerdizi.keyiflerolsun.powerDiziPlugin() },
@@ -81,7 +83,7 @@ internal val VENDORED_SOURCES: List<VendoredSource> = listOf(
     VendoredSource("Sinezy", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.sinezy.kraptor.SinezyPlugin() },
     VendoredSource("Startv", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.startv.UmayTrade.StarTvPlugin() },
     VendoredSource("Supercartoons", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.supercartoons.byayzen.SuperCartoonsPlugin() },
-    VendoredSource("SuperFilmGeldi", "Nikyokki Turkish Providers") { com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun.SuperFilmGeldiPlugin() },
+    VendoredSource("SuperFilmGeldi", "NeO Turkish Providers") { com.berkstream.vendor.neowatch.superfilmgeldi.neowatch.SuperFilmGeldiPlugin() },
     VendoredSource("TLC", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.tlc.nikyokki.TLCPlugin() },
     VendoredSource("TLCtr", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.tlctr.keyiflerolsun.TlctrPlugin() },
     VendoredSource("TRanimaci", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.tranimaci.keyiflerolsun.TRanimaciPlugin() },
@@ -90,7 +92,7 @@ internal val VENDORED_SOURCES: List<VendoredSource> = listOf(
     VendoredSource("Tv8", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.tv8.kerimmkirac.Tv8Plugin() },
     VendoredSource("TvDiziler", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.tvdiziler.UmayTrade.TvDizilerPlugin() },
     VendoredSource("TwitchProvider", "ReCloudStream Official Extensions") { com.berkstream.vendor.official.twitchprovider.recloudstream.TwitchPlugin() },
-    VendoredSource("UgurFilm", "Nikyokki Turkish Providers") { com.berkstream.vendor.nikyokki.ugurfilm.keyiflerolsun.UgurFilmPlugin() },
+    VendoredSource("UgurFilm", "NeO Turkish Providers") { com.berkstream.vendor.neowatch.ugurfilm.neowatch.UgurFilmPlugin() },
     VendoredSource("vavooSpor", "Nikyokki Turkish Providers") { com.berkstream.vendor.nikyokki.vavoospor.keyiflerolsun.vavooSporPlugin() },
     VendoredSource("Watch2Movies", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.watch2movies.keyiflerolsun.Watch2MoviesPlugin() },
     VendoredSource("WebdramaTurkey2", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.webdramaturkey2.patron.WebdramaTurkey2Plugin() },

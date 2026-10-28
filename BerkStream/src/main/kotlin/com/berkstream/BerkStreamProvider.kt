@@ -184,6 +184,7 @@ class BerkStreamProvider : TmdbProvider() {
         "powerDizi", "DiziPalOriginal", "WebdramaTurkey2", "KoreanTurk",
         "Dizigecesi", "DiziPod", "DramaDizilerim",
         // Kraptor (v39): yerli diziler kanallarin kendi sitesinden de aranir.
+        "DiziPalGuncel", "DiziPalOrjinal",
         "Dizilife", "DiziYo", "DiziBal", "DiziBol", "DiziPalOrg", "BirAsyaDizi",
         "Kanal D", "ATV", "Show TV", "Star TV", "Tv8",
         // Film
