@@ -860,7 +860,7 @@ class HDFilmCehennemi : MainAPI() {
         val rawHtml = document.html()
         val scripts = document.select("script").map { it.data() }.filter { it.isNotBlank() }
 
-        var decryptedUrl: String? = null
+        var decryptedUrl: String? = com.berkstream.extra.HdfcCloseDecoder.decode(rawHtml, url)
         var foundScript: String? = null
         var foundUnpacked: String? = null
 

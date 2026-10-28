@@ -144,6 +144,12 @@
       "reason": "arama istegi Cloudflare asicisini kullanmiyordu; Turkiye'den arama hep bos donuyordu (2026-10-05)",
       "pattern": "(\"\\$\\{mainUrl\\}/search\\?q=\\$\\{query\\}\",\\s*headers\\s*=\\s*mapOf\\(\"X-Requested-With\" to \"fetch\"\\))(\\s*\\))",
       "replace": "$1,\n            interceptor = interceptor$2"
+    },
+    {
+      "module": "HDFilmCehennemi",
+      "reason": "site Close oynaticisinin adresini yeni fonksiyonla sifreliyor; upstream bozuk adres veriyordu, once BerkStream cozucusu deneniyor (2026-10-28, Attack Force Z)",
+      "pattern": "var decryptedUrl: String\\? = null",
+      "replace": "var decryptedUrl: String? = com.berkstream.extra.HdfcCloseDecoder.decode(rawHtml, url)"
     }
   ]
 }
