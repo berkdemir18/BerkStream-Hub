@@ -10,6 +10,7 @@ class FullHDFilmizlesenePlugin: Plugin() {
     override fun load(context: Context) {
         registerMainAPI(FullHDFilmizlesene())
         registerExtractorAPI(RapidVid())
+        registerExtractorAPI(object : RapidVid() { override val mainUrl = "https://rapidvid.org" })
         registerExtractorAPI(TRsTX())
         registerExtractorAPI(VidMoxy())
         registerExtractorAPI(Sobreatsesuyp())

@@ -25,6 +25,7 @@ open class RapidVid : ExtractorApi() {
         val extRef   = referer ?: ""
         val videoReq = app.get(url, referer=extRef).document
 
+        if (com.berkstream.extra.RapidVidP8.extract(videoReq.html(), url, name, subtitleCallback, callback)) return
         val script = videoReq.select("script").find { it.data().contains("jwSetup.sources") }?.data() ?: ""
 
         if (script.isNotEmpty()) {

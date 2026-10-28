@@ -156,6 +156,18 @@
       "reason": "upstream'in ilk cozum adimi kosulsuz calisip BerkStream cozucusunun dogru adresini bozuk sonucla eziyordu (2026-10-28)",
       "pattern": "val unpackedFromHtml = unpackPackerJs\\(rawHtml\\)",
       "replace": "val unpackedFromHtml = if (decryptedUrl != null) null else unpackPackerJs(rawHtml)"
+    },
+    {
+      "module": "FullHDFilmizlesene",
+      "reason": "RapidVid sayfayi window._p8 JSON'una tasidi, upstream jwSetup.sources arayip link vermiyordu (2026-10-28, Cehennemde Randevu)",
+      "pattern": "val\\ script\\ =\\ videoReq\\.select\\(\"script\"\\)\\.find\\ \\{\\ it\\.data\\(\\)\\.contains\\(\"jwSetup\\.sources\"\\)\\ \\}",
+      "replace": "if (com.berkstream.extra.RapidVidP8.extract(videoReq.html(), url, name, subtitleCallback, callback)) return\n        val script = videoReq.select(\"script\").find { it.data().contains(\"jwSetup.sources\") }"
+    },
+    {
+      "module": "FullHDFilmizlesene",
+      "reason": "RapidVid rapidvid.org'a tasindi; extractor yalniz rapidvid.net'i taniyordu ve hic cagrilmiyordu (2026-10-28)",
+      "pattern": "registerExtractorAPI\\(RapidVid\\(\\)\\)",
+      "replace": "registerExtractorAPI(RapidVid())\n        registerExtractorAPI(object : RapidVid() { override val mainUrl = \"https://rapidvid.org\" })"
     }
   ]
 }
