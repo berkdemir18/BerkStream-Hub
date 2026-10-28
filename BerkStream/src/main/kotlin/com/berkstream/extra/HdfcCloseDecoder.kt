@@ -19,6 +19,7 @@ object HdfcCloseDecoder {
     private val fileVar = Regex("""file\s*:\s*([A-Za-z_$][\w$]*)""")
     private val splitArg = Regex("""^["']([^"']*)["']\s*\.\s*split\s*\(\s*["']([^"']*)["']\s*\)$""")
     private val quoted = Regex(""""([^"]*)"""")
+    private val jsEscape = Regex("""\\(.)""")
 
     /** @return cozulen adres; sayfa bu duzende degilse null. */
     fun decode(html: String, embedUrl: String): String? = runCatching {
@@ -28,10 +29,13 @@ object HdfcCloseDecoder {
         val parts = splitArg.find(call)?.let { m -> m.groupValues[1].split(m.groupValues[2]) }
             ?: if (call.startsWith("[")) quoted.findAll(call).map { it.groupValues[1] }.toList() else return null
         if (parts.size < 13) return null
+        // Parcalar JS dizgesi: tarayici "\/" gibi kacislari cozerek okuyor.
+        // Ham birakinca bazi sayfalarda base64 bozuluyordu (15 istekte 4).
+        val unescaped = parts.map { it.replace(jsEscape) { m -> m.groupValues[1] } }
         // URI kullanilmiyor: upstream adresi "/{rapidrame_id}" ekiyle veriyor ve
         // URI o suslu parantezde patlayip cozucuyu sessizce null'a dusuruyordu.
         val host = Regex("""^https?://([^/:?#]+)""").find(embedUrl)?.groupValues?.get(1) ?: return null
-        decrypt(parts, host).takeIf { it.startsWith("http") }
+        decrypt(unescaped, host).takeIf { it.startsWith("http") }
             ?: null.also { Log.w(TAG, "Cozum adres vermedi: $embedUrl") }
     }.onFailure { Log.e(TAG, "Cozulemedi: $embedUrl", it) }.getOrNull()
 
