@@ -9,9 +9,14 @@ import android.util.Log
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
+import org.json.JSONObject
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
+import android.util.Base64
 
 class DiziPalOriginal : MainAPI() {
-    override var mainUrl              = "https://dizipal2127.com"
+    override var mainUrl              = "https://dizipal2141.com"
     override var name                 = "DiziPalOriginal"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -271,21 +276,75 @@ class DiziPalOriginal : MainAPI() {
             return false
         }
 
-        val cookies = getResponse.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
+        val cookies = getResponse.headers.values("Set-Cookie")
+            .mapNotNull { it.split(";").firstOrNull()?.trim()?.takeIf { p -> p.contains("=") } }
+            .distinct()
+            .joinToString("; ")
+            .ifEmpty {
+                getResponse.cookies.entries.joinToString("; ") { "${it.key}=${it.value}" }
+            }
 
         Log.d("DZP", "Bulunan Token » $configToken")
         Log.d("DZP", "Yakalanan Çerezler » $cookies")
 
-        // 2. AŞAMA: Token'ı Base64 Decode Et
-        val paddedToken = configToken + "=".repeat((4 - configToken.length % 4) % 4)
-        val decodedToken = String(android.util.Base64.decode(paddedToken, android.util.Base64.DEFAULT))
-        Log.d("DZP", "Decoded Token » $decodedToken")
+        // 2. AŞAMA: data-cfg'yi çöz
+        val configJson: JSONObject = if (configToken.trimStart().startsWith("{")) {
+            // Nadir durum: direkt JSON gömülü
+            try {
+                JSONObject(configToken)
+            } catch (e: Exception) {
+                Log.e("DZP", "data-cfg JSON parse edilemedi: ${e.message}")
+                return false
+            }
+        } else {
+            // Normal durum: POST /ajax-player-config { cfg: token }
+            val cfgResponse = app.post(
+                url = "$mainUrl/ajax-player-config",
+                data = mapOf("cfg" to configToken),
+                referer = data,
+                headers = mapOf(
+                    "User-Agent"       to userAgent,
+                    "X-Requested-With" to "XMLHttpRequest",
+                    "Accept"           to "application/json, text/javascript, */*; q=0.01",
+                    "Cookie"           to cookies
+                )
+            )
+            Log.d("DZP", "ajax-player-config yanıtı » ${cfgResponse.text}")
+            try {
+                JSONObject(cfgResponse.text)
+            } catch (e: Exception) {
+                Log.e("DZP", "ajax-player-config yanıtı JSON değil: ${e.message}")
+                return false
+            }
+        }
 
-        val embedUrlRaw = Regex(""""v"\s*:\s*"([^"]+)"""").find(decodedToken)?.groupValues?.getOrNull(1)
-            ?.replace("\\/", "/")
+        val innerConfig = configJson.optJSONObject("config") ?: configJson
+
+        val embedUrlRaw: String? = when {
+            innerConfig.has("v") -> {
+                val vObj = innerConfig.optJSONObject("v")
+                if (vObj != null) {
+                    decryptEnc(vObj)
+                } else {
+                    val vStr = innerConfig.optString("v", "").trim()
+                    when {
+                        vStr.startsWith("{") -> {
+                            try {
+                                decryptEnc(JSONObject(vStr))
+                            } catch (e: Exception) {
+                                vStr
+                            }
+                        }
+                        vStr.isNotBlank() -> vStr
+                        else -> null
+                    }
+                }
+            }
+            else -> null
+        }
 
         if (embedUrlRaw.isNullOrEmpty()) {
-            Log.e("DZP", "Embed URL token içinden alınamadı! Dönen yanıt: $decodedToken")
+            Log.e("DZP", "Embed URL (v) bulunamadı veya decrypt edilemedi! config: $configJson")
             return false
         }
 
@@ -381,6 +440,7 @@ class DiziPalOriginal : MainAPI() {
             ?: Regex("""v\s*:\s*["']([^"']+\.html.*?)["']""").find(embedSource)
 
         val extractedUrl = m3u8Match?.groupValues?.getOrNull(1)
+            ?: embedUrl.takeIf { it.contains("embed-") && it.contains(".html") }
 
         if (extractedUrl == null) {
             Log.e("DZP", "Embed kaynağında geçerli bir link bulunamadı!")
@@ -396,7 +456,7 @@ class DiziPalOriginal : MainAPI() {
 
             if (idMatch != null) {
                 // İstenen formata göre string interpolation ile yeni URL'yi inşa ediyoruz
-                "https://s2.superadjacentsoddenly.xyz/hls2/01/00007/${idMatch}_,n,h,.urlset/master.m3u8"
+                "https://s8.superadjacentsoddenly.xyz/hls2/01/00016/${idMatch}_,n,h,.urlset/master.m3u8"
             } else {
                 Log.e("DZP", "HTML linkinden ID ayıklanamadı: $extractedUrl")
                 null
@@ -457,5 +517,38 @@ class DiziPalOriginal : MainAPI() {
         }
 
         return true
+    }
+}
+
+private fun b64ToBytes(s: String): ByteArray? = try {
+    val normalized = s.replace('-', '+').replace('_', '/')
+        .padEnd((s.length + 3) / 4 * 4, '=')
+    Base64.decode(normalized, Base64.DEFAULT)
+} catch (e: Exception) { null }
+
+private fun xorBytes(a: ByteArray, b: ByteArray): ByteArray {
+    val len = minOf(a.size, b.size)
+    return ByteArray(len) { (a[it].toInt() xor b[it].toInt()).toByte() }
+}
+
+private fun decryptEnc(enc: JSONObject): String? {
+    return try {
+        val k1 = b64ToBytes(enc.getString("k1")) ?: return null
+        val k2 = b64ToBytes(enc.getString("k2")) ?: return null
+        val iv = b64ToBytes(enc.getString("iv")) ?: return null
+        val ct = b64ToBytes(enc.getString("c"))  ?: return null
+
+        val key = xorBytes(k1, k2)
+
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+        cipher.init(
+            Cipher.DECRYPT_MODE,
+            SecretKeySpec(key, "AES"),
+            IvParameterSpec(iv)
+        )
+        String(cipher.doFinal(ct), Charsets.UTF_8).takeIf { it.isNotBlank() }
+    } catch (e: Exception) {
+        Log.e("DZP", "decryptEnc hata: ${e.message}")
+        null
     }
 }

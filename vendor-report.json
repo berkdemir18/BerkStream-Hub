@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-09-09T10:35:14.911Z",
-  "vendoredCount": 64,
-  "pluginClassCount": 64,
+  "generatedAt": "2026-10-28T12:51:08.144Z",
+  "vendoredCount": 89,
+  "pluginClassCount": 89,
   "originCounts": {
     "official": 5,
-    "feroxx": 36,
-    "nikyokki": 23
+    "feroxx": 37,
+    "kraptor": 32,
+    "nikyokki": 15
   },
   "vendored": [
     {
@@ -91,8 +92,8 @@
     {
       "id": "AsyaWatch",
       "slug": "asyawatch",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
           "name": "AsyaWatch",
@@ -107,13 +108,40 @@
         "TvSeries"
       ],
       "authors": [
-        "nikyokki"
+        "UmayTrade"
       ],
       "iconUrl": "https://www.google.com/s2/favicons?domain=asyawatch.com&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.asyawatch.nikyokki.AsyaWatchPlugin"
+        "com.berkstream.vendor.kraptor.asyawatch.UmayTrade.AsyaWatchPlugin"
       ],
       "fileCount": 3
+    },
+    {
+      "id": "Atv",
+      "slug": "atv",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "ATV",
+          "mainUrl": "https://www.atv.com.tr"
+        }
+      ],
+      "version": 1,
+      "description": "ATV'nin sevilen dizileri (Aşk ve Taht, Altı Üstü İstanbul) ve programları (Müge Anlı, Esra Erol) izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Live"
+      ],
+      "authors": [
+        "kerimmkirac"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.atv.com.tr&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.atv.UmayTrade.AtvPlugin"
+      ],
+      "fileCount": 2
     },
     {
       "id": "BelgeselX",
@@ -141,6 +169,32 @@
         "com.berkstream.vendor.feroxx.belgeselx.keyiflerolsun.BelgeselXPlugin"
       ],
       "fileCount": 3
+    },
+    {
+      "id": "BirAsyaDizi",
+      "slug": "birasyadizi",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "BirAsyaDizi",
+          "mainUrl": "https://www.birasyadizi.cx"
+        }
+      ],
+      "version": 8,
+      "description": "Asya'nın En Ünlü Dizilerini en yüksek çözünürlükte HD ve kesintisiz izleyin, kaliteli Asya film ve dizilerinin keyfini sürün.",
+      "language": "tr",
+      "tvTypes": [
+        "AsianDrama"
+      ],
+      "authors": [
+        "kraptor"
+      ],
+      "iconUrl": "https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.birasyadizi.com/&size=16",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.birasyadizi.kraptor.BirAsyaDiziPlugin"
+      ],
+      "fileCount": 2
     },
     {
       "id": "CanliTV",
@@ -192,7 +246,7 @@
           "mainUrl": "https://drive.google.com"
         }
       ],
-      "version": 16,
+      "version": 17,
       "description": "ÇizgiMax ile Çizgi Film izlemek artık daha kolay, donmadan full hd ve reklamsız bir sitedir, içerisinde 700 den fazla çizgi film olan, Bu site bu işi profesyonelce yapıyor.",
       "language": "tr",
       "tvTypes": [
@@ -243,10 +297,10 @@
       "providers": [
         {
           "name": "DDizi",
-          "mainUrl": "https://www.ddizi.im"
+          "mainUrl": "https://www.ddizi.tel"
         }
       ],
-      "version": 22,
+      "version": 24,
       "description": "DDizi.im için Cloudstream eklentisi",
       "language": "tr",
       "tvTypes": [
@@ -262,6 +316,62 @@
       "fileCount": 2
     },
     {
+      "id": "DiziBal",
+      "slug": "dizibal",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziBal",
+          "mainUrl": "https://dizibal.org"
+        }
+      ],
+      "version": 1,
+      "description": "En popüler yabancı dizileri yeni bölümleriyle takip edin. HBO, Netflix, Apple TV+ yapımları Türkçe altyazılı olarak dizibaL'da!",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries",
+        "Anime"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dizibal.org&sz=128",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.dizibal.UmayTrade.DiziBalPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "DiziBol",
+      "slug": "dizibol",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziBol",
+          "mainUrl": "https://dizibol.org"
+        }
+      ],
+      "version": 1,
+      "description": "En popüler yabancı dizileri yeni bölümleriyle takip edin. HBO, Netflix, Apple TV+ yapımları Türkçe altyazılı olarak dizibaL'da!",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries",
+        "Anime"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dizibol.org&sz=128",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.dizibol.UmayTrade.DiziBolPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
       "id": "DiziBox",
       "slug": "dizibox",
       "origin": "feroxx",
@@ -272,7 +382,7 @@
           "mainUrl": "https://www.dizibox.live"
         }
       ],
-      "version": 23,
+      "version": 25,
       "description": "Yabancı Dizi izle, Tüm yabancı dizilerin yeni ve eski sezonlarını full hd izleyebileceğiniz elit site.",
       "language": "tr",
       "tvTypes": [
@@ -290,14 +400,9 @@
     {
       "id": "DiziGom",
       "slug": "dizigom",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
-      "providers": [
-        {
-          "name": "DiziGom",
-          "mainUrl": "https://dizigom101.com"
-        }
-      ],
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [],
       "version": 9,
       "description": "Türkçe altyazılı yabancı dizi izle, Tüm yabancı, kore, netflix dizilerin yeni ve eski sezonlarını orijinal dilinde dizigom1 alt yazılı film izleyebilir, sadece türkçe altyazılı en iyi yabancı diziler ve filmler hakkında yorum yapabilirsiniz.",
       "language": "tr",
@@ -309,9 +414,9 @@
       ],
       "iconUrl": "https://www.google.com/s2/favicons?domain=dizigom1.co&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.dizigom.nikyokki.DiziGomPlugin"
+        "com.berkstream.vendor.kraptor.dizigom.UmayTrade.DiziGomPlugin"
       ],
-      "fileCount": 2
+      "fileCount": 3
     },
     {
       "id": "DiziKorea",
@@ -338,6 +443,33 @@
         "com.berkstream.vendor.feroxx.dizikorea.keyiflerolsun.DiziKoreaPlugin"
       ],
       "fileCount": 5
+    },
+    {
+      "id": "DiziLife",
+      "slug": "dizilife",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Dizilife",
+          "mainUrl": "https://dizi74.life"
+        }
+      ],
+      "version": 2,
+      "description": "Dizi.life Türkçe dizi/film izleme platformu — yabancı diziler, yeni filmler, son bölümler.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://dizi73.life&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.dizilife.UmayTrade.DiziLifePlugin"
+      ],
+      "fileCount": 2
     },
     {
       "id": "Dizilla",
@@ -372,12 +504,12 @@
     {
       "id": "DiziMag",
       "slug": "dizimag",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
           "name": "DiziMag",
-          "mainUrl": "https://dizimag.lol"
+          "mainUrl": "https://dizimag.eu"
         }
       ],
       "version": 18,
@@ -391,7 +523,7 @@
       ],
       "iconUrl": "https://www.google.com/s2/favicons?domain=dizimag.net&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.dizimag.nikyokki.DiziMagPlugin"
+        "com.berkstream.vendor.kraptor.dizimag.UmayTrade.DiziMagPlugin"
       ],
       "fileCount": 4
     },
@@ -403,14 +535,14 @@
       "providers": [
         {
           "name": "DiziMom",
-          "mainUrl": "https://www.dizimom.diy"
+          "mainUrl": "https://www.dizidad.com"
         },
         {
           "name": "HDStreamAble",
           "mainUrl": "https://hdstreamable.com"
         }
       ],
-      "version": 58,
+      "version": 64,
       "description": "Binlerce yerli yabancı dizi arşivi, tüm sezonlar, kesintisiz bölümler. Sadece dizi izle, Dizimom heryerde seninle!",
       "language": "tr",
       "tvTypes": [
@@ -433,14 +565,14 @@
       "providers": [
         {
           "name": "DiziPal",
-          "mainUrl": "https://dizipal1579.com"
+          "mainUrl": "https://dizipal1592.com"
         },
         {
           "name": "DizipalPlayer",
           "mainUrl": "dplayer82.site"
         }
       ],
-      "version": 106,
+      "version": 117,
       "description": "en yeni dizileri güvenli ve hızlı şekilde sunar.",
       "language": "tr",
       "tvTypes": [
@@ -465,10 +597,10 @@
       "providers": [
         {
           "name": "DiziPalOriginal",
-          "mainUrl": "https://dizipal2127.com"
+          "mainUrl": "https://dizipal2141.com"
         }
       ],
-      "version": 88,
+      "version": 111,
       "description": "en yeni dizileri güvenli ve hızlı şekilde sunar.",
       "language": "tr",
       "tvTypes": [
@@ -486,6 +618,90 @@
       "fileCount": 3
     },
     {
+      "id": "DiziPalOrijinal",
+      "slug": "dizipalorijinal",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziPalOrg",
+          "mainUrl": "https://dizipal1580.com"
+        },
+        {
+          "name": "Hotlinger",
+          "mainUrl": "https://hotlinger.com"
+        }
+      ],
+      "version": 19,
+      "description": "DiziPal Orijinal.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://dizipal1580.com&size=128",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.dizipalorijinal.UmayTrade.DiziPalOrijinalPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "DiziPod",
+      "slug": "dizipod",
+      "origin": "feroxx",
+      "originName": "Feroxx Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziPod",
+          "mainUrl": "https://dizipod.com"
+        }
+      ],
+      "version": 3,
+      "description": "Yabancı dizi ve film izleme platformu. Altyazılı yabancı dizi ve film izle.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Movie"
+      ],
+      "authors": [
+        "patr0n"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=dizipod.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.feroxx.dizipod.patr0n.DiziPodPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "DiziYo",
+      "slug": "diziyo",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "DiziYo",
+          "mainUrl": "https://www.diziyo.so"
+        }
+      ],
+      "version": 1,
+      "description": "Yeni film, dizi, anime ve bölümleri keşfet; güncel trendleri, sıralamaları ve yayın takvimini incele.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://www.diziyo.so&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.diziyo.UmayTrade.DiziYoPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
       "id": "DiziYou",
       "slug": "diziyou",
       "origin": "feroxx",
@@ -496,7 +712,7 @@
           "mainUrl": "https://www.diziyou.one"
         }
       ],
-      "version": 25,
+      "version": 26,
       "description": "Diziyou en kaliteli Türkçe dublaj ve altyazılı yabancı dizi izleme sitesidir. Güncel ve efsanevi dizileri 1080p Full HD kalitede izlemek için hemen tıkla!",
       "language": "tr",
       "tvTypes": [
@@ -514,28 +730,81 @@
     {
       "id": "DMax",
       "slug": "dmax",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
           "name": "DMax",
           "mainUrl": "https://www.dmax.com.tr"
         }
       ],
-      "version": 2,
-      "description": "DMAX dizi ve programlarını takip etmek için ziyaret edin. DMAX dizi ve programlarını tek parça ve hd kalitesiyle izleyin.",
+      "version": 1,
+      "description": "DMAX dizi ve programlarını takip etmek için ziyaret edin. DMAX dizi ve programlarını tek parça ve hd kalitesiyle izleyin..",
       "language": "tr",
       "tvTypes": [
         "TvSeries"
       ],
       "authors": [
-        "nikyokki"
+        "UmayTrade"
       ],
       "iconUrl": "https://www.dmax.com.tr/favicon.ico",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.dmax.nikyokki.DMaxPlugin"
+        "com.berkstream.vendor.kraptor.dmax.nikyokki.DMaxPlugin"
       ],
       "fileCount": 2
+    },
+    {
+      "id": "DocumentaryArea",
+      "slug": "documentaryarea",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "DocumentaryArea",
+          "mainUrl": "https://www.documentaryarea.com"
+        }
+      ],
+      "version": 2,
+      "description": "Watch the best online documentary films.Stunning collection of awesome, eyeopening, interesting, just released, full documentaries.",
+      "language": "en",
+      "tvTypes": [
+        "Documentary"
+      ],
+      "authors": [
+        "ByAyzen"
+      ],
+      "iconUrl": "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://documentaryarea.com&size=128",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.documentaryarea.byayzen.DocumentaryAreaPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "FilmEkseni",
+      "slug": "filmekseni",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "FilmEkseni",
+          "mainUrl": "https://filmekseni.vip"
+        }
+      ],
+      "version": 1,
+      "description": "Film Ekseni Vizyonda ki, en güncel ve en yeni filmleri full hd kalitesinde türkçe dublaj ve altyazı seçenekleriyle 1080p olarak izleyebileceğiniz adresiniz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://www.filmekseni.vip&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.filmekseni.UmayTrade.FilmEkseniPlugin"
+      ],
+      "fileCount": 4
     },
     {
       "id": "FilmIzleIlk",
@@ -563,6 +832,32 @@
         "com.berkstream.vendor.nikyokki.filmizleilk.nikyokki.FilmIzleIlkPlugin"
       ],
       "fileCount": 3
+    },
+    {
+      "id": "FilmIzyon",
+      "slug": "filmizyon",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "FilmIzyon",
+          "mainUrl": "https://www.filmizyon.net"
+        }
+      ],
+      "version": 5,
+      "description": "Yerli ve yabancı ödüllü tüm filmleri Türkçe Dublaj veya Orjinal dilde izleyebileceğiniz Türkiye'nin en kaliteli film izleme platformuna hoşgeldiniz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "kraptor"
+      ],
+      "iconUrl": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://www.filmizyon.com/&size=64",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.filmizyon.kraptor.FilmIzyonPlugin"
+      ],
+      "fileCount": 2
     },
     {
       "id": "FilmKovasi",
@@ -601,7 +896,7 @@
           "mainUrl": "https://filmmakinesi.to"
         }
       ],
-      "version": 58,
+      "version": 59,
       "description": "Film Makinesi, en yeni ve en güncel filmleri sitemizde full HD kalite farkı ile izleyebilirsiniz. HD film izle denildiğinde akla gelen en kaliteli film izleme sitesi.",
       "language": "tr",
       "tvTypes": [
@@ -615,7 +910,7 @@
       "pluginClasses": [
         "com.berkstream.vendor.feroxx.filmmakinesi.keyiflerolsun.FilmMakinesiPlugin"
       ],
-      "fileCount": 3
+      "fileCount": 4
     },
     {
       "id": "FilmModu",
@@ -640,6 +935,28 @@
       "iconUrl": "https://www.filmmodu.one/icon/favicon.ico",
       "pluginClasses": [
         "com.berkstream.vendor.feroxx.filmmodu.keyiflerolsun.FilmModuPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "Filmzal",
+      "slug": "filmzal",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [],
+      "version": 1,
+      "description": "Filmzal - Film ve dizi izleme.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "NeO"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=filmzal.me&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.filmzal.UmayTrade.FilmzalPlugin"
       ],
       "fileCount": 3
     },
@@ -733,7 +1050,7 @@
           "mainUrl": "https://www.hdfilmcehennemi.nl"
         }
       ],
-      "version": 48,
+      "version": 58,
       "description": "Türkiye'nin en hızlı hd film izleme sitesi",
       "language": "tr",
       "tvTypes": [
@@ -751,28 +1068,56 @@
       "fileCount": 2
     },
     {
-      "id": "HDFilmCehennemi2",
-      "slug": "hdfilmcehennemi2",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "id": "HDFilmCehennemi1",
+      "slug": "hdfilmcehennemi1",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
-          "name": "HDFilmCehennemi2",
-          "mainUrl": "https://www.hdfilmcehennemi2.site"
+          "name": "HDFilmCehennemi1",
+          "mainUrl": "https://www.hdfilmcehennemi.nl"
         }
       ],
-      "version": 7,
-      "description": "Full hd film izleme keyfini hdfilmcehennemi2 ile yaşayın. Türkiyenin en güncel yüksek hd kalitede film izleme sitesi.",
+      "version": 48,
+      "description": "Türkiye'nin en hızlı hd film izleme sitesi",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "hexated",
+        "keyiflerolsun"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=hdfilmcehennemi.com&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.hdfilmcehennemi1.UmayTrade.HDFilmCehennemiPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "HdFilmCehennemi2",
+      "slug": "hdfilmcehennemi2",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "HdFilmCehennemi2",
+          "mainUrl": "https://www.hdfilmcehennemi2.biz"
+        }
+      ],
+      "version": 14,
+      "description": "Full hd film izleme keyfini hdfilmcehennemi2 ile yaşayın. Türkiye'nin en güncel yüksek hd kalitede film izleme sitesi.",
       "language": "tr",
       "tvTypes": [
         "Movie"
       ],
       "authors": [
-        "nikyokki"
+        "kraptor"
       ],
-      "iconUrl": "https://www.google.com/s2/favicons?domain=www.hdfilmcehennemi2.nl&sz=%size%",
+      "iconUrl": "https://hdfilmcehennemi2.rip/wp-content/uploads/2023/07/favi.png",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.hdfilmcehennemi2.nikyokki.HDFilmCehennemi2Plugin"
+        "com.berkstream.vendor.kraptor.hdfilmcehennemi2.kraptor.HdFilmCehennemi2Plugin"
       ],
       "fileCount": 3
     },
@@ -928,6 +1273,29 @@
       "fileCount": 2
     },
     {
+      "id": "inatbox-bc",
+      "slug": "inatboxbc",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [],
+      "version": 59,
+      "description": "Güncel sunucu protokolü ve saat eşitleme desteği.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries",
+        "Live"
+      ],
+      "authors": [
+        "Dr.Octagon"
+      ],
+      "iconUrl": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh3vCp6N1K4bECoYRQD-cisJF2_6V_Hk01ZhDmoPR2JuM8O5qr4MqrPO1munM9cRlleBBSK6odYhLtDBWv4E3vhPhynlmS5hVVtJZShHoGA5REQ8_3v8SIlccTEqzVQu2UJyNYQdJNrKIfWy66RQeT0D-CcmFCbHPz5023H6p2v5fv4NVloZ5Rqo_yGrIY/s320/iNat-Box-App.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.inatboxbc.keyiflerolsun.InatBoxBCPlugin"
+      ],
+      "fileCount": 7
+    },
+    {
       "id": "JetFilmizle",
       "slug": "jetfilmizle",
       "origin": "feroxx",
@@ -935,10 +1303,10 @@
       "providers": [
         {
           "name": "JetFilmizle",
-          "mainUrl": "https://jetfilmizle.now"
+          "mainUrl": "https://jetfilmizle.app"
         }
       ],
-      "version": 47,
+      "version": 48,
       "description": "Binlerce Film İzleme Seçeneğiyle En İyi Film İzleme Sitesi",
       "language": "tr",
       "tvTypes": [
@@ -952,6 +1320,32 @@
         "com.berkstream.vendor.feroxx.jetfilmizle.keyiflerolsun.JetFilmizlePlugin"
       ],
       "fileCount": 4
+    },
+    {
+      "id": "KanalD",
+      "slug": "kanald",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Kanal D",
+          "mainUrl": "https://www.kanald.com.tr"
+        }
+      ],
+      "version": 1,
+      "description": "TV8'in eğlenceli programları, yarışmaları ve dizileri ile keyifle TV izle. Survivor, O Ses Türkiye, Jet Sosyete, Kızım, Yemekteyiz ve Masterchef için TV8 izle.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "kerimmkirac"
+      ],
+      "iconUrl": "https://w1.pngwing.com/pngs/291/105/png-transparent-cartoon-network-logo-kanal-d-television-television-channel-kanal-7-serial-live-television-blue-thumbnail.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.kanald.kerimmkirac.KanalDPlugin"
+      ],
+      "fileCount": 2
     },
     {
       "id": "KoreanTurk",
@@ -1003,6 +1397,33 @@
       "iconUrl": "https://www.google.com/s2/favicons?domain=kultfilmler.net&sz=%size%",
       "pluginClasses": [
         "com.berkstream.vendor.feroxx.kultfilmler.keyiflerolsun.KultFilmlerPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "LoveFilm",
+      "slug": "lovefilm",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "LoveFilm",
+          "mainUrl": "https://lovefilmizle.net"
+        }
+      ],
+      "version": 1,
+      "description": "Full HD Film izle - Türkçe Dublaj Altyazılı Film izleme sitesi olarak sizlere yabancı yerli filmleri yüksek kalitede sunmakdayız. Kaliteli film izle sitesi",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "blackhope01"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=https://lovefilmizle.net&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.lovefilm.UmayTrade.LoveFilmPlugin"
       ],
       "fileCount": 3
     },
@@ -1096,10 +1517,10 @@
       "providers": [
         {
           "name": "RecTV",
-          "mainUrl": "https://a.prectv71.lol"
+          "mainUrl": "https://a.psrectv80.xyz"
         }
       ],
-      "version": 113,
+      "version": 116,
       "description": "RecTv APK, Türkiye’deki en popüler Çevrimiçi Medya Akış platformlarından biridir. Filmlerin, Canlı Sporların, Web Dizilerinin ve çok daha fazlasının keyfini ücretsiz çıkarın.",
       "language": "tr",
       "tvTypes": [
@@ -1116,6 +1537,34 @@
       "iconUrl": "https://rectv.org.tr/wp-content/uploads/2024/11/rectv-modified.webp",
       "pluginClasses": [
         "com.berkstream.vendor.feroxx.rectv.keyiflerolsun.RecTVPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "rectv-bc",
+      "slug": "rectvbc",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "RecTV BC",
+          "mainUrl": "https://a.prectv71.lol"
+        }
+      ],
+      "version": 4,
+      "description": "RecTV BronzeCloud Edition - Spor ve Canlı TV",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "Live",
+        "TvSeries"
+      ],
+      "authors": [
+        "Dr.Octagon"
+      ],
+      "iconUrl": "https://rectv.org.tr/wp-content/uploads/2024/11/rectv-modified.webp",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.rectvbc.droctagon.RecTVBCPlugin"
       ],
       "fileCount": 3
     },
@@ -1157,10 +1606,10 @@
       "providers": [
         {
           "name": "SelcukFlix",
-          "mainUrl": "https://selcukflix.com"
+          "mainUrl": "https://selcukflix.app"
         }
       ],
-      "version": 1,
+      "version": 3,
       "description": "SelcukFlix eklentisi.",
       "language": "tr",
       "tvTypes": [
@@ -1184,10 +1633,10 @@
       "providers": [
         {
           "name": "SetFilmIzle",
-          "mainUrl": "https://www.setfilmizle.uk"
+          "mainUrl": "https://www.setfilmizle.ltd"
         }
       ],
-      "version": 30,
+      "version": 32,
       "description": "Setfilmizle sitemizde, donma yaşamadan Türkçe dublaj ve altyazılı filmleri ile dizileri muhteşem 1080p full HD kalitesinde izleyebilirsiniz.",
       "language": "tr",
       "tvTypes": [
@@ -1231,6 +1680,60 @@
       "fileCount": 3
     },
     {
+      "id": "Showtv",
+      "slug": "showtv",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Show TV",
+          "mainUrl": "https://www.showtv.com.tr"
+        }
+      ],
+      "version": 1,
+      "description": "Show TV'nin sevilen dizileri ve programları: Muhtemel Aşk, Kızılcık Şerbeti, Sevdan Bir Ateş, Güldür Güldür Show ve daha fazlası.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Live"
+      ],
+      "authors": [
+        "UmayTrade"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.showtv.com.tr&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.showtv.UmayTrade.ShowTvPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "Sinefy",
+      "slug": "sinefy",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Sinefy",
+          "mainUrl": "https://sinefy3.com"
+        }
+      ],
+      "version": 14,
+      "description": "Yabancı film izle olarak vizyondaki en yeni yabancı filmleri türkçe dublaj ve altyazılı olarak en hızlı şekilde full hd olarak sizlere sunuyoruz.",
+      "language": "tr",
+      "tvTypes": [
+        "Movie",
+        "TvSeries"
+      ],
+      "authors": [
+        "kraptor"
+      ],
+      "iconUrl": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://sinefy3.com/&size=128",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.sinefy.UmayTrade.SinefyPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
       "id": "SinemaCX",
       "slug": "sinemacx",
       "origin": "feroxx",
@@ -1238,10 +1741,10 @@
       "providers": [
         {
           "name": "SinemaCX",
-          "mainUrl": "https://www.sinema.gg"
+          "mainUrl": "https://sinemacc.com"
         }
       ],
-      "version": 24,
+      "version": 26,
       "description": "Güncel ve en iyi yabancı filmleri yüksek görüntü kalitesinde, Türkçe dublaj ve altyazı seçenekleriyle filmleri full izleyin.",
       "language": "tr",
       "tvTypes": [
@@ -1264,10 +1767,10 @@
       "providers": [
         {
           "name": "Sinewix",
-          "mainUrl": "https://ydfvfdizipanel.ru"
+          "mainUrl": "https://ydfvfdizipanel.ru/login"
         }
       ],
-      "version": 2,
+      "version": 3,
       "description": "Sinewix | Ücretsiz Film - Dizi - Anime İzleme Uygulaması",
       "language": "tr",
       "tvTypes": [
@@ -1282,6 +1785,111 @@
       "iconUrl": "https://play-lh.googleusercontent.com/brwGNmr7IjA_MKk_TTPs0va10hdKE_bD_a1lnKoiMuCayW98EHpRv55edA6aEoJlmwfX",
       "pluginClasses": [
         "com.berkstream.vendor.feroxx.sinewix.keyiflerolsun.SinewixPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "Sinezy",
+      "slug": "sinezy",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Sinezy",
+          "mainUrl": "https://sinezy.to"
+        }
+      ],
+      "version": 9,
+      "description": "Yerli ve yabancı film izle! Türkçe Dublaj ve Alt Yazılı Seçenekleriyle full hd film izlemek için En çok tercih edilen adres!",
+      "language": "tr",
+      "tvTypes": [
+        "Movie"
+      ],
+      "authors": [
+        "kraptor"
+      ],
+      "iconUrl": "https://t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://sinezy.org/&size=48",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.sinezy.kraptor.SinezyPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "Startv",
+      "slug": "startv",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Star TV",
+          "mainUrl": "https://www.startv.com.tr"
+        }
+      ],
+      "version": 1,
+      "description": "Star TV'nin sevilen dizileri (Tuzlu Kahve, Sevdiğim Sensin, Yalı Çapkını) ve programları (Didem Arslan, Songül ve Uğur) izleyin.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries",
+        "Live"
+      ],
+      "authors": [
+        "kerimmkirac"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.startv.com.tr&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.startv.UmayTrade.StarTvPlugin"
+      ],
+      "fileCount": 2
+    },
+    {
+      "id": "Streamed",
+      "slug": "streamed",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "Streamed",
+          "mainUrl": "https://streamed.pk"
+        }
+      ],
+      "version": 28,
+      "description": "Streamed ile Canlı Spor Yayınlarını İzleyebilirsiniz.",
+      "language": "en",
+      "tvTypes": [
+        "Live"
+      ],
+      "authors": [
+        "kraptor"
+      ],
+      "iconUrl": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://streamed.pk/&size=128",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.streamed.kraptor.StreamedPlugin"
+      ],
+      "fileCount": 3
+    },
+    {
+      "id": "Supercartoons",
+      "slug": "supercartoons",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "SuperCartoons",
+          "mainUrl": "https://www.supercartoons.net"
+        }
+      ],
+      "version": 2,
+      "description": "Watch Cartoons Online. Here you can Watch old Classical Cartoons like Bugs Bunny, Mickey Mouse, Pink Panther, Tom and Jerry and Many Many More!",
+      "language": "en",
+      "tvTypes": [
+        "Cartoon"
+      ],
+      "authors": [
+        "ByAyzen"
+      ],
+      "iconUrl": "https://i.imgur.com/LBfX2k3.png",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.supercartoons.byayzen.SuperCartoonsPlugin"
       ],
       "fileCount": 2
     },
@@ -1319,8 +1927,8 @@
     {
       "id": "TLC",
       "slug": "tlc",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
           "name": "TLC",
@@ -1338,7 +1946,7 @@
       ],
       "iconUrl": "https://www.tlctv.com.tr/favicon.ico",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.tlc.nikyokki.TLCPlugin"
+        "com.berkstream.vendor.kraptor.tlc.nikyokki.TLCPlugin"
       ],
       "fileCount": 2
     },
@@ -1379,7 +1987,7 @@
           "mainUrl": "https://tranimaci.com"
         }
       ],
-      "version": 18,
+      "version": 19,
       "description": "TRanimeci - Türkiye'nin Online Anime izleme sitesi.",
       "language": "tr",
       "tvTypes": [
@@ -1402,11 +2010,15 @@
       "originName": "Feroxx Turkish Providers",
       "providers": [
         {
+          "name": "Odnoklassniki",
+          "mainUrl": "https://odnoklassniki.ru"
+        },
+        {
           "name": "AsyaLog",
           "mainUrl": "https://asyalog.co"
         }
       ],
-      "version": 65,
+      "version": 66,
       "description": "TRasyalog izleme sitesi.",
       "language": "tr",
       "tvTypes": [
@@ -1419,7 +2031,7 @@
       "pluginClasses": [
         "com.berkstream.vendor.feroxx.trasyalog.keyiflerolsun.TRasyalogPlugin"
       ],
-      "fileCount": 2
+      "fileCount": 3
     },
     {
       "id": "TurkAnime",
@@ -1448,30 +2060,51 @@
       "fileCount": 2
     },
     {
-      "id": "TvDiziler",
-      "slug": "tvdiziler",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "id": "Tv8",
+      "slug": "tv8",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
-          "name": "TvDiziler",
-          "mainUrl": "https://tvdiziler.cc/home"
+          "name": "Tv8",
+          "mainUrl": "https://www.tv8.com.tr"
         }
       ],
-      "version": 5,
-      "description": "Ücretsiz yerli dizi izleme sitesi en popüler dizileri tek parça hd kalitesiyle ve reklamsız bedava olarak buradan tv dizileri izleyin.",
+      "version": 1,
+      "description": "TV8'in eğlenceli programları, yarışmaları ve dizileri ile keyifle TV izle. Survivor, O Ses Türkiye, Jet Sosyete, Kızım, Yemekteyiz ve Masterchef için TV8 izle.",
       "language": "tr",
       "tvTypes": [
         "TvSeries"
       ],
       "authors": [
-        "nikyokki"
+        "kerimmkirac"
       ],
-      "iconUrl": "https://www.google.com/s2/favicons?domain=tvdiziler.cc&sz=%size%",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=www.tv8.com.tr&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.tvdiziler.nikyokki.TvDizilerPlugin"
+        "com.berkstream.vendor.kraptor.tv8.kerimmkirac.Tv8Plugin"
       ],
-      "fileCount": 3
+      "fileCount": 2
+    },
+    {
+      "id": "TvDiziler",
+      "slug": "tvdiziler",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [],
+      "version": 1,
+      "description": "TvDiziler - Yerli diziler, Türkçe dublaj/altyazılı bölümler.",
+      "language": "tr",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "NeO"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?domain=tvdiziler.tv&sz=%size%",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.tvdiziler.UmayTrade.TvDizilerPlugin"
+      ],
+      "fileCount": 4
     },
     {
       "id": "TwitchProvider",
@@ -1693,15 +2326,15 @@
     {
       "id": "YabanciDizi",
       "slug": "yabancidizi",
-      "origin": "nikyokki",
-      "originName": "Nikyokki Turkish Providers",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
       "providers": [
         {
           "name": "YabanciDizi",
-          "mainUrl": "https://yabancidizi.so"
+          "mainUrl": "https://yabancidizi.news"
         }
       ],
-      "version": 8,
+      "version": 9,
       "description": "Son çıkan yabancı dizi ve filmleri yabancidizi' de izle. En yeni yabancı film ve diziler, türkçe altyazılı yada dublaj olarak 1080p kalitesinde hd izle.",
       "language": "tr",
       "tvTypes": [
@@ -1710,9 +2343,35 @@
       "authors": [
         "nikyokki"
       ],
-      "iconUrl": "https://www.google.com/s2/favicons?domain=yabancidizi.tv&sz=%size%",
+      "iconUrl": "https://www.google.com/s2/favicons?domain=yabancidizi.news&sz=%size%",
       "pluginClasses": [
-        "com.berkstream.vendor.nikyokki.yabancidizi.nikyokki.YabanciDiziPlugin"
+        "com.berkstream.vendor.kraptor.yabancidizi.nikyokki.YabanciDiziPlugin"
+      ],
+      "fileCount": 4
+    },
+    {
+      "id": "YoTurkish",
+      "slug": "yoturkish",
+      "origin": "kraptor",
+      "originName": "Kraptor Turkish Providers",
+      "providers": [
+        {
+          "name": "YoTurkish",
+          "mainUrl": "https://yoturkish.to"
+        }
+      ],
+      "version": 4,
+      "description": "YoTurkish - is the most favorite website for watching turkish series with english subtitles for free online, only at yoturkish.to",
+      "language": "en",
+      "tvTypes": [
+        "TvSeries"
+      ],
+      "authors": [
+        "kraptor"
+      ],
+      "iconUrl": "https://www.google.com/s2/favicons?sz=64&domain=yoturkish.to",
+      "pluginClasses": [
+        "com.berkstream.vendor.kraptor.yoturkish.kraptor.YoTurkishPlugin"
       ],
       "fileCount": 4
     },
@@ -1747,8 +2406,48 @@
   ],
   "skipped": [
     {
+      "origin": "kraptor",
+      "module": "AnimeAV",
+      "reason": "liste disi birakildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "AnimeciX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "AnimeciX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "Animejara",
+      "reason": "liste disi birakildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "AnimeWorld",
+      "reason": "liste disi birakildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "AnimeYTX",
+      "reason": "liste disi birakildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "AsyaAnimeleri",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "AsyaWatch",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "BelgeselX",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1762,13 +2461,33 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
-      "origin": "nikyokki",
+      "origin": "kraptor",
+      "module": "CinemaCity",
+      "reason": "status=0"
+    },
+    {
+      "origin": "kraptor",
       "module": "CizgiMax",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "nikyokki",
+      "module": "CizgiMax",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
       "module": "DDizi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DDizi",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "DiziBox",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1778,7 +2497,22 @@
     },
     {
       "origin": "nikyokki",
+      "module": "DiziGom",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
       "module": "DiziKorea",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziKorea",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "Dizilla",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1788,12 +2522,32 @@
     },
     {
       "origin": "nikyokki",
+      "module": "DiziMag",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
       "module": "DiziMom",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "nikyokki",
+      "module": "DiziMom",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
       "module": "DiziPal",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "DiziPal",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "DiziYou",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1803,8 +2557,23 @@
     },
     {
       "origin": "nikyokki",
+      "module": "DMax",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "DramaDizilerim",
+      "reason": "liste disi birakildi"
+    },
+    {
+      "origin": "nikyokki",
       "module": "Filmİzlesene",
       "reason": "status=0"
+    },
+    {
+      "origin": "kraptor",
+      "module": "FilmMakinesi",
+      "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "nikyokki",
@@ -1822,8 +2591,18 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "kraptor",
+      "module": "FullHDFilmizlesene",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "FullHDFilmizlesene",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "HDFilmCehennemi",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1833,12 +2612,27 @@
     },
     {
       "origin": "nikyokki",
+      "module": "HDFilmCehennemi2",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
       "module": "InatBox",
       "reason": "status=3"
     },
     {
+      "origin": "kraptor",
+      "module": "JetFilmizle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "JetFilmizle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "KultFilmler",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1847,8 +2641,18 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "kraptor",
+      "module": "RareFilmm",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "RecTV",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "SelcukFlix",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1857,8 +2661,18 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "kraptor",
+      "module": "SetFilmIzle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "SetFilmIzle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "SezonlukDizi",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1867,8 +2681,18 @@
       "reason": "feroxx surumu tercih edildi"
     },
     {
+      "origin": "kraptor",
+      "module": "SinemaCX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
       "origin": "nikyokki",
       "module": "SinemaCX",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "SineWix",
       "reason": "feroxx surumu tercih edildi"
     },
     {
@@ -1883,13 +2707,53 @@
     },
     {
       "origin": "nikyokki",
+      "module": "TLC",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "TRasyalog",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
       "module": "TurkAnime",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "TurkAnime",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "TvDiziler",
+      "reason": "kraptor surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "Watch2Movies",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "WebdramaTurkey2",
       "reason": "feroxx surumu tercih edildi"
     },
     {
       "origin": "nikyokki",
       "module": "WebteIzle",
       "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "Webteizle",
+      "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "nikyokki",
+      "module": "YabanciDizi",
+      "reason": "kraptor surumu tercih edildi"
     }
   ],
   "failures": []

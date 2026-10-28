@@ -161,7 +161,7 @@ class BerkStreamProvider : TmdbProvider() {
     private val wantedSubtitleLanguages = setOf("tur", "tr", "eng", "en")
 
     private val liveProviderPriority =
-        listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "vavooSpor", "BerkStream Canlı")
+        listOf("plt-tv", "CanliTV", "InatBox", "RecTV", "İnatBox", "RecTV BC", "vavooSpor", "BerkStream Canlı")
 
     private val movieTypes = setOf(TvType.Movie, TvType.AnimeMovie)
 
@@ -183,6 +183,9 @@ class BerkStreamProvider : TmdbProvider() {
         "RoketDizi", "YabanciDizi", "TvDiziler", "DiziMom", "DDizi", "DiziKorea",
         "powerDizi", "DiziPalOriginal", "WebdramaTurkey2", "KoreanTurk",
         "Dizigecesi", "DiziPod", "DramaDizilerim",
+        // Kraptor (v39): yerli diziler kanallarin kendi sitesinden de aranir.
+        "Dizilife", "DiziYo", "DiziBal", "DiziBol", "DiziPalOrg", "BirAsyaDizi",
+        "Kanal D", "ATV", "Show TV", "Star TV", "Tv8",
         // Film
         "HDFilmCehennemi", "HDFilmCehennemi2", "HDFilmDelisi", "HDFilmİzle", "HDFilmSitesi",
         "FilmMakinesi", "FullHDFilm", "FullHDFilmizlesene", "FullHDFilmİzlede",
@@ -190,6 +193,8 @@ class BerkStreamProvider : TmdbProvider() {
         "FilmModu", "FilmKovası", "SelcukFlix", "UgurFilm", "XPrime", "Sinewix",
         "4KFilmİzlesene", "WFilmİzle", "Filmİzleİlk", "Watch2Movies", "KultFilmler",
         "RareFilmm", "RecTV", "powerSinema",
+        "HDFilmCehennemi1", "FilmEkseni", "Sinefy", "Sinezy", "Filmzal", "LoveFilm",
+        "FilmIzyon", "RecTV BC", "İnatBox",
         // Anime/cizgi: listede olmadiklari icin hepsi en sona dusuyor ve
         // take(18) onlari kesiyordu; One Piece gibi basliklarda hicbir anime
         // kaynagi taranmiyordu.

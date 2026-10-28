@@ -8,6 +8,13 @@
       "priority": 110
     },
     {
+      "id": "kraptor",
+      "name": "Kraptor Turkish Providers",
+      "manifest": "https://raw.githubusercontent.com/aytzey/cs-kraptor/builds/plugins.json",
+      "repository": "https://github.com/aytzey/cs-kraptor",
+      "priority": 90
+    },
+    {
       "id": "feroxx",
       "name": "Feroxx Turkish Providers",
       "manifest": "https://raw.githubusercontent.com/feroxx/Kekik-cloudstream/builds/plugins.json",
@@ -57,6 +64,13 @@
       "priority": 100
     },
     {
+      "id": "kraptor",
+      "name": "Kraptor Turkish Providers",
+      "url": "https://github.com/aytzey/cs-kraptor.git",
+      "branch": "source-backup",
+      "priority": 90
+    },
+    {
       "id": "nikyokki",
       "name": "Nikyokki Turkish Providers",
       "url": "https://github.com/nikyokki/nik-cloudstream.git",
@@ -65,7 +79,11 @@
   ],
   "vendorExcludedPlugins": [
     "Dizigecesi",
-    "DramaDizilerim"
+    "DramaDizilerim",
+    "AnimeAV",
+    "Animejara",
+    "AnimeWorld",
+    "AnimeYTX"
   ],
   "bundlePltEngine": true,
   "manualDomains": {

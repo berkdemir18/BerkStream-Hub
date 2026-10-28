@@ -4,6 +4,7 @@
 package com.berkstream.vendor.feroxx.ddizi.keyiflerolsun
 
 import android.util.Log
+import android.util.Log.d
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.M3u8Helper
@@ -18,7 +19,7 @@ import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
 
 class DDizi : MainAPI() {
-    override var mainUrl              = "https://www.ddizi.im"
+    override var mainUrl              = "https://www.ddizi.tel"
     override var name                 = "DDizi"
     override val hasMainPage          = true
     override var lang                 = "tr"
@@ -86,7 +87,7 @@ class DDizi : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        Log.d("DDizi:", "Searching for $query")
+        d("DDizi:", "Searching for $query")
         
         val formData = mapOf("arama" to query)
         
@@ -100,22 +101,22 @@ class DDizi : MainAPI() {
         try {
             val boxCatResults = document.select("div.dizi-boxpost-cat").mapNotNull { it.toSearchResult() }
             if (boxCatResults.isNotEmpty()) {
-                Log.d("DDizi:", "Found ${boxCatResults.size} box-cat results")
+                d("DDizi:", "Found ${boxCatResults.size} box-cat results")
                 results.addAll(boxCatResults)
             }
         } catch (e: Exception) {
-            Log.d("DDizi:", "Error parsing box-cat search results: ${e.message}")
+            d("DDizi:", "Error parsing box-cat search results: ${e.message}")
         }
         
         if (results.isEmpty()) {
             try {
                 val boxResults = document.select("div.dizi-boxpost").mapNotNull { it.toSearchResult() }
                 if (boxResults.isNotEmpty()) {
-                    Log.d("DDizi:", "Found ${boxResults.size} box results")
+                    d("DDizi:", "Found ${boxResults.size} box results")
                     results.addAll(boxResults)
                 }
             } catch (e: Exception) {
-                Log.d("DDizi:", "Error parsing box search results: ${e.message}")
+                d("DDizi:", "Error parsing box search results: ${e.message}")
             }
         }
         
@@ -131,11 +132,11 @@ class DDizi : MainAPI() {
                 }
                 
                 if (altResults.isNotEmpty()) {
-                    Log.d("DDizi:", "Found ${altResults.size} alternative results")
+                    d("DDizi:", "Found ${altResults.size} alternative results")
                     results.addAll(altResults)
                 }
             } catch (e: Exception) {
-                Log.d("DDizi:", "Error parsing alternative search results: ${e.message}")
+                d("DDizi:", "Error parsing alternative search results: ${e.message}")
             }
         }
         
@@ -219,12 +220,12 @@ override suspend fun loadLinks(
     val iframeSrc = document.selectFirst("iframe")?.attr("src")
     if (iframeSrc?.contains("youtube", ignoreCase = true) == true) {
         // Log the iframe src for debugging
-        Log.d("DDizi:", "iframeSrc = $iframeSrc")
+        d("DDizi:", "iframeSrc = $iframeSrc")
         
         // Extract the YouTube URL from the id parameter
         val youtubeUrl = Regex("""id=([^&]+)""").find(iframeSrc)?.groupValues?.get(1)
         if (youtubeUrl != null) {
-        Log.d("DDizi:", "Calling loadExtractor with $youtubeUrl")
+            d("DDizi:", "Calling loadExtractor with $youtubeUrl")
             try {
                 loadExtractor("https://www.youtube.com/watch?v=$youtubeUrl", "", subtitleCallback, callback)
                 return true
@@ -237,16 +238,16 @@ override suspend fun loadLinks(
     // Proceed to og:video extraction if YouTube iframe is not present or fails
     val ogVideo = document.selectFirst("iframe")?.attr("src")
         ?: return loadExtractor(data, data, subtitleCallback, callback) // Fallback to loadExtractor if no og:video
-        Log.d("DDizi:", "iframe src $ogVideo")
+    d("DDizi:", "iframe src $ogVideo")
     val playerDoc = app.get("${mainUrl.removeSuffix("/")}//${ogVideo.removePrefix("/")}", headers = getHeaders(data)).document
     val jwScript = playerDoc.select("script").firstOrNull { it.html().contains("jwplayer") && it.html().contains("sources") }
         ?: return loadExtractor(ogVideo, data, subtitleCallback, callback) // Fallback to loadExtractor if no JW script
-    Log.d("DDizi:", "jwScript $jwScript")
+    d("DDizi:", "jwScript $jwScript")
     val sourcesRegex = Regex("""sources:\s*\[\s*\{(.*?)\}\s*,?\s*\]""", RegexOption.DOT_MATCHES_ALL)
     val fileRegex = Regex("""file:\s*["'](.*?)["']""")
     val sourcesMatch = sourcesRegex.find(jwScript.html()) ?: return false
     val fileUrl = fileRegex.find(sourcesMatch.groupValues[1])?.groupValues?.get(1) ?: return false
-    Log.d("DDizi: fileurl", fileUrl)
+    d("DDizi: fileurl", fileUrl)
     val isHls = fileUrl.contains(".m3u8")
     val quality = Regex("""label:\s*["'](.*?)["']""").find(sourcesMatch.groupValues[1])?.groupValues?.get(1) ?: "Auto"
     val videoHeaders = if (fileUrl.contains("master.txt")) {
