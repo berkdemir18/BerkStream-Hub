@@ -1,6 +1,6 @@
 // BU DOSYA URETILMISTIR - elle duzenleme.
 // Ureten: scripts/vendor-sources.mjs
-// Gomulu kaynak sayisi: 89
+// Gomulu kaynak sayisi: 88
 package com.berkstream
 
 import com.lagradost.cloudstream3.plugins.BasePlugin
@@ -80,7 +80,6 @@ internal val VENDORED_SOURCES: List<VendoredSource> = listOf(
     VendoredSource("Sinewix", "Feroxx Turkish Providers") { com.berkstream.vendor.feroxx.sinewix.keyiflerolsun.SinewixPlugin() },
     VendoredSource("Sinezy", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.sinezy.kraptor.SinezyPlugin() },
     VendoredSource("Startv", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.startv.UmayTrade.StarTvPlugin() },
-    VendoredSource("Streamed", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.streamed.kraptor.StreamedPlugin() },
     VendoredSource("Supercartoons", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.supercartoons.byayzen.SuperCartoonsPlugin() },
     VendoredSource("SuperFilmGeldi", "Nikyokki Turkish Providers") { com.berkstream.vendor.nikyokki.superfilmgeldi.keyiflerolsun.SuperFilmGeldiPlugin() },
     VendoredSource("TLC", "Kraptor Turkish Providers") { com.berkstream.vendor.kraptor.tlc.nikyokki.TLCPlugin() },

@@ -61,6 +61,9 @@ npm run vendor
 - Kapalı kaynak bir birleşik sağlayıcı motoru (ikili olarak eklenir)
 - Birincil Türkçe sağlayıcı topluluğu deposu
 - İkincil Türkçe sağlayıcı topluluğu deposu
+- Kraptor deposu (asıl depo 2026-08'de kapandı; topluluğun bakımını sürdürdüğü
+  kopyasından alınır). ATV, Kanal D, Show TV, Star TV, TV8 gibi kanal siteleri
+  ve RecTV/İnatBox'ın ikinci sürümleri buradan gelir.
 
 Yalnız manifestinde `status: 1` olan eklentiler alınır. Aynı eklenti birden çok
 kaynakta varsa öncelik sırası `sources.json` içindeki `priority` alanına göredir.

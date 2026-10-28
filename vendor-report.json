@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-28T12:51:08.144Z",
-  "vendoredCount": 89,
-  "pluginClassCount": 89,
+  "generatedAt": "2026-10-28T12:54:29.579Z",
+  "vendoredCount": 88,
+  "pluginClassCount": 88,
   "originCounts": {
     "official": 5,
     "feroxx": 37,
-    "kraptor": 32,
+    "kraptor": 31,
     "nikyokki": 15
   },
   "vendored": [
@@ -1842,32 +1842,6 @@
       "fileCount": 2
     },
     {
-      "id": "Streamed",
-      "slug": "streamed",
-      "origin": "kraptor",
-      "originName": "Kraptor Turkish Providers",
-      "providers": [
-        {
-          "name": "Streamed",
-          "mainUrl": "https://streamed.pk"
-        }
-      ],
-      "version": 28,
-      "description": "Streamed ile Canlı Spor Yayınlarını İzleyebilirsiniz.",
-      "language": "en",
-      "tvTypes": [
-        "Live"
-      ],
-      "authors": [
-        "kraptor"
-      ],
-      "iconUrl": "https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://streamed.pk/&size=128",
-      "pluginClasses": [
-        "com.berkstream.vendor.kraptor.streamed.kraptor.StreamedPlugin"
-      ],
-      "fileCount": 3
-    },
-    {
       "id": "Supercartoons",
       "slug": "supercartoons",
       "origin": "kraptor",
@@ -2699,6 +2673,11 @@
       "origin": "nikyokki",
       "module": "SineWix",
       "reason": "feroxx surumu tercih edildi"
+    },
+    {
+      "origin": "kraptor",
+      "module": "Streamed",
+      "reason": "liste disi birakildi"
     },
     {
       "origin": "nikyokki",
