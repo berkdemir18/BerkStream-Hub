@@ -1,25 +1,4 @@
-// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.4.0","description":"BerkStream Hub'ın Windows motoru: çeşitli raflar, Türkçe kaynaklar ve uygulama içi oynatıcı.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
-//
-// BerkStream Hub - masaüstü (JavaScript) sürümü.
-//
-// Neden bu dosya var: Hub'ın kataloğu (repo.json / plugins.json) CloudStream'in
-// Android eklenti formatı; .cs3 dosyaları PC'de açılmıyor. Bu dosya Hub'daki
-// Kotlin sağlayıcıların çalışan JS karşılığı.
-//
-// ÇALIŞMA ORTAMI - buna dikkat (2.0.0 tam da bu yüzden sessizce çuvalladı):
-// BerkStream masaüstü eklentileri **Boa** (Rust JS motoru) içinde çalıştırıyor
-// ve host yalnızca iki şey enjekte ediyor: `fetch` ve `console`.
-// YOK olanlar: setTimeout / clearTimeout, Buffer, atob, URL, URLSearchParams,
-// AbortController, TextDecoder. Bunlardan birine dokunan ilk satır bütün
-// eklentiyi düşürüyor ve uygulamada "hiçbir şey gelmiyor" olarak görünüyor.
-// Host'un fetch'i: fetch(url, {method, headers, body}) -> {ok, status, text(), json()}
-// (yanıt başlıkları okunamıyor, yönlendirmeyi host hallediyor.)
-//
-// Sözleşme (host bu üçünü çağırır, JSON string bekler):
-//   getCatalog(arg)      -> [{title, items:[...]}]  (ana sayfa rafları)
-//   search(query)        -> [{id,title,poster_url,media_type,year,...}]
-//   getEpisodes(mediaId) -> [{id,title,season,episode_number,...}]
-//   getStreams(mediaId)  -> [{url,quality,format,provider,language,headers}]
+// @plugin-info {"id":"berkstream-desktop","name":"BerkStream Desktop","version":"2.5.0","description":"BerkStream Hub'ın Windows motoru: FilmModu, SinemaCX, SezonlukDizi ve çalışan Türkçe kaynaklar.","author":"berkdemir18","icon_url":"https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/assets/berkstream-icon.png","supported_types":["movie","show"],"is_builtin":false}
 
 var TMDB_KEY = "e6333b32409e02a4a6eba6fb7ff866bb";
 var TMDB = "https://api.themoviedb.org/3";
@@ -39,13 +18,11 @@ var BROWSER_HEADERS = {
 
 // ───────────────────────── yardımcılar (motor-güvenli) ─────────────────────────
 
-/** new URL yok; origin'i elle çıkarıyoruz. */
 function originOf(url) {
   var m = /^(https?:\/\/[^/]+)/i.exec(url || "");
   return m ? m[1] : "";
 }
 
-/** new URL yok; göreli adresi elle mutlaklaştırıyoruz. */
 function absolute(base, href) {
   if (!href) return null;
   href = String(href).trim();
@@ -57,7 +34,6 @@ function absolute(base, href) {
   return base.replace(/\/[^/]*$/, "/") + href;
 }
 
-/** URLSearchParams yok. */
 function formEncode(obj) {
   var parts = [];
   for (var k in obj) {
@@ -68,10 +44,10 @@ function formEncode(obj) {
   return parts.join("&");
 }
 
-/** Buffer ve atob yok; base64 çözümü elle. Latin-1 bayt dizisi döner. */
 var B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 function b64decode(input) {
-  var data = String(input).replace(/[^A-Za-z0-9+/=]/g, "");
+  var data = String(input || "").replace(/[^A-Za-z0-9+/=]/g, "");
+  while (data.length % 4) data += "=";
   var out = "";
   for (var i = 0; i < data.length; i += 4) {
     var e1 = B64.indexOf(data.charAt(i));
@@ -88,7 +64,6 @@ function b64decode(input) {
   return out;
 }
 
-/** TextDecoder yok; latin-1 bayt dizisini UTF-8 metne çeviriyoruz. */
 function utf8FromBytes(bytes) {
   var out = "";
   var i = 0;
@@ -122,13 +97,21 @@ function decodeB64Json(b64) {
   return JSON.parse(utf8FromBytes(b64decode(b64)));
 }
 
+function decodeB64Text(b64) {
+  try {
+    var raw = String(b64 || "").replace(/-/g, "+").replace(/_/g, "/");
+    return utf8FromBytes(b64decode(raw));
+  } catch (e) {
+    return "";
+  }
+}
+
 // ───────────────────────────────── HTTP ─────────────────────────────────
 
 function isChallenge(body) {
   return /Just a moment|cf-browser-verification|challenge-platform|__cf_chl/i.test(body || "");
 }
 
-/** setTimeout yok; zaman aşımını host hallediyor. */
 async function req(url, opts) {
   opts = opts || {};
   var origin = originOf(url);
@@ -155,15 +138,12 @@ async function getJson(url) {
 }
 
 // ────────────────────────── başlık eşleştirme ──────────────────────────
-// BerkStreamProvider.kt'deki looseTitle/titleMatches portu. Gevşek "içeren"
-// karşılaştırması "Dexter" aramasını "Dexter's Laboratory" ile eşleştiriyordu.
 
 var NOISE =
   /\b(izle|seyret|full|hd|fullhd|4k|1080p|720p|480p|turkce|turkiye|dublaj|altyazili|altyazi|filmi|film|dizisi|dizi|online|tek|parca|part|sezon|bolum|yerli|yabanci|hdfilm|tr)\b/g;
 
 var ACCENTS = { ı: "i", İ: "i", ş: "s", Ş: "s", ğ: "g", Ğ: "g", ü: "u", Ü: "u", ö: "o", Ö: "o", ç: "c", Ç: "c", â: "a", î: "i", û: "u", é: "e", è: "e", á: "a", ó: "o", ú: "u", ñ: "n" };
 
-/** normalize("NFD") yok sayılıyor; harf eşlemesi elle. */
 function deaccent(value) {
   var s = String(value == null ? "" : value);
   var out = "";
@@ -198,28 +178,61 @@ function tokenSetRatio(a, b) {
   return Math.round((2 * shared * 100) / (keysA.length + keysB.length));
 }
 
-function titleMatches(candidate, target) {
-  var a = looseTitle(candidate);
-  var b = looseTitle(target);
+function extractAliases(raw) {
+  var s = String(raw == null ? "" : raw).trim();
+  if (!s) return [];
+  var list = [s];
+  var parts = s.split(/[\(\)\[\]\/\-–—|:]+/);
+  for (var i = 0; i < parts.length; i++) {
+    var p = parts[i].trim();
+    if (p && p.length >= 2 && p !== s) list.push(p);
+  }
+  return list;
+}
+
+function singleMatch(cand, targ) {
+  var a = looseTitle(cand);
+  var b = looseTitle(targ);
   if (!a || !b) return false;
   if (a === b) return true;
-  if (deaccent(candidate).replace(/[^a-z0-9]/g, "") === deaccent(target).replace(/[^a-z0-9]/g, ""))
-    return true;
+  var da = deaccent(cand).replace(/[^a-z0-9]/g, "");
+  var db = deaccent(targ).replace(/[^a-z0-9]/g, "");
+  if (da && db && da === db) return true;
 
-  // Adayda hedefte geçmeyen anlamlı kelime varsa bu başka bir yapım:
-  // "dexter resurrection" ve "dexters laboratory", "dexter" değildir.
   var targetWords = {};
   var bw = b.split(" ");
   for (var i = 0; i < bw.length; i++) targetWords[bw[i]] = 1;
   var aw = a.split(" ");
+  var missing = 0;
   for (var j = 0; j < aw.length; j++) {
-    if (aw[j].length > 2 && !targetWords[aw[j]]) return false;
+    if (aw[j].length > 2 && !targetWords[aw[j]]) missing++;
   }
-  return tokenSetRatio(a, b) >= 92;
+  if (missing === 0 && tokenSetRatio(a, b) >= 75) return true;
+
+  var candWords = {};
+  for (var k = 0; k < aw.length; k++) candWords[aw[k]] = 1;
+  var missingTarg = 0;
+  for (var l = 0; l < bw.length; l++) {
+    if (bw[l].length > 2 && !candWords[bw[l]]) missingTarg++;
+  }
+  if (missingTarg === 0 && tokenSetRatio(a, b) >= 75) return true;
+
+  return tokenSetRatio(a, b) >= 85;
+}
+
+function titleMatches(candidate, target) {
+  if (!candidate || !target) return false;
+  var cands = extractAliases(candidate);
+  var targs = extractAliases(target);
+  for (var i = 0; i < cands.length; i++) {
+    for (var j = 0; j < targs.length; j++) {
+      if (singleMatch(cands[i], targs[j])) return true;
+    }
+  }
+  return false;
 }
 
 // ────────────────────── packed-eval çözücü ──────────────────────
-// Türk oynatıcı sayfalarının çoğu m3u8'i "p,a,c,k,e,d" sıkıştırmasında saklıyor.
 
 var PACKED = /eval\(function\(p,a,c,k,e,(?:r|d)\)\{[\s\S]*?\}\((.*?)\)\)/;
 
@@ -272,7 +285,6 @@ function unescapeUrl(v) {
     .replace(/\\/g, "");
 }
 
-/** matchAll yerine motor-güvenli global tarama. */
 function findAll(re, text) {
   var out = [];
   var rx = new RegExp(re.source, re.flags.indexOf("g") === -1 ? re.flags + "g" : re.flags);
@@ -284,71 +296,6 @@ function findAll(re, text) {
   return out;
 }
 
-/** ContentX ailesi: pichive.online, contentx.me, hotlinger.com, playru.net */
-async function contentX(url, referer) {
-  var origin = originOf(url);
-  var page = await req(url, { referer: referer });
-  var streams = [];
-  var subtitles = [];
-  var seen = {};
-
-  var subMatches = findAll(/"file":"((?:\\"|[^"])+)","label":"((?:\\"|[^"])+)"/g, page);
-  for (var i = 0; i < subMatches.length; i++) {
-    var subUrl = unescapeUrl(subMatches[i][1]);
-    if (!subUrl || seen[subUrl]) continue;
-    seen[subUrl] = 1;
-    subtitles.push({ lang: subMatches[i][2], url: absolute(origin, subUrl) });
-  }
-
-  var targets = [];
-  var main = /window\.openPlayer\('([^']+)'/.exec(page);
-  if (main) targets.push({ id: main[1], label: "Türkçe Altyazı" });
-  var dub = /,"([^"']+?)","Türkçe/.exec(page);
-  if (dub) targets.push({ id: dub[1], label: "Türkçe Dublaj" });
-
-  for (var t = 0; t < targets.length; t++) {
-    try {
-      var src = await req(origin + "/source2.php?v=" + targets[t].id, { referer: referer });
-      var file = /file":"([^"]+)/.exec(src);
-      if (!file) continue;
-      var link = unescapeUrl(file[1]);
-      if (/hotlinger|dplayer82\.site/.test(link)) link = link.replace("m.php", "master.m3u8");
-      streams.push({
-        url: link,
-        format: "hls",
-        language: targets[t].label,
-        headers: { Referer: url, "User-Agent": UA },
-      });
-    } catch (e) {}
-  }
-  return { streams: streams, subtitles: subtitles };
-}
-
-/** VidRame: m3u8 ters çevrilmiş + ROT13 + base64 sarılı. */
-function rot13(s) {
-  return s.replace(/[a-zA-Z]/g, function (c) {
-    var base = c <= "Z" ? 90 : 122;
-    var next = c.charCodeAt(0) + 13;
-    return String.fromCharCode(base >= next ? next : next - 26);
-  });
-}
-
-async function vidRame(url, referer) {
-  var page = await req(url, { referer: referer });
-  var packed = /\.dd\("([^"]+)"\)/.exec(page);
-  if (!packed) return { streams: [], subtitles: [] };
-  var raw = packed[1].replace(/-/g, "+").replace(/_/g, "/");
-  while (raw.length % 4) raw += "=";
-  var link = rot13(b64decode(raw)).split("").reverse().join("");
-  return {
-    streams: [
-      { url: link, format: "hls", language: "Türkçe", headers: { Referer: originOf(url) + "/" } },
-    ],
-    subtitles: [],
-  };
-}
-
-/** PlayerJS / FirePlayer şablonu - Türk sitelerinin ortak oynatıcısı. */
 async function playerJs(url, referer) {
   var page = unpack(await req(url, { referer: referer }));
   var streams = [];
@@ -377,27 +324,12 @@ async function playerJs(url, referer) {
   return { streams: streams, subtitles: subtitles };
 }
 
-/**
- * İframe'i akışa çevirir; çeviremezse "embed" olarak geri verir.
- *
- * Oynatıcı sunucularının çoğu Cloudflare arkasında (2026-09-09 ölçümü: 54
- * kaynağın 15'i). CloudStream Android'de bunu WebView ile aşıyor; masaüstünde
- * karşılığı uygulamanın kendi web görünümü - embed açıldığında Cloudflare
- * kendiliğinden geçiliyor.
- */
 async function resolveFrame(frame, referer, language) {
-  // Sayfa şablonlarında çözülmemiş `${...}` kalıntısı iframe olarak geliyor.
   if (!frame || frame.indexOf("${") !== -1 || frame.indexOf("%7B") !== -1) {
     return { streams: [], subtitles: [] };
   }
   try {
-    if (/contentx\.me|pichive\.online|playru\.net|hotlinger\.com|dplayer82\.site/i.test(frame)) {
-      var cx = await contentX(frame, referer);
-      if (cx.streams.length) return cx;
-    } else if (/vidrame\./i.test(frame)) {
-      var vr = await vidRame(frame, referer);
-      if (vr.streams.length) return vr;
-    } else if (!/youtube|youtu\.be|fragman|trailer/i.test(frame)) {
+    if (!/youtube|youtu\.be|fragman|trailer/i.test(frame)) {
       var pj = await playerJs(frame, referer);
       if (pj.streams.length) return pj;
     }
@@ -410,9 +342,337 @@ async function resolveFrame(frame, referer, language) {
   };
 }
 
-// ──────────────────────────── sağlayıcılar ────────────────────────────
+// ──────────────────────────── SAĞLAYICILAR ────────────────────────────
 
-/** RoketDizi'nin altyapısı (Hub: RoketDizi.kt). Yanıtlar base64 sarılı. */
+/**
+ * 1. FilmModu (Filmler için çalışan en hızlı doğrudan HLS kaynağı)
+ */
+var filmModu = {
+  name: "FilmModu",
+  kind: "movie",
+  mainUrl: "https://www.filmmodu.one",
+
+  search: async function (query) {
+    var url = this.mainUrl + "/film-ara?term=" + encodeURIComponent(query);
+    var res;
+    var html;
+    try {
+      res = await fetch(url, {
+        headers: {
+          "User-Agent": UA,
+          Referer: this.mainUrl + "/",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+        }
+      });
+      html = await res.text();
+    } catch (e) {
+      return [];
+    }
+    if (isChallenge(html)) return [];
+
+    var out = [];
+
+    // Case A: Tekli net eşleşmede FilmModu doğrudan film sayfasına yönlendirir.
+    if (/<div class="[^"]*alternates[^"]*"/.test(html) && /var videoId =/.test(html)) {
+      var canonical =
+        (/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i.exec(html) ||
+          /<meta[^>]+property=["']og:url["'][^>]+content=["']([^"']+)["']/i.exec(html) ||
+          [])[1] || res.url;
+      var titleM = /<title>([^<]+)<\/title>/i.exec(html);
+      var pageTitle = titleM ? titleM[1].replace(/\s*(?:izle|film izle|hd film izle).*$/i, "").trim() : query;
+      if (canonical) {
+        out.push({ title: pageTitle, url: canonical, year: null });
+        return out;
+      }
+    }
+
+    // Case B: Arama sonuç kartları
+    var re = /<div class="[^"]*movie[^"]*"[^>]*>[\s\S]*?<div class="poster">[\s\S]*?<a href="([^"]+)">([^<]+)<\/a>/g;
+    var m;
+    var seen = {};
+    while ((m = re.exec(html)) !== null) {
+      var href = absolute(this.mainUrl, m[1]);
+      var title = m[2].replace(/&amp;/g, "&").replace(/&#039;/g, "'").trim();
+      if (!href || seen[href]) continue;
+      seen[href] = 1;
+      out.push({ title: title, url: href, year: null });
+    }
+    return out;
+  },
+
+  links: async function (url) {
+    var self = this;
+    var html;
+    try {
+      html = await req(url);
+    } catch (e) {
+      return { streams: [], subtitles: [] };
+    }
+    var alternates = [];
+    var altBlock = /<div class="[^"]*alternates[^"]*">([\s\S]*?)<\/div>/.exec(html);
+    if (altBlock) {
+      var altRe = /<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g;
+      var am;
+      while ((am = altRe.exec(altBlock[1])) !== null) {
+        var altText = am[2].replace(/<[^>]+>/g, "").trim();
+        if (altText.indexOf("Fragman") === -1) {
+          alternates.push({ href: absolute(self.mainUrl, am[1]), label: altText });
+        }
+      }
+    }
+    if (!alternates.length) {
+      alternates.push({ href: url, label: "Film" });
+    }
+
+    var out = { streams: [], subtitles: [] };
+    var seenStream = {};
+
+    for (var i = 0; i < alternates.length && i < 3; i++) {
+      var alt = alternates[i];
+      try {
+        var pageHtml = (alt.href === url) ? html : await req(alt.href, { referer: url });
+        var vidId = (/var videoId = '([^']+)'/.exec(pageHtml) || [])[1];
+        var vidType = (/var videoType = '([^']*)'/.exec(pageHtml) || [])[1];
+        if (vidId) {
+          var srcUrl = self.mainUrl + "/get-source?movie_id=" + vidId + "&type=" + (vidType || "");
+          var srcText = await req(srcUrl, {
+            referer: alt.href,
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+          });
+          var srcData = JSON.parse(srcText);
+          var sources = srcData.sources || [];
+          var isDub = /dublaj/i.test(alt.label);
+          var langLabel = isDub ? "Türkçe Dublaj" : "Türkçe Altyazılı";
+          for (var s = 0; s < sources.length; s++) {
+            var item = sources[s];
+            var streamUrl = item.src ? unescapeUrl(item.src) : null;
+            if (!streamUrl || seenStream[streamUrl]) continue;
+            seenStream[streamUrl] = 1;
+            var qual = item.label || item.res || "1080p";
+            out.streams.push({
+              provider: "FilmModu",
+              name: "FilmModu [" + langLabel + " - " + qual + "]",
+              quality: qual,
+              language: langLabel,
+              format: "hls",
+              url: streamUrl,
+              headers: { Referer: self.mainUrl + "/" }
+            });
+          }
+          if (srcData.subtitle) {
+            out.subtitles.push({
+              lang: "Türkçe",
+              url: absolute(self.mainUrl, unescapeUrl(srcData.subtitle))
+            });
+          }
+        }
+      } catch (err) {}
+    }
+    return out;
+  }
+};
+
+/**
+ * 2. SinemaCX (Onarılmış sinemacc.com portu)
+ */
+var sinemaCx = {
+  name: "SinemaCX",
+  kind: "movie",
+  mainUrl: "https://sinemacc.com",
+
+  search: async function (query) {
+    var raw;
+    try {
+      raw = await req(this.mainUrl + "/arama/", {
+        method: "POST",
+        body: "action=ajax_search&arama_kelime=" + encodeURIComponent(query),
+        referer: this.mainUrl + "/",
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      });
+    } catch (e) {
+      return [];
+    }
+    var out = [];
+    var re = /<a class="arama_s\s*" href="([^"]+)"[\s\S]*?<span class="year">([^<]+)<\/span>[\s\S]*?<span class="title">([^<]+)<\/span>/g;
+    var m;
+    var seen = {};
+    while ((m = re.exec(raw)) !== null) {
+      var href = absolute(this.mainUrl, m[1]);
+      var year = parseInt(m[2].trim(), 10) || null;
+      var title = m[3].replace(/&amp;/g, "&").replace(/&#039;/g, "'").trim();
+      if (!href || seen[href]) continue;
+      seen[href] = 1;
+      out.push({ title: title, url: href, year: year });
+    }
+    return out;
+  },
+
+  links: async function (url) {
+    var self = this;
+    var html;
+    try {
+      html = await req(url, { referer: self.mainUrl + "/" });
+    } catch (e) {
+      return { streams: [], subtitles: [] };
+    }
+    var frames = [];
+    var re = /<iframe[^>]+(?:data-vsrc|src)="([^"]+)"/gi;
+    var m;
+    while ((m = re.exec(html)) !== null) {
+      var raw = m[1];
+      if (/^[A-Za-z0-9+/=]{20,}$/.test(raw)) {
+        var dec = decodeB64Text(raw);
+        if (/^https?:\/\//i.test(dec)) raw = dec;
+      }
+      if (/vr_set=|vidon=|youtube|youtu\.be|fragman|trailer|abuse-telif|telif|dmca/i.test(raw)) continue;
+      frames.push(raw);
+    }
+
+    var out = { streams: [], subtitles: [] };
+    for (var i = 0; i < frames.length && i < 3; i++) {
+      var frame = absolute(self.mainUrl, frames[i].split("?img=")[0]);
+      var isDub = /lng=tur|dublaj/i.test(frame);
+      var langLabel = isDub ? "Türkçe Dublaj" : "Türkçe";
+      var r = await resolveFrame(frame, self.mainUrl + "/", langLabel);
+      out.streams = out.streams.concat(r.streams);
+      out.subtitles = out.subtitles.concat(r.subtitles);
+    }
+    return out;
+  }
+};
+
+/**
+ * 3. SezonlukDizi (Diziler için çalışan kaynak)
+ */
+var sezonlukDizi = {
+  name: "SezonlukDizi",
+  kind: "show",
+  mainUrl: "https://sezonlukdizi.cc",
+
+  search: async function (query) {
+    var raw;
+    try {
+      raw = await req(this.mainUrl + "/ajax/arama.asp", {
+        method: "POST",
+        body: "q=" + encodeURIComponent(query),
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      });
+    } catch (e) {
+      return [];
+    }
+    var data;
+    try {
+      data = JSON.parse(raw);
+    } catch (e) {
+      return [];
+    }
+    var list = (data.results && data.results.diziler && data.results.diziler.results) || [];
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var item = list[i];
+      var rawTitle = item.title || "";
+      var ym = /\((\d{4})\)/.exec(rawTitle);
+      var year = ym ? parseInt(ym[1], 10) : null;
+      var clean = rawTitle.replace(/\(\d{4}\)/, "").trim();
+      var slug = (item.url || "")
+        .replace("/diziler/", "")
+        .replace(".html", "")
+        .replace("-izle", "");
+      if (slug) {
+        out.push({ title: clean || rawTitle, url: slug, year: year });
+      }
+    }
+    return out;
+  },
+
+  episodeUrl: async function (item, season, episode) {
+    var s = season || 1;
+    var e = episode || 1;
+    return this.mainUrl + "/" + item.url + "/" + s + "-sezon-" + e + "-bolum.html";
+  },
+
+  links: async function (url) {
+    var self = this;
+    var html;
+    try {
+      html = await req(url);
+    } catch (e) {
+      return { streams: [], subtitles: [] };
+    }
+    var bidMatch = /data-id=["']([^"']+)["']/.exec(html);
+    if (!bidMatch) return { streams: [], subtitles: [] };
+    var bid = bidMatch[1];
+
+    var out = { streams: [], subtitles: [] };
+    var modes = [
+      { dil: 0, label: "Türkçe Dublaj" },
+      { dil: 1, label: "Türkçe Altyazılı" }
+    ];
+
+    for (var m = 0; m < modes.length; m++) {
+      var mode = modes[m];
+      try {
+        var altRaw = await req(self.mainUrl + "/ajax/dataAlternatif22.asp", {
+          method: "POST",
+          body: "bid=" + bid + "&dil=" + mode.dil,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Referer": url,
+            "X-Requested-With": "XMLHttpRequest"
+          }
+        });
+        var altData = JSON.parse(altRaw);
+        var alts = altData.data || [];
+        // Hizli ve rate-limit yememek icin en guvenilir 1 alternatif sec (Filemoon / Sibnet / VidMoly)
+        var chosen = null;
+        for (var a = 0; a < alts.length; a++) {
+          if (/filemoon/i.test(alts[a].baslik)) { chosen = alts[a]; break; }
+        }
+        if (!chosen) {
+          for (var a2 = 0; a2 < alts.length; a2++) {
+            if (/sibnet|vidmoly/i.test(alts[a2].baslik)) { chosen = alts[a2]; break; }
+          }
+        }
+        if (!chosen && alts.length) chosen = alts[0];
+
+        if (chosen) {
+          try {
+            var embRaw = await req(self.mainUrl + "/ajax/dataEmbed22.asp", {
+              method: "POST",
+              body: "id=" + chosen.id,
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Referer": url,
+                "X-Requested-With": "XMLHttpRequest"
+              }
+            });
+            var srcMatch = /<iframe[^>]+src=["']([^"']+)["']/i.exec(embRaw);
+            if (srcMatch && srcMatch[1].indexOf("/") !== 0) {
+              var frameUrl = srcMatch[1].indexOf("//") === 0 ? "https:" + srcMatch[1] : srcMatch[1];
+              out.streams.push({
+                provider: "SezonlukDizi",
+                name: "SezonlukDizi [" + mode.label + " - " + (chosen.baslik || "Player") + "]",
+                quality: "1080p",
+                language: mode.label,
+                format: "embed",
+                url: frameUrl,
+                headers: { Referer: self.mainUrl + "/" }
+              });
+            }
+          } catch (e) {}
+        }
+      } catch (e) {}
+    }
+    return out;
+  }
+};
+
+/**
+ * 4. RoketDizi (Dizi yedeği)
+ */
 function macellan(name, mainUrl, kind) {
   async function secureData(url) {
     var html = await req(url);
@@ -429,56 +689,61 @@ function macellan(name, mainUrl, kind) {
     mainUrl: mainUrl,
 
     search: async function (query) {
-      var raw = await req(mainUrl + "/api/bg/searchcontent?searchterm=" + encodeURIComponent(query), {
-        method: "POST",
-        body: "",
-        referer: mainUrl + "/",
-      });
-      var data = decodeB64Json(JSON.parse(raw).response);
-      if (data.state !== true) return [];
-      var out = [];
-      var list = data.result || [];
-      for (var i = 0; i < list.length; i++) {
-        var r = list[i];
-        var slug = String(r.used_slug || "");
-        if (!r.object_name || !slug || slug.indexOf("/seri-filmler/") !== -1) continue;
-        out.push({
-          title: r.object_name,
-          url: absolute(mainUrl, "/" + slug),
-          year: r.object_release_year || null,
+      try {
+        var raw = await req(mainUrl + "/api/bg/searchcontent?searchterm=" + encodeURIComponent(query), {
+          method: "POST",
+          body: "",
+          referer: mainUrl + "/",
         });
+        var data = decodeB64Json(JSON.parse(raw).response);
+        if (data.state !== true) return [];
+        var out = [];
+        var list = data.result || [];
+        for (var i = 0; i < list.length; i++) {
+          var r = list[i];
+          var slug = String(r.used_slug || "");
+          if (!r.object_name || !slug || slug.indexOf("/seri-filmler/") !== -1) continue;
+          out.push({
+            title: r.object_name,
+            url: absolute(mainUrl, "/" + slug),
+            year: r.object_release_year || null,
+          });
+        }
+        return out;
+      } catch (e) {
+        return [];
       }
-      return out;
     },
 
     episodeUrl: async function (item, season, episode) {
-      var root = await secureData(item.url);
-      var related = (root && (root.RelatedResults || root.relatedResults)) || {};
-      var seasons =
-        (related.getSerieSeasonAndEpisodes && related.getSerieSeasonAndEpisodes.result) || [];
-      for (var i = 0; i < seasons.length; i++) {
-        if (Number(seasons[i].season_no) !== Number(season)) continue;
-        var eps = seasons[i].episodes || [];
-        for (var j = 0; j < eps.length; j++) {
-          if (Number(eps[j].episode_no) === Number(episode)) {
-            return absolute(mainUrl, "/" + eps[j].used_slug);
+      try {
+        var root = await secureData(item.url);
+        var related = (root && (root.RelatedResults || root.relatedResults)) || {};
+        var seasons =
+          (related.getSerieSeasonAndEpisodes && related.getSerieSeasonAndEpisodes.result) || [];
+        for (var i = 0; i < seasons.length; i++) {
+          if (Number(seasons[i].season_no) !== Number(season)) continue;
+          var eps = seasons[i].episodes || [];
+          for (var j = 0; j < eps.length; j++) {
+            if (Number(eps[j].episode_no) === Number(episode)) {
+              return absolute(mainUrl, "/" + eps[j].used_slug);
+            }
           }
         }
-      }
+      } catch (e) {}
       return null;
     },
 
     links: async function (url) {
-      var root = await secureData(url);
       var out = { streams: [], subtitles: [] };
-      if (!root) return out;
-      var related = root.RelatedResults || root.relatedResults || {};
-
-      // source_content bir URL değil, komple <iframe ...> HTML'i.
-      var frames = [];
-      function push(list) {
-        for (var i = 0; i < (list || []).length; i++) {
-          var s = list[i];
+      try {
+        var root = await secureData(url);
+        if (!root) return out;
+        var related = root.RelatedResults || root.relatedResults || {};
+        var frames = [];
+        var sources = related.getEpisodeSources && related.getEpisodeSources.result;
+        for (var i = 0; i < (sources || []).length; i++) {
+          var s = sources[i];
           var src = /src=["']([^"']+)["']/.exec(s.source_content || "");
           if (src) {
             frames.push({
@@ -488,138 +753,29 @@ function macellan(name, mainUrl, kind) {
             });
           }
         }
-      }
-      push(related.getEpisodeSources && related.getEpisodeSources.result);
-      var keys = Object.keys(related);
-      for (var k = 0; k < keys.length; k++) {
-        if (keys[k].indexOf("getMoviePartSourcesById") === 0) {
-          push(related[keys[k]] && related[keys[k]].result);
-        }
-      }
 
-      var seen = {};
-      for (var f = 0; f < frames.length && f < 6; f++) {
-        var frame = frames[f];
-        if (!frame.url || seen[frame.url]) continue;
-        seen[frame.url] = 1;
-        var r = await resolveFrame(frame.url, mainUrl + "/", frame.language);
-        for (var s2 = 0; s2 < r.streams.length; s2++) {
-          var st = r.streams[s2];
-          st.quality = frame.quality || st.quality;
-          out.streams.push(st);
+        var seen = {};
+        for (var f = 0; f < frames.length && f < 3; f++) {
+          var frame = frames[f];
+          if (!frame.url || seen[frame.url]) continue;
+          seen[frame.url] = 1;
+          var r = await resolveFrame(frame.url, mainUrl + "/", frame.language);
+          for (var s2 = 0; s2 < r.streams.length; s2++) {
+            var st = r.streams[s2];
+            st.quality = frame.quality || st.quality;
+            out.streams.push(st);
+          }
+          out.subtitles = out.subtitles.concat(r.subtitles);
         }
-        out.subtitles = out.subtitles.concat(r.subtitles);
-      }
+      } catch (e) {}
       return out;
     },
   };
 }
 
-/** HDFilmİzle - arama JSON döndürüyor (Hub: HDFilmIzle.kt). */
-var hdFilmIzle = {
-  name: "HDFilmİzle",
-  kind: "movie",
-  mainUrl: "https://www.hdfilmizle.vip",
+var roketDizi = macellan("RoketDizi", "https://www.roketdizi.live", "show");
 
-  search: async function (query) {
-    var raw = await req(this.mainUrl + "/search/", {
-      method: "POST",
-      body: formEncode({ query: query }),
-      referer: this.mainUrl + "/",
-    });
-    var list;
-    try {
-      list = JSON.parse(raw);
-    } catch (e) {
-      return [];
-    }
-    var out = [];
-    for (var i = 0; i < (list || []).length; i++) {
-      if (!list[i].name || !list[i].slug) continue;
-      out.push({
-        title: list[i].name,
-        url: absolute(this.mainUrl, list[i].slug),
-        year: parseInt(list[i].year, 10) || null,
-      });
-    }
-    return out;
-  },
-
-  links: async function (url) {
-    var html = await req(url);
-    var out = { streams: [], subtitles: [] };
-    var frames = findAll(/<iframe[^>]+data-src=["']([^"']+)["']/gi, html);
-    for (var i = 0; i < frames.length && i < 3; i++) {
-      var r = await resolveFrame(absolute(this.mainUrl, frames[i][1]), this.mainUrl + "/");
-      out.streams = out.streams.concat(r.streams);
-      out.subtitles = out.subtitles.concat(r.subtitles);
-    }
-    return out;
-  },
-};
-
-/** SinemaCX (Hub: SinemaCX.kt). */
-var sinemaCx = {
-  name: "SinemaCX",
-  kind: "movie",
-  mainUrl: "https://www.sinema.gg",
-
-  search: async function (query) {
-    var html = await req(this.mainUrl + "/?s=" + encodeURIComponent(query));
-    var out = [];
-    var hits = findAll(/<a[^>]+href=["']([^"']+)["'][^>]*title=["']([^"']+)["']/gi, html);
-    for (var i = 0; i < hits.length; i++) {
-      var url = absolute(this.mainUrl, hits[i][1]);
-      if (!url || !/\/[a-z0-9-]+-izle/i.test(url)) continue;
-      var dup = false;
-      for (var j = 0; j < out.length; j++) if (out[j].url === url) dup = true;
-      if (dup) continue;
-      out.push({ title: hits[i][2].replace(/^\s+|\s+$/g, ""), url: url, year: null });
-    }
-    return out;
-  },
-
-  links: async function (url) {
-    var self = this;
-    function grab(html) {
-      var frames = findAll(/<iframe[^>]+data-vsrc=["']([^"']+)["']/gi, html);
-      var list = [];
-      for (var i = 0; i < frames.length; i++) list.push(frames[i][1]);
-      return list;
-    }
-    var frames = grab(await req(url));
-    var onlyTrailer = frames.length > 0;
-    for (var t = 0; t < frames.length; t++) {
-      if (!/youtube|fragman|trailer/i.test(frames[t])) onlyTrailer = false;
-    }
-    if (!frames.length || onlyTrailer) {
-      try {
-        var alt = url.charAt(url.length - 1) === "/" ? url + "2/" : url + "/2/";
-        frames = grab(await req(alt, { referer: url }));
-      } catch (e) {}
-    }
-    var out = { streams: [], subtitles: [] };
-    for (var i2 = 0; i2 < frames.length && i2 < 3; i2++) {
-      var frame = absolute(self.mainUrl, frames[i2].split("?img=")[0]);
-      var r = await resolveFrame(frame, self.mainUrl + "/");
-      out.streams = out.streams.concat(r.streams);
-      out.subtitles = out.subtitles.concat(r.subtitles);
-    }
-    return out;
-  },
-};
-
-var roketDizi = macellan("RoketDizi", "https://roketdizi.life", "show");
-
-/**
- * Etkin sağlayıcılar - Hub'daki providerPriority sırasının bu sürümdeki karşılığı.
- * Dışarıda kalanlar (2026-09-09 ölçümü, 54 kaynak: 19 açılıyor, 15 Cloudflare, 20 ölü):
- *   - Dizilla, SelcukFlix : yanıtı AES ile şifreli, anahtar çözümü portlanmadı
- *   - HDFilmCehennemi, DiziPal, DiziYou, FilmMakinesi, WebteIzle, JetFilmizle,
- *     SezonlukDizi (arama sayfası) ve 8 tanesi daha : Cloudflare duvarı
- *   - 20 kaynak : alan adı ölü (Hub'daki domains.json "disabled" listesi)
- */
-var PROVIDERS = [roketDizi, hdFilmIzle, sinemaCx];
+var PROVIDERS = [filmModu, sinemaCx, sezonlukDizi, roketDizi];
 
 // ──────────────────────────── toplayıcı ────────────────────────────
 
@@ -643,7 +799,6 @@ async function scanProvider(provider, query) {
         if (titleMatches(results[i].title, query.originalTitle)) picked = results[i];
       }
     }
-    // Yıl doğruluyorsa bulanık eşleşmeyi kabul et; yoksa yanlış yapım riski var.
     if (!picked && query.year) {
       for (i = 0; i < results.length && !picked; i++) {
         if (results[i].year && Math.abs(results[i].year - query.year) <= 1) picked = results[i];
@@ -673,22 +828,19 @@ async function scanProvider(provider, query) {
       format: st.format,
       url: st.url,
       headers: st.headers || {},
-      subtitles: found.subtitles,
+      subtitles: found.subtitles || [],
     });
   }
   return out;
 }
 
-/** Bütün kaynakları paralel tarar. Hepsi hata verse bile boş dizi döner. */
 async function resolveQuery(query) {
   var jobs = [];
   for (var i = 0; i < PROVIDERS.length; i++) {
     jobs.push(
       (function (p) {
         return scanProvider(p, query).then(
-          function (v) {
-            return v;
-          },
+          function (v) { return v; },
           function (e) {
             console.log("[BerkStream] " + p.name + ": " + e);
             return [];
@@ -705,8 +857,6 @@ async function resolveQuery(query) {
 
 // ─────────────────── host sözleşmesi (JSON string döner) ───────────────────
 
-
-/** TMDB listesini host'un beklediği karta çevirir. */
 function toCards(list, forcedType) {
   var out = [];
   for (var i = 0; i < (list || []).length; i++) {
@@ -742,11 +892,6 @@ var SHELVES = [
   { title: "En yüksek puanlı diziler", path: "/tv/top_rated", params: "", type: "tv" }
 ];
 
-/**
- * Ana sayfa rafları. Uygulama açılışta bunu çağırıyor; bu çağrı olmadan
- * ana ekran boş kalıyordu ve içerik yalnızca aramadan geliyordu.
- * Raflar TMDB'den, oynatma yine kaynak taramasıyla.
- */
 async function getCatalog() {
   var jobs = [];
   for (var i = 0; i < SHELVES.length; i++) {
@@ -827,7 +972,6 @@ async function getEpisodes(mediaId) {
   return JSON.stringify(episodes);
 }
 
-/** mediaId biçimleri: "movie:<tmdbId>" veya "tv:<tmdbId>:<sezon>:<bölüm>" */
 async function getStreams(mediaId) {
   var parts = String(mediaId).split(":");
   var kind = parts[0] === "movie" ? "movie" : "tv";
@@ -843,17 +987,12 @@ async function getStreams(mediaId) {
     episode: parts[3] ? Number(parts[3]) : 1,
   });
 
-  // Sıra önemli: gerçek Türkçe kaynaklar önce, evrensel oynatıcılar sonra.
-  // Önceki sürüm vidlink'i en üste sabitliyordu ve adını "BerkStream Dahili
-  // Oynatıcı" koyuyordu; kullanıcı hep onu seçiyor, o da çoğu zaman dönen
-  // çarkta kalıyordu (2026-09-10). Türkçe dublajlı kaynaklar listenin
-  // dibinde görünmüyordu.
   var path = kind === "movie" ? "movie/" + id : "tv/" + id + "/" + (parts[2] || 1) + "/" + (parts[3] || 1);
   var fallback = [
-    { provider: "Evrensel", name: "Evrensel yedek — VidLink", quality: "1080p", language: "Çoklu dil / altyazı", format: "embed", url: "https://vidlink.pro/" + path, headers: {}, subtitles: [] },
-    { provider: "Evrensel", name: "Evrensel yedek — VidSrc", quality: "1080p", language: "Orijinal / altyazı", format: "embed", url: "https://vidsrc.xyz/embed/" + path, headers: {}, subtitles: [] },
-    { provider: "Evrensel", name: "Evrensel yedek — EmbedSu", quality: "1080p", language: "Orijinal / altyazı", format: "embed", url: "https://embed.su/embed/" + path, headers: {}, subtitles: [] },
-    { provider: "Evrensel", name: "Evrensel yedek — AutoEmbed", quality: "720p", language: "Orijinal / altyazı", format: "embed", url: "https://player.autoembed.cc/embed/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel — VidSrc", quality: "1080p", language: "Orijinal / Çoklu Altyazı", format: "embed", url: "https://vidsrc.to/embed/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel — SmashyStream", quality: "1080p", language: "Orijinal / Altyazı", format: "embed", url: "https://player.smashy.stream/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel — VidLink", quality: "1080p", language: "Çoklu Dil / Altyazı", format: "embed", url: "https://vidlink.pro/" + path, headers: {}, subtitles: [] },
+    { provider: "Evrensel", name: "Evrensel — 2Embed", quality: "720p", language: "Orijinal / Altyazı", format: "embed", url: "https://www.2embed.cc/embed/" + id + (kind === "tv" ? "&s=" + (parts[2] || 1) + "&e=" + (parts[3] || 1) : ""), headers: {}, subtitles: [] },
   ];
   return JSON.stringify(sources.concat(fallback));
 }
