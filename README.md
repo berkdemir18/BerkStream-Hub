@@ -67,7 +67,8 @@ npm run vendor
 Yalnız manifestinde `status: 1` olan eklentiler alınır. Aynı eklenti birden çok
 kaynakta varsa öncelik sırası `sources.json` içindeki `priority` alanına göredir.
 Eklentilerin telif ve lisans koşulları kendi kaynak depolarına aittir; gömülen
-kaynak kodu değiştirilmeden, kaynağı ve orijinal paketi belirtilerek taşınır.
+kaynak kodu, paket adı ve giriş noktası uyarlanarak ve gerektiğinde yamalanarak,
+kaynağı ve orijinal paketi belirtilerek taşınır.
 
 ## Yerelde güncelleme ve doğrulama
 
@@ -109,8 +110,29 @@ olduğunu kanıtlar. Kaynak sitelerin arama, bölüm ve oynatma akışlarının 
 
 ## Yasal uyarı
 
-Bu depo yalnızca kişisel ve eğitim amaçlı bir CloudStream eklenti derlemesidir.
-Hiçbir video içeriği barındırmaz, yüklemez veya dağıtmaz; yalnızca üçüncü taraf
-kaynakları tek pakette toplar. Sağlayıcıların eriştiği içeriğin telif durumu
-ilgili sitelere aittir. Kullanıcı, bulunduğu ülkenin mevzuatına uymakla
-yükümlüdür. Hak sahibiyseniz depo sahibine ulaşarak kaldırma talep edebilirsiniz.
+**Resmî değildir.** Bu depo gayriresmî bir CloudStream eklenti derlemesidir.
+CloudStream, Netflix, Prime Video, Disney+, HBO Max, tabii, TMDB veya kaynak
+sitelerle bağlantılı değildir, onlar tarafından onaylanmamıştır. Marka adları
+sahiplerine aittir ve yalnızca katalogları tanımlamak için geçer.
+
+**İçerik barındırmaz.** Depoda ve `builds` dalında video dosyası yoktur; yalnızca
+kod ve katalog dosyaları bulunur. Eklenti, bağlantıları üçüncü taraf sitelerden
+alır. Bu sitelerin bir kısmı içerikleri hak sahiplerinin izni olmadan sunuyor
+olabilir. Depo bu siteleri denetlemez, içeriklerinin yasal olduğunu garanti etmez.
+Bu uyarı, bir içeriğe erişimi kendiliğinden hukuka uygun hale getirmez.
+
+**Sorumluluk kullanıcıdadır.** Kullanıcı, başta Türkiye'de 5846 sayılı Fikir ve
+Sanat Eserleri Kanunu olmak üzere bulunduğu ülkenin mevzuatına uymakla yükümlüdür.
+İzlemeye hakkın olmayan içerik için bu eklentiyi kullanma.
+
+**Garanti yoktur.** Yazılım "olduğu gibi" sunulur; kullanımından doğan sonuçlardan
+depo sahibi ve katkıda bulunanlar sorumlu tutulamaz.
+
+**Lisans.** [`LICENSE`](LICENSE) yalnızca bu depoya ait özgün kod için geçerlidir.
+`BerkStream/src/main/kotlin/com/berkstream/vendor/` altındaki kod kendi kaynak
+depolarının koşullarına tabidir; depolar `sources.json` dosyasında listelidir.
+
+**Kaldırma talebi.** Hak sahibiyseniz bu depoda bir
+[Issue](https://github.com/berkdemir18/BerkStream-Hub/issues) açabilir veya
+[GitHub'ın DMCA sürecini](https://docs.github.com/en/site-policy/content-removal-policies/guide-to-submitting-a-dmca-takedown-notice)
+kullanabilirsiniz. Geçerli talepte ilgili kaynak paketten çıkarılır.
