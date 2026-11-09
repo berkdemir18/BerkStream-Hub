@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-11-09T12:56:24.602Z",
+  "overrides": {
+    "DiziPal": "https://dizipal1586.com",
+    "FilmKovası": "https://filmkovasi.co",
+    "HDFilmİzle": "https://www.hdfilmizle.live",
+    "RoketDizi": "https://roketdizi.life"
+  },
+  "disabled": [
+    "4KFilmİzlesene",
+    "CizgiDuo",
+    "DiziMag",
+    "DiziMom",
+    "HDStreamAble",
+    "DiziYo",
+    "Filmİzleİlk",
+    "FilmMakinesi",
+    "FullHDFilm",
+    "FullHDFilmİzlede",
+    "HDFilmCehennemi1",
+    "HdFilmCehennemi2",
+    "HDFilmİzle",
+    "Sinefy",
+    "WFilmİzle"
+  ]
+}
