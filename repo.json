@@ -1,0 +1,11 @@
+{
+  "name": "BerkStream",
+  "description": "Tüm Türkçe kaynakları tek eklentide toplayan BerkStream",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/builds/plugins.json"
+  ],
+  "desktopPluginLists": [
+    "https://raw.githubusercontent.com/berkdemir18/BerkStream-Hub/main/desktop/plugins.json"
+  ]
+}
